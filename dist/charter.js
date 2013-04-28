@@ -8851,7 +8851,7 @@ define("d3", (function (global) {
 }(this)));
 
 (function() {
-  define('charts/barchart',["d3"], function(d3) {
+  define('barchart',["d3"], function(d3) {
     return function() {
       return console.log('This is the barchart module');
     };
@@ -8859,5 +8859,5 @@ define("d3", (function (global) {
 
 }).call(this);
 
-require(["charts/barchart"]);
+require(["barchart"]);
 }());

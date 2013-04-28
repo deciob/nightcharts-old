@@ -2,7 +2,8 @@
   requirejs.config({
     paths: {
       d3: "../lib/d3/d3",
-      almond: "../node_modules/grunt-requirejs/node_modules/almond/almond"
+      almond: "../node_modules/grunt-requirejs/node_modules/almond/almond",
+      barchart: "charts/barchart"
     },
     shim: {
       d3: {
@@ -10,9 +11,9 @@
       }
     },
     name: "almond",
-    include: ["charts/barchart"],
+    include: ["barchart"],
     wrap: true,
-    insertRequire: ['charts/barchart']
+    insertRequire: ["barchart"]
   });
 
 }).call(this);
