@@ -11,7 +11,8 @@
     },
     name: "almond",
     include: ["charts/barchart"],
-    wrap: true
+    wrap: true,
+    insertRequire: ['charts/barchart']
   });
 
 }).call(this);

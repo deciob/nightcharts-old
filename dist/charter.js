@@ -8858,4 +8858,6 @@ define("d3", (function (global) {
   });
 
 }).call(this);
+
+require(["charts/barchart"]);
 }());
