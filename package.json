@@ -22,11 +22,11 @@
   ],
   "dependencies": {},
   "devDependencies": {
-    "serv": "",
+    "grunt": "~0.4.1",
+    "grunt-requirejs": "0.3.5",
     "bower": ""
   },
   "scripts": {
-    "postinstall": "bower install",
-    "start": "serv --port 8000"
+    "postinstall": "bower install"
   }
 }

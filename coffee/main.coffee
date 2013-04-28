@@ -1,6 +1,3 @@
-define [
-  'js!d3'
-], (d3) ->
+define ["charts/barchart"], (barchart) ->
 
-  init = ->
-    console.log '@@@@@@@@@@@@@@@@@'
+  barchart

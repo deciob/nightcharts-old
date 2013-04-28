@@ -1,33 +1,25 @@
-
-
-
-  config = 
-    base_url: "../",
-    pluginPath: 'lib/curl/src/curl/plugin',
-    packages: [
-      {
-        name: "curl"
-        location: "lib/curl/dist/curl"
-        main: "curl"
-      },
-      {
-        name: "d3"
-        location: "lib/d3"
-        main: "d3"
-      }
-    ]
-
-  curl(config, ["js!d3"])
-    .next(["js/main"])
-    .then( 
-      (main) ->
-        main()
-    ,
-      (err) ->
-        console.log err
-    )
+requirejs.config
   
+  # The path where your JavaScripts are located
+  #/home/deciob/dev/charts/js/barchart.js
+  #baseUrl: "../js"
+  
+  # Specify dependency libraries
+  paths:
+    d3: "../lib/d3/d3"
 
+  # Not AMD-capable per default,
+  # so we need to use the AMD wrapping of RequireJS.
+  shim:
+    d3:
+      exports: "d3"
 
+  #packages: [
+  #  { name: 'charter', location: 'charts/barcharts', main: 'charter' }
+  #]
 
-
+  name: "charts/barchart"
+  #include: ["js/charts/barchart"]
+  wrap: true
+  #  startFile: "../wrap/start.frag"
+  #  endFile: "../wrap/end.frag"
