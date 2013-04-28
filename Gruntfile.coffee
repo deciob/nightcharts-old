@@ -5,17 +5,17 @@ module.exports = (grunt) ->
 
     requirejs:
       options:
-        #almond: trues
         baseUrl: "js"
         mainConfigFile: 'js/run.js'
       compress:
         options:
           optimize: 'uglify2'
           out: "dist/charter.min.js"
-      standard:
+      plain:
         options:
           optimize: 'none'
           out: "dist/charter.js"
+
   )
 
   grunt.loadNpmTasks('grunt-requirejs')
