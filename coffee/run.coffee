@@ -14,8 +14,10 @@ requirejs.config
 
   name: "almond"
   include: ["barchart"]
-  wrap: true
+  
   insertRequire: ["barchart"] 
-  #  startFile: "../wrap/start.frag"
-  #  endFile: "../wrap/end.frag"
+
+  wrap: #true
+    startFile: "../wrap/start.frag"
+    endFile: "../wrap/end.frag"
 

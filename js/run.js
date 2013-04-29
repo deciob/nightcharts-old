@@ -12,8 +12,11 @@
     },
     name: "almond",
     include: ["barchart"],
-    wrap: true,
-    insertRequire: ["barchart"]
+    insertRequire: ["barchart"],
+    wrap: {
+      startFile: "../wrap/start.frag",
+      endFile: "../wrap/end.frag"
+    }
   });
 
 }).call(this);
