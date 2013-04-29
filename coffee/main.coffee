@@ -1,3 +1,6 @@
-define ["charts/barchart"], (barchart) ->
-
-  barchart
+#define ["charts/barchart"], (barchart) ->
+#
+#  charter = {}
+#  charter.barchart = barchart
+#
+#  charter
