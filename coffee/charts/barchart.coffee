@@ -55,7 +55,7 @@ define ["d3"], (d3) ->
           .attr("id", (d) -> "l_#{d}" )
       # Custom events:
       if _.find(events, (evt) -> evt == "onHover") == "onHover"
-        dispatch = WukumUrl.Charters.barChart.dispatch
+        dispatch = barChart.dispatch
         txt.on "mouseover", (d, i) ->
           # Restructuring the data to match the bars data structure.
           # In this way we can share listeners for both legend and bar events.
@@ -101,8 +101,8 @@ define ["d3"], (d3) ->
     chart = (selection) ->
   
       # Setting and exposing custom events.
-      WukumUrl.Charters.barChart.dispatch = d3.dispatch.call this, events
-      dispatch = WukumUrl.Charters.barChart.dispatch
+      barChart.dispatch = d3.dispatch.call this, events
+      dispatch = barChart.dispatch
       _.each events, (evt) ->
         dispatch.on "#{evt}.legend", updateLegend
         dispatch.on "#{evt}.onHover.bar", updateBars

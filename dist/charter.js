@@ -8904,7 +8904,7 @@ define("d3", (function (global) {
         if (_.find(events, function(evt) {
           return evt === "onHover";
         }) === "onHover") {
-          dispatch = WukumUrl.Charters.barChart.dispatch;
+          dispatch = barChart.dispatch;
           txt.on("mouseover", function(d, i) {
             d = {
               name: d
@@ -8954,8 +8954,8 @@ define("d3", (function (global) {
       chart = function(selection) {
         var dispatch;
 
-        WukumUrl.Charters.barChart.dispatch = d3.dispatch.call(this, events);
-        dispatch = WukumUrl.Charters.barChart.dispatch;
+        barChart.dispatch = d3.dispatch.call(this, events);
+        dispatch = barChart.dispatch;
         _.each(events, function(evt) {
           dispatch.on("" + evt + ".legend", updateLegend);
           return dispatch.on("" + evt + ".onHover.bar", updateBars);
