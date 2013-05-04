@@ -1,5 +1,5 @@
 (function() {
-  define(["charts/barchart"], function(barchart) {
+  define(["barchart"], function(barchart) {
     var charter;
 
     charter = {};
