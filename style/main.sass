@@ -1,0 +1,21 @@
+$axis-grey: #9C9C9C
+$text-orange: #f38417
+
+@mixin axis-base
+  fill: none
+  stroke: $axis-grey
+  shape-rendering: crispEdges
+
+
+.axis path
+  @include axis-base
+.axis line
+  @include axis-base
+    
+
+.x.axis path
+  display: none
+
+text 
+  fill: $text-orange
+

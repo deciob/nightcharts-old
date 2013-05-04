@@ -8,7 +8,7 @@
     } else {
         //Browser globals case. Just assign the
         //result to a property on the global.
-        root.Charter = factory();
+        root.charter = factory();
     }
 }(this, function () {
     //almond, and your modules will be inlined here
@@ -8864,7 +8864,7 @@ define("d3", (function (global) {
 }(this)));
 
 (function() {
-  define('barchart',["d3"], function(d3) {
+  define('charts/barchart',["d3"], function(d3) {
     var barChart;
 
     return barChart = function() {
@@ -9081,10 +9081,20 @@ define("d3", (function (global) {
 
 }).call(this);
 
-require(["barchart"]);
+(function() {
+  define('charter',["charts/barchart"], function(barchart) {
+    var charter;
+
+    charter = {};
+    charter.barchart = barchart;
+    console.log(charter);
+    return charter;
+  });
+
+}).call(this);
     //The modules for your project will be inlined above
     //this snippet. Ask almond to synchronously require the
     //module value for 'main' here and return it as the
     //value to use for the public API for the built file.
-    return require('barchart');
+    return require('charter');
 }));

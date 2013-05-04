@@ -6,11 +6,11 @@ module.exports = (grunt) ->
     requirejs:
       options:
         baseUrl: "js"
-      compress:
-        options:
-          optimize: 'uglify2'
-          out: "dist/charter.min.js"
-          mainConfigFile: 'js/run.js'
+      #compress:
+      #  options:
+      #    optimize: 'uglify2'
+      #    out: "dist/charter.min.js"
+      #    mainConfigFile: 'js/run.js'
       plain:
         options:
           optimize: 'none'

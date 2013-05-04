@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>The HTML5 Herald</title>
+  <meta name="description" content="Spec runner">
+  <meta name="author" content="Decio">
+  <script src="../lib/requirejs/require.js"></script>
+  <script src="../lib/testr/index.js"></script>
+  <script>
+      // set options
+      testr.config({
+          root: '../',
+          //baseUrl: 'src',
+          specUrl: 'spec',
+          ignore: ['d3']
+      });
+  
+      // load app and specs
+      testr.run('../js/run.js', function() {
+          // kick off the test framework of choice... e.g:
+          mocha.run();
+      });
+  </script>
+
+</head>
+<body>
+
+</body>
+</html>

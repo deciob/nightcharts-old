@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "d3": "3.1.5"
+    "d3": "3.1.5",
+    "requirejs": "2.1.5",
+    "testr": "https://raw.github.com/mattfysh/testr.js/master/testr.js"
   }
 }

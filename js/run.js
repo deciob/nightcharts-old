@@ -11,8 +11,7 @@
       }
     },
     name: "almond",
-    include: ["barchart"],
-    insertRequire: ["barchart"],
+    include: ["charter"],
     wrap: {
       startFile: "../wrap/start.frag",
       endFile: "../wrap/end.frag"

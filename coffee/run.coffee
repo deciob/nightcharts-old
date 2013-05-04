@@ -13,11 +13,11 @@ requirejs.config
       exports: "d3"
 
   name: "almond"
-  include: ["barchart"]
+  include: ["charter"]
   
-  insertRequire: ["barchart"] 
+  #insertRequire: ["charter"] 
 
-  wrap: #true
+  wrap:
     startFile: "../wrap/start.frag"
     endFile: "../wrap/end.frag"
 
