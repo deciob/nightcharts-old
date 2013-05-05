@@ -1,7 +1,10 @@
-define ["d3"], (d3) ->
+define [
+  "d3"
+  "lodash" 
+], (d3, _) ->
   
 
-  barChart = ->
+  barChart = (config={}) ->
   
     ####
     # Follows d3 margin convention: http://bl.ocks.org/mbostock/3019563
@@ -25,10 +28,13 @@ define ["d3"], (d3) ->
       .range(["#15534C", "#E2E062"])
     #color = d3.scale.category10()
     events = ["onClick"]
+    
+    internals = {}
+    _.extend {expose: no}, config
   
-  
+
     # TODO: need to hook in the exits!
-    _drawLegend = (selection, data) ->
+    internals.drawLegend = (selection, data) ->
       outer_legend = selection.selectAll("g.outer_legend")
         .data([data])
       .enter().append("g")
@@ -74,7 +80,7 @@ define ["d3"], (d3) ->
     ###
   
     # Highlights the selected item in the legend
-    updateLegend = (d, i, entering) ->
+    internals.updateLegend = (d, i, entering) ->
       name = d.name
       item = d3.select("#l_#{name}")
       if entering
@@ -83,7 +89,7 @@ define ["d3"], (d3) ->
         item.attr("class", "")
   
     # Highlights the selected bar(s)
-    updateBars = (d, i, entering) ->
+    internals.updateBars = (d, i, entering) ->
       name = d.name
       items = d3.selectAll(".b_#{name}")
       original_class_values = items.attr("class").replace /selected/, ""
@@ -91,8 +97,20 @@ define ["d3"], (d3) ->
         items.attr("class", "#{original_class_values} selected")
       else
         items.attr("class", original_class_values)
+
+    internals.wireEvents = () ->
+      _.each events, (evt) ->
+        dispatch.on "#{evt}.legend", interals.updateLegend
+        dispatch.on "#{evt}.onHover.bar", interals.updateBars
   
-  
+    
+    # Extract the bar names from first data group (data[0]),
+    # because these be will be repeated the same in all groups.
+    # Used for the legend.
+    internals.extractBarNames = (data) ->
+      _.map data[0].values, (d) -> d.name
+
+
     ###
      Public Interface
     ###
@@ -101,100 +119,91 @@ define ["d3"], (d3) ->
     chart = (selection) ->
   
       # Setting and exposing custom events.
-      barChart.dispatch = d3.dispatch.call this, events
-      dispatch = barChart.dispatch
-      _.each events, (evt) ->
-        dispatch.on "#{evt}.legend", updateLegend
-        dispatch.on "#{evt}.onHover.bar", updateBars
+      barChart.dispatch = dispatch = d3.dispatch.call this, events
+      internals.wireEvents dispatch
   
       # Scale ranges need to be called here and not outside of the chart 
       # function, because they need to be updated on every new selection.
-      # !! Why using ouerWidth() ??
       # X0 refers to the outer bar group.
       # rangeRoundBands [min, max], padding, outer-padding
       x0Scale.rangeRoundBands [0, width], .1, .02
       yScale.range [height, 0]
-  
-      # This is the first outer selection.
-      # Usually the 'selection` length will be equal to one.
-      selection.each (data, i) ->
-  
-        # Extract the bar names from first data group (data[0]),
-        # because these be will be repeated the same in all groups.
-        # Used for the legend.
-        bar_names = _.map data[0].values, (d) -> d.name
-  
-        # Data input domains
-        x0Scale.domain data.map (d) -> d.name
-        yScale.domain [ 0, d3.max data, (d) -> d.max ]
-        color.domain([0, data[0].values.length])
-  
-        # Select the svg element, if it exists.
-        svg = d3.select(this).selectAll("svg").data([data])
-          
-        # Otherwise, create the skeletal chart.
-        gEnter = svg.enter().append("svg").append("g")
-        #gEnter.append("g").attr "class", "chart_group"
-        gEnter.append("g").attr "class", "x axis"
-        gEnter.append("g").attr "class", "y axis"
-  
-        # Set the outer dimensions.
-        svg.attr("width", width + margin.left + margin.right)
-          .attr("height", height + margin.top + margin.bottom)
-  
-        g = svg.select("g")
-          # move right x pixels, move down y pixels:
-          .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-  
-        # Update the x-axis.
-        g.select(".x.axis")
-          .attr("transform", "translate(0," + height + ")")
-          .call(xAxis)
-  
-        # Update the y-axis.
-        g.select(".y.axis")
-          .call(yAxis)
-  
-        # Select all the chart groups, if existent.
-        chart_group = g.selectAll("g.chart_group").data(data)
-        # Otherwise, create the skeletal chart groups.
-        chart_group.enter()
-          .append("g")
-          .attr("class", "chart_group")
-          .attr("transform", (d) -> "translate(" + x0Scale(d.name) + ",0)")
-  
-        # iterating over every chart group, in order to draw the single bars.
-        chart_group.each (inner_data, i) ->
-          # X1 refers to the inner-bar-group (the individual bars of each group).
-          x1Scale.rangeRoundBands([0, width / data.length], .1, .2)
-          x1Scale.domain inner_data.values.map (d) -> d.name
-          bar = d3.select(@).selectAll('.bar')
-            .data (d) -> d.values
-          bar.enter()
-            .append("rect")
-            .attr("class", (d) -> "bar b_#{d.name}")
-            .attr("x", (d) -> x1Scale d.name)
-            .attr("width", 0)
-            .attr("y", (d) -> height )
-            .attr("height", (d) -> 0)
-            .style "fill", (d, i) -> 
-              color(i+1)
-          bar.exit().remove()
-          bar.transition()
-            .duration(500)
-            .attr("x", (d) -> x1Scale d.name)
-            .attr("width", x1Scale.rangeBand())
-            .attr("y", (d) -> yScale(d.val) )
-            .attr "height", (d) -> height - yScale(d.val)
-          
-          if _.find(events, (evt) -> evt == "onHover") == "onHover"
-            bar.on "mouseover", (d, i) -> 
-              dispatch.onHover.apply this, [d, i, yes]
-            bar.on "mouseout", (d, i) -> dispatch.onHover.apply this, [d, i]
-  
-        chart_group.exit().remove()
-  
-        _drawLegend g, bar_names
+
+      # Equivalent to: selection.node().__data__ 
+      data = selection.datum()
+      bar_names = internals.extractBarNames data
+
+      # Data input domains
+      x0Scale.domain data.map (d) -> d.name
+      yScale.domain [ 0, d3.max data, (d) -> d.max ]
+      color.domain([0, data[0].values.length])
+
+      # Select the svg element, if it exists. Grouping the data.
+      svg = selection.selectAll("svg").data([data])
+        
+      # Otherwise, create the skeletal chart.
+      gEnter = svg.enter().append("svg").append("g")
+      #gEnter.append("g").attr "class", "chart_group"
+      gEnter.append("g").attr "class", "x axis"
+      gEnter.append("g").attr "class", "y axis"
+
+      # Set the outer dimensions.
+      svg.attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+
+      g = svg.select("g")
+        # move right x pixels, move down y pixels:
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+      # Update the x-axis.
+      g.select(".x.axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+
+      # Update the y-axis.
+      g.select(".y.axis")
+        .call(yAxis)
+
+      # Select all the chart groups, if existent.
+      chart_group = g.selectAll("g.chart_group").data(data)
+      # Otherwise, create the skeletal chart groups.
+      chart_group.enter()
+        .append("g")
+        .attr("class", "chart_group")
+        .attr("transform", (d) -> "translate(" + x0Scale(d.name) + ",0)")
+
+      # iterating over every chart group, in order to draw the single bars.
+      chart_group.each (inner_data, i) ->
+        # X1 refers to the inner-bar-group (the individual bars of each group).
+        x1Scale.rangeRoundBands([0, width / data.length], .1, .2)
+        x1Scale.domain inner_data.values.map (d) -> d.name
+        bar = d3.select(@).selectAll('.bar')
+          .data (d) -> d.values
+        bar.enter()
+          .append("rect")
+          .attr("class", (d) -> "bar b_#{d.name}")
+          .attr("x", (d) -> x1Scale d.name)
+          .attr("width", 0)
+          .attr("y", (d) -> height )
+          .attr("height", (d) -> 0)
+          .style "fill", (d, i) -> 
+            color(i+1)
+        bar.exit().remove()
+        bar.transition()
+          .duration(500)
+          .attr("x", (d) -> x1Scale d.name)
+          .attr("width", x1Scale.rangeBand())
+          .attr("y", (d) -> yScale(d.val) )
+          .attr "height", (d) -> height - yScale(d.val)
+        
+        if _.find(events, (evt) -> evt == "onHover") == "onHover"
+          bar.on "mouseover", (d, i) -> 
+            dispatch.onHover.apply this, [d, i, yes]
+          bar.on "mouseout", (d, i) -> dispatch.onHover.apply this, [d, i]
+
+      chart_group.exit().remove()
+
+      internals.drawLegend g, bar_names
    
   
     # IMPORTANT: when customizing the chart, margin MUST be called before
@@ -228,6 +237,11 @@ define ["d3"], (d3) ->
       return events  unless arguments.length
       events = _
       chart
+
+    # Expose internals (private methods) to the
+    # outside (through the chart function).
+    if config.expose
+      chart.internals = internals
   
     chart
   
