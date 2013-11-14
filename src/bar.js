@@ -1,4 +1,4 @@
-(function () {
+chart.bar = (function () {
   "use strict"
 
   function(config) {
@@ -12,7 +12,7 @@
       if (!arguments.length) {
         return width;
       }
-      width = c - conf.margin.left - conf.margin.right;
+      width = c - config.margin.left - config.margin.right;
       return chart;
     }
 
