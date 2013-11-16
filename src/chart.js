@@ -1,2 +1,2 @@
-var chart;
-if (!chart) chart = {};
+// Using the d3 namespace
+d3.chart = {};

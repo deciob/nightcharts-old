@@ -1,0 +1,24 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>d3 charts</title>
+    <meta name="description" content="d3 charts">
+    <meta name="author" content="Decio Battaglia">
+    <link rel="stylesheet" href="main.css?v=1.0">
+  </head>
+  <body>
+    <div id="viz"></div>
+    <script src="lib/d3/d3.js"></script>
+    <script src="build/chart.js"></script>
+    <script>
+      var data = [{name: 'tot', value: 23}, {name: 'rot', value: 75}];
+      var bar = d3.chart.bar()
+          .padding(.2)
+          .xValue( function(d) { return d['name']; } )
+          .yValue( function(d) { return d['value']; } );
+      d3.select("#viz").datum(data).call(bar);
+    </script>
+  </body>
+</html>

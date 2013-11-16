@@ -1,14 +1,26 @@
-chart.utils = (function () {
+d3.chart.utils = (function () {
 
-  function extend(o, p) {
-      for(prop in p) {
-          o[prop] = p[prop];
+  function extend (target, source) {
+    for(prop in source) {
+      target[prop] = source[prop];
+    }
+    return target;
+  }
+
+  function getset (obj, state) {
+    d3.keys(state).forEach( function(key) {
+      obj[key] = function (x) {
+        if (!arguments.length) return state[key];
+        var old = state[key];
+        state[key] = x;
+        return obj;
       }
-      return o;
+    });
   }
 
   return {
-    extend: extend;
+    extend: extend,
+    getset: getset
   };
 
 })();

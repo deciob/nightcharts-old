@@ -1,0 +1,36 @@
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: steelblue;
+}
+
+.bar.active {
+  fill: darkRed;
+}
+
+.x.axis path {
+  display: none;
+}
+
+#year-label {
+  position: absolute;
+  top: 250px;
+  right: 350px;
+  float: right;
+  font-size: 8em;
+}
+
+button {
+  font-size: 1.6em;
+  padding: 5px;
+  margin: 30px;
+}
