@@ -1,0 +1,511 @@
+year,rank,country,agglomeration,population
+1950,1,United States of America,New York-Newark,12.34
+1950,2,Japan,Tokyo,11.27
+1950,3,United Kingdom,London,8.36
+1950,4,France,Paris,6.28
+1950,5,Russian Federation,Moskva (Moscow),5.36
+1950,6,Argentina,Buenos Aires,5.10
+1950,7,United States of America,Chicago,5.00
+1950,8,India,Kolkata (Calcutta),4.51
+1950,9,China,Shanghai,4.30
+1950,10,Japan,Osaka-Kobe,4.15
+1950,11,United States of America,Los Angeles-Long Beach-Santa Ana,4.05
+1950,12,Germany,Berlin,3.34
+1950,13,United States of America,Philadelphia,3.13
+1950,14,Brazil,Rio de Janeiro,2.95
+1950,15,Russian Federation,Sankt Peterburg (Saint Petersburg),2.90
+1950,16,Mexico,Ciudad de México (Mexico City),2.88
+1950,17,India,Mumbai (Bombay),2.86
+1950,18,United States of America,Detroit,2.77
+1950,19,United States of America,Boston,2.55
+1950,20,Egypt,Al-Qahirah (Cairo),2.49
+1950,21,China,Tianjin,2.47
+1950,22,United Kingdom,Manchester,2.42
+1950,23,Brazil,São Paulo,2.33
+1950,24,United Kingdom,Birmingham,2.23
+1950,25,China,Shenyang,2.15
+1950,26,Italy,Roma (Rome),1.88
+1950,27,Italy,Milano (Milan),1.88
+1950,28,United States of America,San Francisco-Oakland,1.86
+1950,29,Spain,Barcelona,1.81
+1950,30,United Kingdom,Glasgow,1.76
+1955,1,Japan,Tokyo,13.71
+1955,2,United States of America,New York-Newark,13.22
+1955,3,United Kingdom,London,8.28
+1955,4,France,Paris,6.80
+1955,5,China,Shanghai,5.85
+1955,6,Argentina,Buenos Aires,5.80
+1955,7,Russian Federation,Moskva (Moscow),5.75
+1955,8,United States of America,Chicago,5.56
+1955,9,United States of America,Los Angeles-Long Beach-Santa Ana,5.15
+1955,10,Japan,Osaka-Kobe,5.12
+1955,11,India,Kolkata (Calcutta),5.06
+1955,12,Mexico,Ciudad de México (Mexico City),3.80
+1955,13,Brazil,Rio de Janeiro,3.59
+1955,14,United States of America,Philadelphia,3.51
+1955,15,India,Mumbai (Bombay),3.43
+1955,16,Germany,Berlin,3.30
+1955,17,Russian Federation,Sankt Peterburg (Saint Petersburg),3.14
+1955,18,United States of America,Detroit,3.14
+1955,19,Brazil,São Paulo,3.04
+1955,20,Egypt,Al-Qahirah (Cairo),3.03
+1955,21,China,Tianjin,2.76
+1955,22,United States of America,Boston,2.68
+1955,23,United Kingdom,Manchester,2.42
+1955,24,China,Shenyang,2.41
+1955,25,China,Beijing,2.36
+1955,26,United Kingdom,Birmingham,2.28
+1955,27,Italy,Roma (Rome),2.14
+1955,28,"China, Hong Kong SAR",Hong Kong,2.12
+1955,29,Spain,Barcelona,2.10
+1955,30,Italy,Milano (Milan),2.10
+1960,1,Japan,Tokyo,16.68
+1960,2,United States of America,New York-Newark,14.16
+1960,3,United Kingdom,London,8.20
+1960,4,France,Paris,7.41
+1960,5,China,Shanghai,6.82
+1960,6,Argentina,Buenos Aires,6.60
+1960,7,United States of America,Los Angeles-Long Beach-Santa Ana,6.53
+1960,8,Japan,Osaka-Kobe,6.23
+1960,9,United States of America,Chicago,6.18
+1960,10,Russian Federation,Moskva (Moscow),6.17
+1960,11,India,Kolkata (Calcutta),5.65
+1960,12,Mexico,Ciudad de México (Mexico City),5.01
+1960,13,Brazil,Rio de Janeiro,4.37
+1960,14,India,Mumbai (Bombay),4.06
+1960,15,Brazil,São Paulo,3.97
+1960,16,United States of America,Philadelphia,3.93
+1960,17,China,Beijing,3.90
+1960,18,Egypt,Al-Qahirah (Cairo),3.68
+1960,19,United States of America,Detroit,3.55
+1960,20,Russian Federation,Sankt Peterburg (Saint Petersburg),3.40
+1960,21,Germany,Berlin,3.26
+1960,22,China,Tianjin,2.94
+1960,23,United States of America,Boston,2.82
+1960,24,China,Shenyang,2.70
+1960,25,Indonesia,Jakarta,2.68
+1960,26,"China, Hong Kong SAR",Hong Kong,2.62
+1960,27,Spain,Barcelona,2.47
+1960,28,Italy,Roma (Rome),2.46
+1960,29,United Kingdom,Manchester,2.43
+1960,30,Italy,Milano (Milan),2.40
+1965,1,Japan,Tokyo,20.28
+1965,2,United States of America,New York-Newark,15.18
+1965,3,United Kingdom,London,7.87
+1965,4,France,Paris,7.86
+1965,5,Japan,Osaka-Kobe,7.65
+1965,6,United States of America,Los Angeles-Long Beach-Santa Ana,7.41
+1965,7,Argentina,Buenos Aires,7.32
+1965,8,Mexico,Ciudad de México (Mexico City),6.65
+1965,9,United States of America,Chicago,6.64
+1965,10,Russian Federation,Moskva (Moscow),6.62
+1965,11,China,Shanghai,6.43
+1965,12,India,Kolkata (Calcutta),6.26
+1965,13,Brazil,São Paulo,5.49
+1965,14,Brazil,Rio de Janeiro,5.39
+1965,15,India,Mumbai (Bombay),4.85
+1965,16,Egypt,Al-Qahirah (Cairo),4.74
+1965,17,China,Beijing,4.58
+1965,18,United States of America,Philadelphia,4.16
+1965,19,United States of America,Detroit,3.76
+1965,20,Russian Federation,Sankt Peterburg (Saint Petersburg),3.68
+1965,21,Republic of Korea,Seoul,3.45
+1965,22,Indonesia,Jakarta,3.30
+1965,23,"China, Hong Kong SAR",Hong Kong,3.29
+1965,24,Germany,Berlin,3.23
+1965,25,China,Tianjin,3.12
+1965,26,United States of America,Boston,3.00
+1965,27,Spain,Barcelona,2.93
+1965,28,China,Shenyang,2.92
+1965,29,Spain,Madrid,2.90
+1965,30,India,Delhi,2.85
+1970,1,Japan,Tokyo,23.30
+1970,2,United States of America,New York-Newark,16.19
+1970,3,Japan,Osaka-Kobe,9.41
+1970,4,Mexico,Ciudad de México (Mexico City),8.77
+1970,5,United States of America,Los Angeles-Long Beach-Santa Ana,8.38
+1970,6,France,Paris,8.21
+1970,7,Argentina,Buenos Aires,8.10
+1970,8,Brazil,São Paulo,7.62
+1970,9,United Kingdom,London,7.51
+1970,10,Russian Federation,Moskva (Moscow),7.11
+1970,11,United States of America,Chicago,7.11
+1970,12,India,Kolkata (Calcutta),6.93
+1970,13,Brazil,Rio de Janeiro,6.64
+1970,14,China,Shanghai,6.04
+1970,15,India,Mumbai (Bombay),5.81
+1970,16,Egypt,Al-Qahirah (Cairo),5.58
+1970,17,Republic of Korea,Seoul,5.31
+1970,18,China,Beijing,4.43
+1970,19,United States of America,Philadelphia,4.40
+1970,20,Russian Federation,Sankt Peterburg (Saint Petersburg),3.98
+1970,21,United States of America,Detroit,3.97
+1970,22,Indonesia,Jakarta,3.92
+1970,23,Philippines,Manila,3.53
+1970,24,India,Delhi,3.53
+1970,25,Spain,Madrid,3.52
+1970,26,Spain,Barcelona,3.48
+1970,27,"China, Hong Kong SAR",Hong Kong,3.47
+1970,28,China,Tianjin,3.32
+1970,29,Iran (Islamic Republic of),Tehran,3.29
+1970,30,Germany,Berlin,3.21
+1975,1,Japan,Tokyo,26.61
+1975,2,United States of America,New York-Newark,15.88
+1975,3,Mexico,Ciudad de México (Mexico City),10.69
+1975,4,Japan,Osaka-Kobe,9.84
+1975,5,Brazil,São Paulo,9.61
+1975,6,United States of America,Los Angeles-Long Beach-Santa Ana,8.93
+1975,7,Argentina,Buenos Aires,8.74
+1975,8,France,Paris,8.56
+1975,9,India,Kolkata (Calcutta),7.89
+1975,10,Russian Federation,Moskva (Moscow),7.62
+1975,11,Brazil,Rio de Janeiro,7.56
+1975,12,United Kingdom,London,7.55
+1975,13,United States of America,Chicago,7.16
+1975,14,India,Mumbai (Bombay),7.08
+1975,15,Republic of Korea,Seoul,6.81
+1975,16,Egypt,Al-Qahirah (Cairo),6.45
+1975,17,China,Shanghai,5.63
+1975,18,Philippines,Manila,5.00
+1975,19,China,Beijing,4.83
+1975,20,Indonesia,Jakarta,4.81
+1975,21,United States of America,Philadelphia,4.47
+1975,22,India,Delhi,4.43
+1975,23,Russian Federation,Sankt Peterburg (Saint Petersburg),4.33
+1975,24,Iran (Islamic Republic of),Tehran,4.27
+1975,25,Pakistan,Karachi,3.99
+1975,26,"China, Hong Kong SAR",Hong Kong,3.91
+1975,27,Spain,Madrid,3.89
+1975,28,United States of America,Detroit,3.89
+1975,29,Thailand,Krung Thep (Bangkok),3.84
+1975,30,Peru,Lima,3.70
+1980,1,Japan,Tokyo,28.55
+1980,2,United States of America,New York-Newark,15.60
+1980,3,Mexico,Ciudad de México (Mexico City),13.01
+1980,4,Brazil,São Paulo,12.09
+1980,5,Japan,Osaka-Kobe,9.99
+1980,6,United States of America,Los Angeles-Long Beach-Santa Ana,9.51
+1980,7,Argentina,Buenos Aires,9.42
+1980,8,India,Kolkata (Calcutta),9.03
+1980,9,France,Paris,8.67
+1980,10,India,Mumbai (Bombay),8.66
+1980,11,Brazil,Rio de Janeiro,8.58
+1980,12,Republic of Korea,Seoul,8.26
+1980,13,Russian Federation,Moskva (Moscow),8.14
+1980,14,United Kingdom,London,7.66
+1980,15,Egypt,Al-Qahirah (Cairo),7.35
+1980,16,United States of America,Chicago,7.22
+1980,17,Indonesia,Jakarta,5.98
+1980,18,China,Shanghai,5.97
+1980,19,Philippines,Manila,5.95
+1980,20,India,Delhi,5.56
+1980,21,China,Beijing,5.37
+1980,22,Iran (Islamic Republic of),Tehran,5.08
+1980,23,Pakistan,Karachi,5.05
+1980,24,Thailand,Krung Thep (Bangkok),4.72
+1980,25,Russian Federation,Sankt Peterburg (Saint Petersburg),4.64
+1980,26,"China, Hong Kong SAR",Hong Kong,4.62
+1980,27,United States of America,Philadelphia,4.54
+1980,28,Peru,Lima,4.44
+1980,29,Turkey,Istanbul,4.40
+1980,30,Spain,Madrid,4.25
+1985,1,Japan,Tokyo,30.30
+1985,2,United States of America,New York-Newark,15.83
+1985,3,Mexico,Ciudad de México (Mexico City),14.11
+1985,4,Brazil,São Paulo,13.39
+1985,5,India,Mumbai (Bombay),10.39
+1985,6,Japan,Osaka-Kobe,10.35
+1985,7,United States of America,Los Angeles-Long Beach-Santa Ana,10.18
+1985,8,Argentina,Buenos Aires,9.96
+1985,9,India,Kolkata (Calcutta),9.95
+1985,10,Republic of Korea,Seoul,9.55
+1985,11,Brazil,Rio de Janeiro,9.09
+1985,12,France,Paris,8.96
+1985,13,Russian Federation,Moskva (Moscow),8.58
+1985,14,Egypt,Al-Qahirah (Cairo),8.33
+1985,15,United Kingdom,London,7.67
+1985,16,India,Delhi,7.33
+1985,17,United States of America,Chicago,7.29
+1985,18,Indonesia,Jakarta,7.01
+1985,19,Philippines,Manila,6.89
+1985,20,China,Shanghai,6.85
+1985,21,Pakistan,Karachi,6.03
+1985,22,China,Beijing,6.02
+1985,23,Iran (Islamic Republic of),Tehran,5.84
+1985,24,Turkey,Istanbul,5.41
+1985,25,Thailand,Krung Thep (Bangkok),5.28
+1985,26,Peru,Lima,5.12
+1985,27,"China, Hong Kong SAR",Hong Kong,5.03
+1985,28,Russian Federation,Sankt Peterburg (Saint Petersburg),4.84
+1985,29,India,Chennai (Madras),4.75
+1985,30,Bangladesh,Dhaka,4.66
+1990,1,Japan,Tokyo,32.53
+1990,2,United States of America,New York-Newark,16.09
+1990,3,Mexico,Ciudad de México (Mexico City),15.31
+1990,4,Brazil,São Paulo,14.78
+1990,5,India,Mumbai (Bombay),12.44
+1990,6,Japan,Osaka-Kobe,11.04
+1990,7,India,Kolkata (Calcutta),10.89
+1990,8,United States of America,Los Angeles-Long Beach-Santa Ana,10.88
+1990,9,Republic of Korea,Seoul,10.54
+1990,10,Argentina,Buenos Aires,10.51
+1990,11,India,Delhi,9.73
+1990,12,Brazil,Rio de Janeiro,9.59
+1990,13,France,Paris,9.33
+1990,14,Egypt,Al-Qahirah (Cairo),9.06
+1990,15,Russian Federation,Moskva (Moscow),8.99
+1990,16,Indonesia,Jakarta,8.18
+1990,17,Philippines,Manila,7.97
+1990,18,China,Shanghai,7.82
+1990,19,United Kingdom,London,7.65
+1990,20,United States of America,Chicago,7.37
+1990,21,Pakistan,Karachi,7.15
+1990,22,China,Beijing,6.79
+1990,23,Bangladesh,Dhaka,6.62
+1990,24,Turkey,Istanbul,6.55
+1990,25,Iran (Islamic Republic of),Tehran,6.36
+1990,26,Thailand,Krung Thep (Bangkok),5.89
+1990,27,Peru,Lima,5.84
+1990,28,"China, Hong Kong SAR",Hong Kong,5.77
+1990,29,India,Chennai (Madras),5.34
+1990,30,Russian Federation,Sankt Peterburg (Saint Petersburg),4.99
+1995,1,Japan,Tokyo,33.59
+1995,2,United States of America,New York-Newark,16.94
+1995,3,Mexico,Ciudad de México (Mexico City),16.81
+1995,4,Brazil,São Paulo,15.95
+1995,5,India,Mumbai (Bombay),14.31
+1995,6,India,Delhi,12.41
+1995,7,India,Kolkata (Calcutta),11.92
+1995,8,United States of America,Los Angeles-Long Beach-Santa Ana,11.34
+1995,9,Argentina,Buenos Aires,11.15
+1995,10,Japan,Osaka-Kobe,11.05
+1995,11,China,Shanghai,10.45
+1995,12,Republic of Korea,Seoul,10.26
+1995,13,Brazil,Rio de Janeiro,10.17
+1995,14,Egypt,Al-Qahirah (Cairo),9.71
+1995,15,France,Paris,9.51
+1995,16,Philippines,Manila,9.40
+1995,17,Russian Federation,Moskva (Moscow),9.20
+1995,18,Pakistan,Karachi,8.47
+1995,19,Bangladesh,Dhaka,8.33
+1995,20,Indonesia,Jakarta,8.32
+1995,21,China,Beijing,8.31
+1995,22,United Kingdom,London,7.91
+1995,23,United States of America,Chicago,7.84
+1995,24,Turkey,Istanbul,7.67
+1995,25,Iran (Islamic Republic of),Tehran,6.69
+1995,26,Peru,Lima,6.58
+1995,27,"China, Hong Kong SAR",Hong Kong,6.14
+1995,28,Thailand,Krung Thep (Bangkok),6.11
+1995,29,Nigeria,Lagos,5.98
+1995,30,India,Chennai (Madras),5.84
+2000,1,Japan,Tokyo,34.45
+2000,2,Mexico,Ciudad de México (Mexico City),18.02
+2000,3,United States of America,New York-Newark,17.85
+2000,4,Brazil,São Paulo,17.10
+2000,5,India,Mumbai (Bombay),16.37
+2000,6,India,Delhi,15.73
+2000,7,China,Shanghai,13.96
+2000,8,India,Kolkata (Calcutta),13.06
+2000,9,Argentina,Buenos Aires,11.85
+2000,10,United States of America,Los Angeles-Long Beach-Santa Ana,11.81
+2000,11,Japan,Osaka-Kobe,11.17
+2000,12,Brazil,Rio de Janeiro,10.80
+2000,13,Bangladesh,Dhaka,10.28
+2000,14,Egypt,Al-Qahirah (Cairo),10.17
+2000,15,China,Beijing,10.16
+2000,16,Pakistan,Karachi,10.03
+2000,17,Russian Federation,Moskva (Moscow),10.00
+2000,18,Philippines,Manila,9.96
+2000,19,Republic of Korea,Seoul,9.92
+2000,20,France,Paris,9.74
+2000,21,Turkey,Istanbul,8.74
+2000,22,Indonesia,Jakarta,8.39
+2000,23,United States of America,Chicago,8.33
+2000,24,United Kingdom,London,8.22
+2000,25,China,Chongqing,7.44
+2000,26,China,"Guangzhou, Guangdong",7.33
+2000,27,Peru,Lima,7.29
+2000,28,Nigeria,Lagos,7.28
+2000,29,Iran (Islamic Republic of),Tehran,6.88
+2000,30,"China, Hong Kong SAR",Hong Kong,6.78
+2005,1,Japan,Tokyo,35.62
+2005,2,United States of America,New York-Newark,18.89
+2005,3,Mexico,Ciudad de México (Mexico City),18.73
+2005,4,India,Delhi,18.67
+2005,5,Brazil,São Paulo,18.33
+2005,6,India,Mumbai (Bombay),17.89
+2005,7,China,Shanghai,16.59
+2005,8,India,Kolkata (Calcutta),13.70
+2005,9,Bangladesh,Dhaka,12.61
+2005,10,Argentina,Buenos Aires,12.59
+2005,11,United States of America,Los Angeles-Long Beach-Santa Ana,12.41
+2005,12,China,Beijing,12.35
+2005,13,Pakistan,Karachi,11.74
+2005,14,Brazil,Rio de Janeiro,11.37
+2005,15,Japan,Osaka-Kobe,11.26
+2005,16,Philippines,Manila,10.76
+2005,17,Russian Federation,Moskva (Moscow),10.75
+2005,18,Egypt,Al-Qahirah (Cairo),10.56
+2005,19,France,Paris,10.11
+2005,20,Republic of Korea,Seoul,9.83
+2005,21,Turkey,Istanbul,9.75
+2005,22,Indonesia,Jakarta,8.99
+2005,23,United States of America,Chicago,8.90
+2005,24,Nigeria,Lagos,8.86
+2005,25,China,"Guangzhou, Guangdong",8.85
+2005,26,China,Chongqing,8.60
+2005,27,United Kingdom,London,8.55
+2005,28,China,Shenzhen,8.41
+2005,29,Peru,Lima,8.08
+2005,30,China,Wuhan,7.74
+2010,1,Japan,Tokyo,36.93
+2010,2,India,Delhi,21.94
+2010,3,Mexico,Ciudad de México (Mexico City),20.14
+2010,4,United States of America,New York-Newark,20.10
+2010,5,Brazil,São Paulo,19.65
+2010,6,China,Shanghai,19.55
+2010,7,India,Mumbai (Bombay),19.42
+2010,8,China,Beijing,15.00
+2010,9,Bangladesh,Dhaka,14.93
+2010,10,India,Kolkata (Calcutta),14.28
+2010,11,Pakistan,Karachi,13.50
+2010,12,Argentina,Buenos Aires,13.37
+2010,13,United States of America,Los Angeles-Long Beach-Santa Ana,13.22
+2010,14,Brazil,Rio de Janeiro,11.87
+2010,15,Philippines,Manila,11.65
+2010,16,Russian Federation,Moskva (Moscow),11.47
+2010,17,Japan,Osaka-Kobe,11.43
+2010,18,Egypt,Al-Qahirah (Cairo),11.03
+2010,19,Turkey,Istanbul,10.95
+2010,20,Nigeria,Lagos,10.79
+2010,21,France,Paris,10.52
+2010,22,China,"Guangzhou, Guangdong",10.49
+2010,23,China,Shenzhen,10.22
+2010,24,Republic of Korea,Seoul,9.75
+2010,25,China,Chongqing,9.73
+2010,26,Indonesia,Jakarta,9.63
+2010,27,United States of America,Chicago,9.54
+2010,28,Peru,Lima,8.95
+2010,29,United Kingdom,London,8.92
+2010,30,China,Wuhan,8.90
+2011,1,Japan,Tokyo,37.22
+2011,2,India,Delhi,22.65
+2011,3,Mexico,Ciudad de México (Mexico City),20.45
+2011,4,United States of America,New York-Newark,20.35
+2011,5,China,Shanghai,20.21
+2011,6,Brazil,São Paulo,19.92
+2011,7,India,Mumbai (Bombay),19.74
+2011,8,China,Beijing,15.59
+2011,9,Bangladesh,Dhaka,15.39
+2011,10,India,Kolkata (Calcutta),14.40
+2011,11,Pakistan,Karachi,13.88
+2011,12,Argentina,Buenos Aires,13.53
+2011,13,United States of America,Los Angeles-Long Beach-Santa Ana,13.40
+2011,14,Brazil,Rio de Janeiro,11.96
+2011,15,Philippines,Manila,11.86
+2011,16,Russian Federation,Moskva (Moscow),11.62
+2011,17,Japan,Osaka-Kobe,11.49
+2011,18,Turkey,Istanbul,11.25
+2011,19,Nigeria,Lagos,11.22
+2011,20,Egypt,Al-Qahirah (Cairo),11.17
+2011,21,China,"Guangzhou, Guangdong",10.85
+2011,22,China,Shenzhen,10.63
+2011,23,France,Paris,10.62
+2011,24,China,Chongqing,9.98
+2011,25,Indonesia,Jakarta,9.77
+2011,26,Republic of Korea,Seoul,9.74
+2011,27,United States of America,Chicago,9.68
+2011,28,China,Wuhan,9.16
+2011,29,Peru,Lima,9.13
+2011,30,United Kingdom,London,9.01
+2015,1,Japan,Tokyo,38.20
+2015,2,India,Delhi,25.63
+2015,3,China,Shanghai,22.96
+2015,4,Mexico,Ciudad de México (Mexico City),21.71
+2015,5,United States of America,New York-Newark,21.33
+2015,6,India,Mumbai (Bombay),21.21
+2015,7,Brazil,São Paulo,21.03
+2015,8,China,Beijing,18.08
+2015,9,Bangladesh,Dhaka,17.38
+2015,10,Pakistan,Karachi,15.50
+2015,11,India,Kolkata (Calcutta),15.08
+2015,12,Argentina,Buenos Aires,14.15
+2015,13,United States of America,Los Angeles-Long Beach-Santa Ana,14.08
+2015,14,Nigeria,Lagos,13.12
+2015,15,Philippines,Manila,12.86
+2015,16,Turkey,Istanbul,12.46
+2015,17,China,"Guangzhou, Guangdong",12.39
+2015,18,Brazil,Rio de Janeiro,12.38
+2015,19,China,Shenzhen,12.34
+2015,20,Russian Federation,Moskva (Moscow),12.14
+2015,21,Egypt,Al-Qahirah (Cairo),11.94
+2015,22,Japan,Osaka-Kobe,11.78
+2015,23,France,Paris,11.10
+2015,24,China,Chongqing,11.05
+2015,25,Indonesia,Jakarta,10.47
+2015,26,Democratic Republic of the Congo,Kinshasa,10.31
+2015,27,China,Wuhan,10.26
+2015,28,United States of America,Chicago,10.20
+2015,29,India,Bangalore,10.02
+2015,30,India,Chennai (Madras),9.89
+2020,1,Japan,Tokyo,38.71
+2020,2,India,Delhi,29.27
+2020,3,China,Shanghai,26.12
+2020,4,India,Mumbai (Bombay),23.66
+2020,5,Mexico,Ciudad de México (Mexico City),23.24
+2020,6,United States of America,New York-Newark,22.49
+2020,7,Brazil,São Paulo,22.24
+2020,8,China,Beijing,20.78
+2020,9,Bangladesh,Dhaka,20.06
+2020,10,Pakistan,Karachi,17.73
+2020,11,India,Kolkata (Calcutta),16.65
+2020,12,Nigeria,Lagos,15.83
+2020,13,United States of America,Los Angeles-Long Beach-Santa Ana,14.91
+2020,14,Argentina,Buenos Aires,14.88
+2020,15,Philippines,Manila,14.43
+2020,16,China,Shenzhen,14.22
+2020,17,China,"Guangzhou, Guangdong",14.17
+2020,18,Turkey,Istanbul,13.79
+2020,19,Egypt,Al-Qahirah (Cairo),13.25
+2020,20,Brazil,Rio de Janeiro,13.02
+2020,21,China,Chongqing,12.48
+2020,22,Russian Federation,Moskva (Moscow),12.48
+2020,23,Democratic Republic of the Congo,Kinshasa,12.32
+2020,24,Japan,Osaka-Kobe,12.00
+2020,25,France,Paris,11.68
+2020,26,India,Bangalore,11.64
+2020,27,China,Wuhan,11.64
+2020,28,Indonesia,Jakarta,11.64
+2020,29,India,Chennai (Madras),11.32
+2020,30,China,Tianjin,10.92
+2025,1,Japan,Tokyo,38.66
+2025,2,India,Delhi,32.94
+2025,3,China,Shanghai,28.40
+2025,4,India,Mumbai (Bombay),26.56
+2025,5,Mexico,Ciudad de México (Mexico City),24.58
+2025,6,United States of America,New York-Newark,23.57
+2025,7,Brazil,São Paulo,23.17
+2025,8,Bangladesh,Dhaka,22.91
+2025,9,China,Beijing,22.63
+2025,10,Pakistan,Karachi,20.19
+2025,11,Nigeria,Lagos,18.86
+2025,12,India,Kolkata (Calcutta),18.71
+2025,13,Philippines,Manila,16.28
+2025,14,United States of America,Los Angeles-Long Beach-Santa Ana,15.69
+2025,15,China,Shenzhen,15.54
+2025,16,Argentina,Buenos Aires,15.52
+2025,17,China,"Guangzhou, Guangdong",15.47
+2025,18,Turkey,Istanbul,14.90
+2025,19,Egypt,Al-Qahirah (Cairo),14.74
+2025,20,Democratic Republic of the Congo,Kinshasa,14.54
+2025,21,China,Chongqing,13.63
+2025,22,Brazil,Rio de Janeiro,13.62
+2025,23,India,Bangalore,13.19
+2025,24,Indonesia,Jakarta,12.82
+2025,25,India,Chennai (Madras),12.81
+2025,26,China,Wuhan,12.73
+2025,27,Russian Federation,Moskva (Moscow),12.58
+2025,28,France,Paris,12.16
+2025,29,Japan,Osaka-Kobe,12.03
+2025,30,China,Tianjin,11.93

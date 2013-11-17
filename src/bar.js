@@ -45,14 +45,13 @@ d3.chart.bar = (function () {
         .orient(__.y_orient);
 
     function bar (selection) {
-      selection.each(function(data) {
-
-        var data = data.map(function(d, i) {
-          return [__.xValue.call(data, d), __.yValue.call(data, d)];
+      selection.each(function(dat) {
+        var data = dat.map(function(d, i) {
+          return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
         });
 
         xScale.rangeRoundBands([0, w()], __.padding)
-          .domain(d3.extent(data, function(d) { return d[0]; }));
+          .domain(data.map(function(d) { return d[0]; }));
         // Note the inverted range for the y-scale: bigger is up!
         yScale.range([h(), 0]).domain([0, d3.max(
           data, function(d) {return parseFloat(d[1]); }) ]);
@@ -91,14 +90,10 @@ d3.chart.bar = (function () {
         // Update the x axis.
         t.select(".x.axis")
           .attr("transform", "translate(0," + yScale.range()[0] + ")")
-          .transition()
-          .duration(__.duration)
           .call(xAxis)
 
         // Update the y axis.
         t.select(".y.axis")
-          .transition()
-          .duration(__.duration)
           .call(yAxis);
 
       });

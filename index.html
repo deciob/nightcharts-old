@@ -10,15 +10,34 @@
   </head>
   <body>
     <div id="viz"></div>
+    <script src="../lib/lodash/dist/lodash.js"></script>
     <script src="lib/d3/d3.js"></script>
     <script src="build/chart.js"></script>
     <script>
-      var data = [{name: 'tot', value: 23}, {name: 'rot', value: 75}];
-      var bar = d3.chart.bar()
-          .padding(.2)
-          .xValue( function(d) { return d['name']; } )
-          .yValue( function(d) { return d['value']; } );
-      d3.select("#viz").datum(data).call(bar);
+      //var data = [{name: 'tot', value: 23}, {name: 'rot', value: 75}];
+      function accessor(d) {
+        // csv headers:
+        // year,rank,country,agglomeration,population
+        return {
+          year: +d.year, //new Date(+d.year, 0, 1), // convert "Year" column to Date
+          rank: d.rank,
+          country: d.country,
+          agglomeration: d.agglomeration,
+          population: +d.population
+        };
+      }
+      d3.csv("data/WUP2011-F11a-30_Largest_Cities.csv",
+       accessor  , function(error, data) {
+          var current_year = 1950;
+          var data_by_year = _.groupBy( data, function (obj) {
+            return obj.year;
+          });
+          var bar = d3.chart.bar()
+              .padding(.2)
+              .xValue( function(d) { return d['agglomeration']; } )
+              .yValue( function(d) { return d['population']; } );
+          d3.select("#viz").datum(data_by_year[current_year]).call(bar);
+      });
     </script>
   </body>
 </html>
