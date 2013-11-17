@@ -15,14 +15,14 @@ d3.chart.bar = (function () {
       width: 500,
       height: 400,
       padding: .1,
+      duration: 900,
+      step: 600,
       x_orient: 'bottom',
       y_orient: 'left',
       colour: 'LightSteelBlue',
       xValue: function(d) { return d[0]; },
       yValue: function(d) { return d[1]; },
-      duration: 900,
-      step: 600,
-      x_label: {y: 0, x: 0, dy: ".35em", transform: ""}
+      handleTransitionEnd: function(d) { return d; }
     }
 
     d3.chart.utils.extend(__, config);
@@ -84,6 +84,13 @@ d3.chart.bar = (function () {
           .attr("width", xScale.rangeBand())
           .attr("y", function(d) { return yScale(d[1]); })
           .attr("height", function(d) { return h() - yScale(d[1]); });
+
+        bars.transition()
+          .duration(__.duration)
+          .attr("x", function(d, i) { return xScale(d[0]); })
+          .attr("y", function(d) { return yScale(d[1]); })
+          .attr("height", function(d) { return h() - yScale(d[1]); })
+          .call(d3.chart.utils.endall, __.handleTransitionEnd);
 
         var t = g.transition().duration(__.duration);
 

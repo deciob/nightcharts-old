@@ -32,11 +32,21 @@
           var data_by_year = _.groupBy( data, function (obj) {
             return obj.year;
           });
+          var selection = d3.select("#viz")
+          function handleTransitionEnd () {
+            current_year += 5;
+            if (data_by_year[current_year]) {
+              setTimeout(function(){
+                selection.datum(data_by_year[current_year]).call(bar);
+              },400);
+            }
+          }
           var bar = d3.chart.bar()
               .padding(.2)
               .xValue( function(d) { return d['agglomeration']; } )
-              .yValue( function(d) { return d['population']; } );
-          d3.select("#viz").datum(data_by_year[current_year]).call(bar);
+              .yValue( function(d) { return d['population']; } )
+              .handleTransitionEnd( handleTransitionEnd );
+          selection.datum(data_by_year[current_year]).call(bar);
       });
     </script>
   </body>
