@@ -1,3 +1,8 @@
+// d3.chart.utils
+// ----------------
+
+// Useful functions that can be shared across modules.
+
 d3.chart.utils = (function () {
 
   function extend (target, source) {

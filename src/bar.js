@@ -19,7 +19,10 @@ d3.chart.bar = (function () {
       y_orient: 'left',
       colour: 'LightSteelBlue',
       xValue: function(d) { return d[0]; },
-      yValue: function(d) { return d[1]; }
+      yValue: function(d) { return d[1]; },
+      duration: 900,
+      step: 600,
+      x_label: {y: 0, x: 0, dy: ".35em", transform: ""}
     }
 
     d3.chart.utils.extend(__, config);
@@ -50,6 +53,7 @@ d3.chart.bar = (function () {
 
         xScale.rangeRoundBands([0, w()], __.padding)
           .domain(d3.extent(data, function(d) { return d[0]; }));
+        // Note the inverted range for the y-scale: bigger is up!
         yScale.range([h(), 0]).domain([0, d3.max(
           data, function(d) {return parseFloat(d[1]); }) ]);
 
@@ -63,8 +67,8 @@ d3.chart.bar = (function () {
         gEnter.append("g").attr("class", "y axis");
 
         // Update the outer dimensions.
-        svg.attr("width", w())
-          .attr("height", h());
+        svg.attr("width", __.width)
+          .attr("height", __.height);
 
         // Update the inner dimensions.
         var g = svg.select("g")
@@ -82,13 +86,20 @@ d3.chart.bar = (function () {
           .attr("y", function(d) { return yScale(d[1]); })
           .attr("height", function(d) { return h() - yScale(d[1]); });
 
+        var t = g.transition().duration(__.duration);
+
         // Update the x axis.
-        g.select(".x.axis")
+        t.select(".x.axis")
           .attr("transform", "translate(0," + yScale.range()[0] + ")")
-          .call(xAxis);
+          .transition()
+          .duration(__.duration)
+          .call(xAxis)
 
         // Update the y axis.
-        g.select(".y.axis").call(yAxis);
+        t.select(".y.axis")
+          .transition()
+          .duration(__.duration)
+          .call(yAxis);
 
       });
 

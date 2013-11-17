@@ -53,13 +53,43 @@
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
               <p>d3.js reusable charts.</p>
+<p><a href="http://bost.ocks.org/mike/chart/">http://bost.ocks.org/mike/chart/</a>
+<a href="http://bost.ocks.org/mike/chart/time-series-chart.js">http://bost.ocks.org/mike/chart/time-series-chart.js</a>
+<a href="http://bost.ocks.org/mike/selection/">http://bost.ocks.org/mike/selection/</a>
+<a href="http://bl.ocks.org/mbostock/3019563">http://bl.ocks.org/mbostock/3019563</a></p>
 <p>Using the d3 namespace</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>d3.chart = {};
+            <div class="content"><div class='highlight'><pre>d3.chart = {};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <h2 id="d3-chart-utils">d3.chart.utils</h2>
 
-d3.chart.utils = (<span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Useful functions that can be shared across modules.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>d3.chart.utils = (<span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
 
   <span class="function"><span class="keyword">function</span> <span class="title">extend</span> <span class="params">(target, source)</span> {</span>
     <span class="keyword">for</span>(prop <span class="keyword">in</span> source) {
@@ -89,11 +119,11 @@ d3.chart.utils = (<span class="function"><span class="keyword">function</span> <
         </li>
         
         
-        <li id="section-4">
+        <li id="section-6">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-4">&#182;</a>
+                <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
               <h2 id="d3-chart-bar">d3.chart.bar</h2>
 
@@ -102,11 +132,11 @@ d3.chart.utils = (<span class="function"><span class="keyword">function</span> <
         </li>
         
         
-        <li id="section-5">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p>Create barcharts.</p>
 
@@ -128,7 +158,10 @@ d3.chart.utils = (<span class="function"><span class="keyword">function</span> <
       y_orient: <span class="string">'left'</span>,
       colour: <span class="string">'LightSteelBlue'</span>,
       xValue: <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">0</span>]; },
-      yValue: <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">1</span>]; }
+      yValue: <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">1</span>]; },
+      duration: <span class="number">900</span>,
+      step: <span class="number">600</span>,
+      x_label: {y: <span class="number">0</span>, x: <span class="number">0</span>, dy: <span class="string">".35em"</span>, transform: <span class="string">""</span>}
     }
 
     d3.chart.utils.extend(__, config);
@@ -141,11 +174,11 @@ d3.chart.utils = (<span class="function"><span class="keyword">function</span> <
         </li>
         
         
-        <li id="section-6">
+        <li id="section-8">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <p>Scales are functions that map from an input domain to an output range.</p>
 
@@ -157,11 +190,11 @@ d3.chart.utils = (<span class="function"><span class="keyword">function</span> <
         </li>
         
         
-        <li id="section-7">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">https://github.com/mbostock/d3/wiki/SVG-Axes</a></p>
 
@@ -182,18 +215,32 @@ d3.chart.utils = (<span class="function"><span class="keyword">function</span> <
         });
 
         xScale.rangeRoundBands([<span class="number">0</span>, w()], __.padding)
-          .domain(d3.extent(data, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">0</span>]; }));
-        yScale.range([h(), <span class="number">0</span>]).domain([<span class="number">0</span>, d3.max(
+          .domain(d3.extent(data, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">0</span>]; }));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Note the inverted range for the y-scale: bigger is up!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        yScale.range([h(), <span class="number">0</span>]).domain([<span class="number">0</span>, d3.max(
           data, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span><span class="keyword">return</span> parseFloat(d[<span class="number">1</span>]); }) ]);</pre></div></div>
             
         </li>
         
         
-        <li id="section-8">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p>Select the svg element, if it exists.</p>
 
@@ -204,11 +251,11 @@ d3.chart.utils = (<span class="function"><span class="keyword">function</span> <
         </li>
         
         
-        <li id="section-9">
+        <li id="section-12">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p>Otherwise, create the skeletal chart.</p>
 
@@ -222,27 +269,27 @@ d3.chart.utils = (<span class="function"><span class="keyword">function</span> <
         </li>
         
         
-        <li id="section-10">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>Update the outer dimensions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        svg.attr(<span class="string">"width"</span>, w())
-          .attr(<span class="string">"height"</span>, h());</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        svg.attr(<span class="string">"width"</span>, __.width)
+          .attr(<span class="string">"height"</span>, __.height);</pre></div></div>
             
         </li>
         
         
-        <li id="section-11">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>Update the inner dimensions.</p>
 
@@ -255,11 +302,11 @@ d3.chart.utils = (<span class="function"><span class="keyword">function</span> <
         </li>
         
         
-        <li id="section-12">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>Select the bar elements, if they exists.</p>
 
@@ -270,11 +317,11 @@ d3.chart.utils = (<span class="function"><span class="keyword">function</span> <
         </li>
         
         
-        <li id="section-13">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Otherwise, create them.</p>
 
@@ -285,39 +332,46 @@ d3.chart.utils = (<span class="function"><span class="keyword">function</span> <
           .attr(<span class="string">"x"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> xScale(d[<span class="number">0</span>]); })
           .attr(<span class="string">"width"</span>, xScale.rangeBand())
           .attr(<span class="string">"y"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> yScale(d[<span class="number">1</span>]); })
-          .attr(<span class="string">"height"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> h() - yScale(d[<span class="number">1</span>]); });</pre></div></div>
+          .attr(<span class="string">"height"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> h() - yScale(d[<span class="number">1</span>]); });
+
+        <span class="keyword">var</span> t = g.transition().duration(__.duration);</pre></div></div>
             
         </li>
         
         
-        <li id="section-14">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>Update the x axis.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        g.select(<span class="string">".x.axis"</span>)
+            <div class="content"><div class='highlight'><pre>        t.select(<span class="string">".x.axis"</span>)
           .attr(<span class="string">"transform"</span>, <span class="string">"translate(0,"</span> + yScale.range()[<span class="number">0</span>] + <span class="string">")"</span>)
-          .call(xAxis);</pre></div></div>
+          .transition()
+          .duration(__.duration)
+          .call(xAxis)</pre></div></div>
             
         </li>
         
         
-        <li id="section-15">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>Update the y axis.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        g.select(<span class="string">".y.axis"</span>).call(yAxis);
+            <div class="content"><div class='highlight'><pre>        t.select(<span class="string">".y.axis"</span>)
+          .transition()
+          .duration(__.duration)
+          .call(yAxis);
 
       });
 
