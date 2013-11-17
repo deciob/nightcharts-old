@@ -1,4 +1,9 @@
 
+// d3.chart
+// ----------------
+
+// d3.js reusable charts.
+
 // Using the d3 namespace
 d3.chart = {};
 
@@ -29,6 +34,11 @@ d3.chart.utils = (function () {
 
 })();
 
+// d3.chart.bar
+// ----------------
+
+// Create barcharts.
+
 d3.chart.bar = (function () {
   'use strict'
 
@@ -56,7 +66,6 @@ d3.chart.bar = (function () {
       return __.height - __.margin.top - __.margin.bottom; };
 
     // Scales are functions that map from an input domain to an output range.
-    console.log(__.padding)
     var xScale = d3.scale.ordinal();
     var yScale = d3.scale.linear();
 

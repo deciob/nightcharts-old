@@ -1,3 +1,8 @@
+// d3.chart.bar
+// ----------------
+
+// Create barcharts.
+
 d3.chart.bar = (function () {
   'use strict'
 
