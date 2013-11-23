@@ -47,7 +47,10 @@ chart.bar = (function () {
 
     function bar (selection) {
       selection.each(function(dat) {
-        var data = dat.map(function(d, i) {
+        
+        var data, svg, gEnter, g, bars, t;
+
+        data = dat.map(function(d, i) {
           return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
         });
 
@@ -58,10 +61,10 @@ chart.bar = (function () {
           data, function(d) {return parseFloat(d[1]); }) ]);
 
         // Select the svg element, if it exists.
-        var svg = d3.select(this).selectAll("svg").data([data]);
+        svg = d3.select(this).selectAll("svg").data([data]);
 
         // Otherwise, create the skeletal chart.
-        var gEnter = svg.enter().append("svg").append("g");
+        gEnter = svg.enter().append("svg").append("g");
         gEnter.append("g").attr("class", "bars");
         gEnter.append("g").attr("class", "x axis");
         gEnter.append("g").attr("class", "y axis");
@@ -71,12 +74,12 @@ chart.bar = (function () {
           .attr("height", __.height);
 
         // Update the inner dimensions.
-        var g = svg.select("g")
+        g = svg.select("g")
           .attr("transform", 
             "translate(" + __.margin.left + "," + __.margin.top + ")");
 
         // Select the bar elements, if they exists.
-        var bars = g.select(".bars").selectAll(".bar").data(data);
+        bars = g.select(".bars").selectAll(".bar").data(data);
 
         // Otherwise, create them.
         bars.enter().append("rect")
