@@ -8,39 +8,40 @@ chart.bar = (function () {
 
   return function (config) {
 
-    var config = config || {};
+    var config = config || {},
+      utils = chart.utils,
+      bar_utils = chart.bar_utils,
+      __ = {
+        margin: {top: 20, right: 20, bottom: 40, left: 40},
+        width: 500,
+        height: 400,
+        padding: .1,
+        duration: 900,
+        step: 600,
+        x_orient: 'bottom',
+        y_orient: 'left',
+        colour: 'LightSteelBlue',
+        orient: 'vertical',
+        xValue: function(d) { return d[0]; },
+        yValue: function(d) { return d[1]; },
+        handleTransitionEnd: function(d) { return d; }
+      },
+      w, h, xScale, yScale, xAxis, yAxis;
 
-    var __ = {
-      margin: {top: 20, right: 20, bottom: 40, left: 40},
-      width: 500,
-      height: 400,
-      padding: .1,
-      duration: 900,
-      step: 600,
-      x_orient: 'bottom',
-      y_orient: 'left',
-      colour: 'LightSteelBlue',
-      xValue: function(d) { return d[0]; },
-      yValue: function(d) { return d[1]; },
-      handleTransitionEnd: function(d) { return d; }
-    }
+    utils.extend(__, config);
 
-    chart.utils.extend(__, config);
-
-    var w = function() { 
-      return __.width - __.margin.right - __.margin.left; };
-    var h = function() { 
-      return __.height - __.margin.top - __.margin.bottom; };
+    w = function() { return __.width - __.margin.right - __.margin.left; };
+    h = function() { return __.height - __.margin.top - __.margin.bottom; };
 
     // Scales are functions that map from an input domain to an output range.
-    var xScale = d3.scale.ordinal();
-    var yScale = d3.scale.linear();
+    xScale = bar_utils[__.orient].xScale();
+    yScale = bar_utils[__.orient].yScale();
 
     // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
-    var xAxis = d3.svg.axis()
+    xAxis = d3.svg.axis()
         .scale(xScale)
         .orient(__.x_orient);
-    var yAxis = d3.svg.axis()
+    yAxis = d3.svg.axis()
         .scale(yScale)
         .orient(__.y_orient);
 
