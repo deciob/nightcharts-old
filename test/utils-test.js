@@ -1,4 +1,7 @@
+var buster = require("buster");
 var assert = buster.assertions.assert;
+
+var chart = require("../build/chart.js");
 
 buster.testCase("Utils", {
 
@@ -14,7 +17,7 @@ buster.testCase("Utils", {
 
     "getset - calling with arguments is setter, without is getter": function () {
 
-        d3.chart.utils.getset(this.myFunction, this.__);
+        chart.utils.getset(this.myFunction, this.__);
 
         this.myFunction.x('xxx');
         assert.equals(this.myFunction.x(), 'xxx');
