@@ -1,9 +1,9 @@
-// d3.chart.bar
+// chart.bar
 // ----------------
 
 // Create barcharts.
 
-d3.chart.bar = (function () {
+chart.bar = (function () {
   'use strict'
 
   return function (config) {
@@ -25,7 +25,7 @@ d3.chart.bar = (function () {
       handleTransitionEnd: function(d) { return d; }
     }
 
-    d3.chart.utils.extend(__, config);
+    chart.utils.extend(__, config);
 
     var w = function() { 
       return __.width - __.margin.right - __.margin.left; };
@@ -107,7 +107,7 @@ d3.chart.bar = (function () {
 
     }
 
-    d3.chart.utils.getset(bar, __);
+    chart.utils.getset(bar, __);
 
     return bar;
 

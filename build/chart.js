@@ -1,5 +1,23 @@
 
-// d3.chart
+// Uses Node, AMD or browser globals to create a module.
+// see: https://github.com/umdjs/umd/blob/master/returnExports.js
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['d3'], factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like enviroments that support module.exports,
+        // like Node.
+        module.exports = factory(require('d3'));
+    } else {
+        // Browser globals (root is window)
+        root.chart = factory(root.d3);
+    }
+}(this, function (d3) {
+
+// chart
 // ----------------
 
 // d3.js reusable charts.
@@ -9,15 +27,15 @@
 // http://bost.ocks.org/mike/selection/
 // http://bl.ocks.org/mbostock/3019563
 
-// Using the d3 namespace
-d3.chart = {};
 
-// d3.chart.utils
+chart = {};
+
+// chart.utils
 // ----------------
 
 // Useful functions that can be shared across modules.
 
-d3.chart.utils = (function () {
+chart.utils = (function () {
 
   function extend (target, source) {
     for(prop in source) {
@@ -39,7 +57,6 @@ d3.chart.utils = (function () {
 
   // https://groups.google.com/forum/#!msg/d3-js/WC_7Xi6VV50/j1HK0vIWI-EJ
   function endall (transition, callback) {
-    console.log(transition, callback);
     var n = 0; 
     transition 
       .each(function() { ++n; }) 
@@ -58,12 +75,12 @@ d3.chart.utils = (function () {
 
 })();
 
-// d3.chart.bar
+// chart.bar
 // ----------------
 
 // Create barcharts.
 
-d3.chart.bar = (function () {
+chart.bar = (function () {
   'use strict'
 
   return function (config) {
@@ -85,7 +102,7 @@ d3.chart.bar = (function () {
       handleTransitionEnd: function(d) { return d; }
     }
 
-    d3.chart.utils.extend(__, config);
+    chart.utils.extend(__, config);
 
     var w = function() { 
       return __.width - __.margin.right - __.margin.left; };
@@ -167,10 +184,13 @@ d3.chart.bar = (function () {
 
     }
 
-    d3.chart.utils.getset(bar, __);
+    chart.utils.getset(bar, __);
 
     return bar;
 
   };
 
 })();
+
+    return chart;
+}));

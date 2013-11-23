@@ -1,9 +1,9 @@
-// d3.chart.utils
+// chart.utils
 // ----------------
 
 // Useful functions that can be shared across modules.
 
-d3.chart.utils = (function () {
+chart.utils = (function () {
 
   function extend (target, source) {
     for(prop in source) {
@@ -25,7 +25,6 @@ d3.chart.utils = (function () {
 
   // https://groups.google.com/forum/#!msg/d3-js/WC_7Xi6VV50/j1HK0vIWI-EJ
   function endall (transition, callback) {
-    console.log(transition, callback);
     var n = 0; 
     transition 
       .each(function() { ++n; }) 

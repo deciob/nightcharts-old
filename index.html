@@ -41,7 +41,7 @@
               },400);
             }
           }
-          var bar = d3.chart.bar()
+          var bar = chart.bar()
               .padding(.2)
               .xValue( function(d) { return d['agglomeration']; } )
               .yValue( function(d) { return d['population']; } )
