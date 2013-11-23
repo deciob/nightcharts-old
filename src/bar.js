@@ -85,22 +85,22 @@ d3.chart.bar = (function () {
           .attr("y", function(d) { return yScale(d[1]); })
           .attr("height", function(d) { return h() - yScale(d[1]); });
 
-        bars.transition()
-          .duration(__.duration)
-          .attr("x", function(d, i) { return xScale(d[0]); })
-          .attr("y", function(d) { return yScale(d[1]); })
-          .attr("height", function(d) { return h() - yScale(d[1]); })
-          .call(d3.chart.utils.endall, __.handleTransitionEnd);
+        //bars.transition()
+        //  .duration(__.duration)
+        //  .attr("x", function(d, i) { return xScale(d[0]); })
+        //  .attr("y", function(d) { return yScale(d[1]); })
+        //  .attr("height", function(d) { return h() - yScale(d[1]); })
+        //  .call(d3.chart.utils.endall, __.handleTransitionEnd);
 
-        var t = g.transition().duration(__.duration);
+        //var t = g.transition().duration(__.duration);
 
         // Update the x axis.
-        t.select(".x.axis")
+        g.select(".x.axis")
           .attr("transform", "translate(0," + yScale.range()[0] + ")")
           .call(xAxis)
 
         // Update the y axis.
-        t.select(".y.axis")
+        g.select(".y.axis")
           .call(yAxis);
 
       });
