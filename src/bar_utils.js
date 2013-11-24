@@ -1,10 +1,11 @@
 // chart.bar_utils
 // ----------------
 
-// Useful functions used by the bar module.
+// Differentiating these methods per barchart orientation.
 
 chart.bar_utils = (function () {
 
+  // TODO: vertical implementation broken!!!
   var vertical = {
     xScale: d3.scale.ordinal,
     yScale: d3.scale.linear,
@@ -19,20 +20,31 @@ chart.bar_utils = (function () {
     },
     createBars: function (xScale, yScale, h) {
       return this
+        .enter().append("rect")
+        .attr("class", "bar")
         .attr("x", function(d) { return xScale(d[0]); })
         .attr("width", xScale.rangeBand())
         .attr("y", function(d) { return yScale(d[1]); })
         .attr("height", function(d) { return h() - yScale(d[1]); });
     },
-    inflateXAxis: function (xAxis, yScale, h) {
-      return this.attr("transform", "translate(0," + yScale.range()[0] + ")")
+    transitionXAxis: function (xAxis, yScale, h) {
+      return this
+        .attr("transform", "translate(0," + yScale.range()[0] + ")")
         .call(xAxis);
     },
-    transitionBars: function () {
-      return this.attr("x", function(d, i) { return x(d.agglomeration); })
-        .attr("y", function(d) { return y(d.population); })
-        .attr("height", function(d) { return height - y(d.population); })
-        .each("end", transEnd);
+    transitionYAxis: function (yAxis, delay, __) {
+      return this.call(yAxis)
+        .selectAll("g")
+        .duration(__.duration)
+        .delay(delay);
+    },
+    transitionBars: function (xScale, yScale, w, h, delay, __) {
+      return this
+        .duration(__.duration)
+        .delay(delay)
+        .attr("x", function(d, i) { return xScale(d[1]); })
+        .attr("y", function(d) { return yScale(d[0]); })
+        .attr("height", function(d) { return h() - yScale(d[0]); });
     }
   }
 
@@ -58,18 +70,16 @@ chart.bar_utils = (function () {
         .attr("y", function(d) { return yScale(d[0]); })
         .attr("height", yScale.rangeBand());
     },
-    inflateXAxis: function (xAxis, yScale, h) {
+    transitionXAxis: function (xAxis, yScale, h) {
       return this.attr("transform", "translate(0," + h() + ")").call(xAxis);
     },
-    transitionAxis: function (axis, __) {
-      return this.selectAll('.y.axis')
-        .call(axis)
+    transitionYAxis: function (yAxis, delay, __) {
+      return this.call(yAxis)
         .selectAll("g")
         .duration(__.duration)
-        .delay(__.step);
+        .delay(delay);
     },
-    transitionBars: function (xScale, yScale, w, delay, __) {
-      debugger;
+    transitionBars: function (xScale, yScale, w, h, delay, __) {
       return this
         .duration(__.duration)
         .delay(delay)
@@ -79,8 +89,8 @@ chart.bar_utils = (function () {
         .attr("width", function(d) { return xScale(d[1]); });
     },
     exitBar: function (h) {
-      return this.attr("y", function(d) { return h(); })
-        .attr("height", function(d) { return 0; })
+      return this.attr("x", 0)
+        .attr("height", 0)
         .remove();
     }
   }

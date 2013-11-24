@@ -35,7 +35,6 @@
           });
           selection = d3.select("#viz")
           function handleTransitionEnd () {
-            console.log('@@@@@');
             current_year += 5;
             if (data_by_year[current_year]) {
               setTimeout(function(){
@@ -47,8 +46,7 @@
               .margin({top: 10, right: 20, bottom: 20, left: 180})
               .width(600)
               .height(800)
-              .padding(.2)
-              .duration(1000)
+              .duration(1500)
               .xValue( function(d) { return d['agglomeration']; } )
               .yValue( function(d) { return d['population']; } )
               .handleTransitionEnd( handleTransitionEnd )

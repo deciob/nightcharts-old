@@ -56,10 +56,14 @@ chart.utils = (function () {
   }
 
   // https://groups.google.com/forum/#!msg/d3-js/WC_7Xi6VV50/j1HK0vIWI-EJ
-  function endall (transition, callback) {
-    var n = 0; 
+  function endall (transition, data, callback) {
+    // Assumes the data length never changes.
+    // Incrementing n (++n) for each transition element does not work if we
+    // have exits in the transition, because of a length mismatch between now
+    // and the end of the transitions. 
+    var n = data.length;
     transition 
-      .each(function() { ++n; }) 
+      //.each(function() { ++n; }) 
       .each("end", function() { 
         if (!--n) {
           callback.apply(this, arguments);
@@ -78,10 +82,11 @@ chart.utils = (function () {
 // chart.bar_utils
 // ----------------
 
-// Useful functions used by the bar module.
+// Differentiating these methods per barchart orientation.
 
 chart.bar_utils = (function () {
 
+  // TODO: vertical implementation broken!!!
   var vertical = {
     xScale: d3.scale.ordinal,
     yScale: d3.scale.linear,
@@ -96,20 +101,31 @@ chart.bar_utils = (function () {
     },
     createBars: function (xScale, yScale, h) {
       return this
+        .enter().append("rect")
+        .attr("class", "bar")
         .attr("x", function(d) { return xScale(d[0]); })
         .attr("width", xScale.rangeBand())
         .attr("y", function(d) { return yScale(d[1]); })
         .attr("height", function(d) { return h() - yScale(d[1]); });
     },
-    inflateXAxis: function (xAxis, yScale, h) {
-      return this.attr("transform", "translate(0," + yScale.range()[0] + ")")
+    transitionXAxis: function (xAxis, yScale, h) {
+      return this
+        .attr("transform", "translate(0," + yScale.range()[0] + ")")
         .call(xAxis);
     },
-    transitionBars: function () {
-      return this.attr("x", function(d, i) { return x(d.agglomeration); })
-        .attr("y", function(d) { return y(d.population); })
-        .attr("height", function(d) { return height - y(d.population); })
-        .each("end", transEnd);
+    transitionYAxis: function (yAxis, delay, __) {
+      return this.call(yAxis)
+        .selectAll("g")
+        .duration(__.duration)
+        .delay(delay);
+    },
+    transitionBars: function (xScale, yScale, w, h, delay, __) {
+      return this
+        .duration(__.duration)
+        .delay(delay)
+        .attr("x", function(d, i) { return xScale(d[1]); })
+        .attr("y", function(d) { return yScale(d[0]); })
+        .attr("height", function(d) { return h() - yScale(d[0]); });
     }
   }
 
@@ -135,18 +151,16 @@ chart.bar_utils = (function () {
         .attr("y", function(d) { return yScale(d[0]); })
         .attr("height", yScale.rangeBand());
     },
-    inflateXAxis: function (xAxis, yScale, h) {
+    transitionXAxis: function (xAxis, yScale, h) {
       return this.attr("transform", "translate(0," + h() + ")").call(xAxis);
     },
-    transitionAxis: function (axis, __) {
-      return this.selectAll('.y.axis')
-        .call(axis)
+    transitionYAxis: function (yAxis, delay, __) {
+      return this.call(yAxis)
         .selectAll("g")
         .duration(__.duration)
-        .delay(__.step);
+        .delay(delay);
     },
-    transitionBars: function (xScale, yScale, w, delay, __) {
-      debugger;
+    transitionBars: function (xScale, yScale, w, h, delay, __) {
       return this
         .duration(__.duration)
         .delay(delay)
@@ -156,8 +170,8 @@ chart.bar_utils = (function () {
         .attr("width", function(d) { return xScale(d[1]); });
     },
     exitBar: function (h) {
-      return this.attr("y", function(d) { return h(); })
-        .attr("height", function(d) { return 0; })
+      return this.attr("x", 0)
+        .attr("height", 0)
         .remove();
     }
   }
@@ -202,8 +216,11 @@ chart.bar = (function () {
     utils.extend(__, config);
 
     function dataIdentifier (d) {
-      //console.log(d)
-      return d[1];
+      return d[0];
+    }
+
+    function delay (d, i) { 
+      return i * 50; 
     }
 
     function bar (selection) {
@@ -216,38 +233,25 @@ chart.bar = (function () {
       yScale = bar_utils[__.orient].yScale();
   
       // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
-      xAxis = d3.svg.axis()
-        .scale(xScale)
-        .orient(__.x_orient);
-      yAxis = d3.svg.axis()
-        .scale(yScale)
-        .orient(__.y_orient);
+      xAxis = d3.svg.axis().scale(xScale).orient(__.x_orient);
+      yAxis = d3.svg.axis().scale(yScale).orient(__.y_orient);
 
       selection.each(function(dat) {
 
         var data, svg, gEnter, g, bars, transition, bars_t, bars_ex, delay;
 
-        delay = function(d, i) { 
-          //console.log(d, i, 'xx');
-          return i * 50; 
-        };
-
         // data structure:
-        // 0: "New York-Newark"
-        // 1: 12.34
+        // 0: name
+        // 1: value
         data = dat.map(function(d, i) {
           return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
         });
-
-        console.log(dat, data)
 
         bar_utils[__.orient].inflateXScale.call(xScale, data, w, __);
         bar_utils[__.orient].inflateYScale.call(yScale, data, h, __);
 
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
-
-
 
         // Otherwise, create the skeletal chart.
         gEnter = svg.enter().append("svg").append("g");
@@ -261,8 +265,21 @@ chart.bar = (function () {
 
         // Update the inner dimensions.
         g = svg.select("g")
-          .attr("transform", 
-            "translate(" + __.margin.left + "," + __.margin.top + ")");
+          .attr("transform", "translate(" + 
+          __.margin.left + "," + __.margin.top + ")");
+
+        // Transitions root.
+        transition = g.transition().duration(__.duration);
+        
+        // Update the y axis.
+        bar_utils[__.orient]
+          .transitionYAxis
+          .call(transition.selectAll('.y.axis'), yAxis, delay, __);
+
+        // Update the x axis.
+        bar_utils[__.orient]
+          .transitionXAxis
+          .call(transition.select(".x.axis"), xAxis, yScale, h);
 
         // Select the bar elements, if they exists.
         bars = g.select(".bars").selectAll(".bar").data(data, dataIdentifier);
@@ -270,38 +287,16 @@ chart.bar = (function () {
         // Otherwise, create them.
         bar_utils[__.orient].createBars.call(bars, xScale, yScale, h);
 
-        transition = g.transition().duration(__.duration);
-        //transition = svg.transition().duration(__.duration);
+        // And transition them.
+        bar_utils[__.orient].transitionBars
+          .call(transition.selectAll('.bar'), xScale, yScale, w, h, delay, __)
+          .call(utils.endall, data, __.handleTransitionEnd);
 
-        
-        //bar_utils[__.orient].transitionBars
-        //  .call(transition.selectAll('.bar'), xScale, yScale, w, delay, __)
-        transition.selectAll('.bar').duration(__.duration)
-        .delay(delay)
-        .attr("y", function(d) { return yScale(d[0]); })
-        .attr("x", 0)
-        .attr("width", function(d) { return xScale(d[1]); })
-        .attr("width", function(d) { return xScale(d[1]); })
-          .call(utils.endall, __.handleTransitionEnd);
-
-        // Update the x axis.
-        bar_utils[__.orient]
-          .inflateXAxis.call(g.select(".x.axis"), xAxis, yScale, h);
-
-        // Update the y axis.
-        g.select(".y.axis")
-          .call(yAxis);
-
-        //bar_utils[__.orient].transitionAxis.call(transition, yAxis, __);
-
-        // Exit stuff
+        // Exit phase.
         bars_ex = bars.exit()
           .transition()
           .duration(__.duration);
         bar_utils[__.orient].exitBar.call(bars_ex, h);
-
-
-
 
       });
 
