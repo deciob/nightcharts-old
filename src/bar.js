@@ -30,35 +30,36 @@ chart.bar = (function () {
 
     utils.extend(__, config);
 
-    w = function() { return __.width - __.margin.right - __.margin.left; };
-    h = function() { return __.height - __.margin.top - __.margin.bottom; };
+    function bar (selection) {
 
-    // Scales are functions that map from an input domain to an output range.
-    xScale = bar_utils[__.orient].xScale();
-    yScale = bar_utils[__.orient].yScale();
-
-    // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
-    xAxis = d3.svg.axis()
+      w = function () { return __.width - __.margin.right - __.margin.left; };
+      h = function () { return __.height - __.margin.top - __.margin.bottom; };
+  
+      // Scales are functions that map from an input domain to an output range.
+      xScale = bar_utils[__.orient].xScale();
+      yScale = bar_utils[__.orient].yScale();
+  
+      // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
+      xAxis = d3.svg.axis()
         .scale(xScale)
         .orient(__.x_orient);
-    yAxis = d3.svg.axis()
+      yAxis = d3.svg.axis()
         .scale(yScale)
         .orient(__.y_orient);
 
-    function bar (selection) {
       selection.each(function(dat) {
-        
+
         var data, svg, gEnter, g, bars, t;
 
+        // data structure:
+        // 0: "New York-Newark"
+        // 1: 12.34
         data = dat.map(function(d, i) {
           return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
         });
 
-        xScale.rangeRoundBands([0, w()], __.padding)
-          .domain(data.map(function(d) { return d[0]; }));
-        // Note the inverted range for the y-scale: bigger is up!
-        yScale.range([h(), 0]).domain([0, d3.max(
-          data, function(d) {return parseFloat(d[1]); }) ]);
+        bar_utils[__.orient].inflateXScale.call(xScale, data, w, __);
+        bar_utils[__.orient].inflateYScale.call(yScale, data, h, __);
 
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
@@ -84,24 +85,13 @@ chart.bar = (function () {
         // Otherwise, create them.
         bars.enter().append("rect")
           .attr("class", "bar")
-          .attr("x", function(d) { return xScale(d[0]); })
-          .attr("width", xScale.rangeBand())
-          .attr("y", function(d) { return yScale(d[1]); })
-          .attr("height", function(d) { return h() - yScale(d[1]); });
-
-        //bars.transition()
-        //  .duration(__.duration)
-        //  .attr("x", function(d, i) { return xScale(d[0]); })
-        //  .attr("y", function(d) { return yScale(d[1]); })
-        //  .attr("height", function(d) { return h() - yScale(d[1]); })
-        //  .call(d3.chart.utils.endall, __.handleTransitionEnd);
+        bar_utils[__.orient].inflateBar.call(bars, xScale, yScale, h);
 
         //var t = g.transition().duration(__.duration);
 
         // Update the x axis.
-        g.select(".x.axis")
-          .attr("transform", "translate(0," + yScale.range()[0] + ")")
-          .call(xAxis)
+        bar_utils[__.orient]
+          .inflateXAxis.call(g.select(".x.axis"), xAxis, yScale, h);
 
         // Update the y axis.
         g.select(".y.axis")
