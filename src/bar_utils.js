@@ -64,8 +64,7 @@ chart.bar_utils = (function () {
       return this
         .enter().append("rect")
         .attr("class", "bar")
-        .attr("x", 0)
-        .attr("x", 0)
+        .attr("x", 3)
         .attr("width", 0)
         .attr("y", function(d) { return yScale(d[0]); })
         .attr("height", yScale.rangeBand());
@@ -84,9 +83,8 @@ chart.bar_utils = (function () {
         .duration(__.duration)
         .delay(delay)
         .attr("y", function(d) { return yScale(d[0]); })
-        .attr("x", 0)
-        .attr("width", function(d) { return xScale(d[1]); })
-        .attr("width", function(d) { return xScale(d[1]); });
+        .attr("x", 3)
+        .attr("width", function(d) { return xScale(d[1]) + 3; });
     },
     exitBar: function (h) {
       return this.attr("x", 0)

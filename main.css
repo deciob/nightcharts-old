@@ -11,6 +11,7 @@ body {
 
 .bar {
   fill: steelblue;
+  fill-opacity: .9;
 }
 
 .bar.active {
