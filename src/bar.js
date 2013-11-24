@@ -30,6 +30,11 @@ chart.bar = (function () {
 
     utils.extend(__, config);
 
+    function dataIdentifier (d) {
+      //console.log(d)
+      return d[1];
+    }
+
     function bar (selection) {
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
@@ -49,7 +54,12 @@ chart.bar = (function () {
 
       selection.each(function(dat) {
 
-        var data, svg, gEnter, g, bars, t;
+        var data, svg, gEnter, g, bars, transition, bars_t, bars_ex, delay;
+
+        delay = function(d, i) { 
+          //console.log(d, i, 'xx');
+          return i * 50; 
+        };
 
         // data structure:
         // 0: "New York-Newark"
@@ -58,11 +68,15 @@ chart.bar = (function () {
           return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
         });
 
+        console.log(dat, data)
+
         bar_utils[__.orient].inflateXScale.call(xScale, data, w, __);
         bar_utils[__.orient].inflateYScale.call(yScale, data, h, __);
 
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
+
+
 
         // Otherwise, create the skeletal chart.
         gEnter = svg.enter().append("svg").append("g");
@@ -80,14 +94,24 @@ chart.bar = (function () {
             "translate(" + __.margin.left + "," + __.margin.top + ")");
 
         // Select the bar elements, if they exists.
-        bars = g.select(".bars").selectAll(".bar").data(data);
+        bars = g.select(".bars").selectAll(".bar").data(data, dataIdentifier);
 
         // Otherwise, create them.
-        bars.enter().append("rect")
-          .attr("class", "bar")
-        bar_utils[__.orient].inflateBar.call(bars, xScale, yScale, h);
+        bar_utils[__.orient].createBars.call(bars, xScale, yScale, h);
 
-        //var t = g.transition().duration(__.duration);
+        transition = g.transition().duration(__.duration);
+        //transition = svg.transition().duration(__.duration);
+
+        
+        //bar_utils[__.orient].transitionBars
+        //  .call(transition.selectAll('.bar'), xScale, yScale, w, delay, __)
+        transition.selectAll('.bar').duration(__.duration)
+        .delay(delay)
+        .attr("y", function(d) { return yScale(d[0]); })
+        .attr("x", 0)
+        .attr("width", function(d) { return xScale(d[1]); })
+        .attr("width", function(d) { return xScale(d[1]); })
+          .call(utils.endall, __.handleTransitionEnd);
 
         // Update the x axis.
         bar_utils[__.orient]
@@ -96,6 +120,17 @@ chart.bar = (function () {
         // Update the y axis.
         g.select(".y.axis")
           .call(yAxis);
+
+        //bar_utils[__.orient].transitionAxis.call(transition, yAxis, __);
+
+        // Exit stuff
+        bars_ex = bars.exit()
+          .transition()
+          .duration(__.duration);
+        bar_utils[__.orient].exitBar.call(bars_ex, h);
+
+
+
 
       });
 
