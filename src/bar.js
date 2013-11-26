@@ -18,6 +18,8 @@ chart.bar = (function () {
         padding: .1,
         duration: 900,
         step: 600,
+        outerTickSize: 0,
+        barOffSet: 4,
         x_orient: 'bottom',
         y_orient: 'left',
         colour: 'LightSteelBlue',
@@ -26,7 +28,7 @@ chart.bar = (function () {
         yValue: function(d) { return d[1]; },
         handleTransitionEnd: function(d) { return d; }
       },
-      w, h, xScale, yScale, xAxis, yAxis;
+      w, h, xScale, yScale, horizontalAxis, verticalAxis;
 
     utils.extend(__, config);
 
@@ -48,9 +50,10 @@ chart.bar = (function () {
       yScale = bar_utils[__.orient].yScale();
   
       // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
-      xAxis = d3.svg.axis().scale(xScale).orient(__.x_orient);
-      // TODO: xy axis confusion on orient!!!!!!!!!!!!!!!!!!
-      yAxis = d3.svg.axis().outerTickSize(0).scale(yScale).orient(__.y_orient);
+      horizontalAxis = d3.svg.axis()
+        .outerTickSize(__.outerTickSize).scale(xScale).orient(__.x_orient);
+      verticalAxis = d3.svg.axis()
+        .outerTickSize(__.outerTickSize).scale(yScale).orient(__.y_orient);
 
       selection.each(function(dat) {
 
@@ -89,22 +92,22 @@ chart.bar = (function () {
         
         // Update the y axis.
         bar_utils[__.orient]
-          .transitionYAxis
-          .call(transition.selectAll('.y.axis'), yAxis, delay, __);
+          .transitionverticalAxis
+          .call(transition.selectAll('.y.axis'), verticalAxis, delay, __);
 
         // Update the x axis.
         bar_utils[__.orient]
-          .transitionXAxis
-          .call(transition.select(".x.axis"), xAxis, yScale, h);
+          .transitionHorizontalAxis
+          .call(transition.select(".x.axis"), horizontalAxis, yScale, h, __);
 
         // Select the bar elements, if they exists.
         bars = g.select(".bars").selectAll(".bar").data(data, dataIdentifier);
 
         // Otherwise, create them.
-        bar_utils[__.orient].createBars.call(bars, xScale, yScale, h);
+        bar_utils[__.orient].createBars.call(bars, xScale, yScale, h, __);
 
         // And transition them.
-        var xx = bar_utils[__.orient].transitionBars
+        bar_utils[__.orient].transitionBars
           .call(transition.selectAll('.bar'), xScale, yScale, w, h, delay, __)
           .call(utils.endall, data, __.handleTransitionEnd);
 

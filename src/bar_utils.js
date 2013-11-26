@@ -27,13 +27,13 @@ chart.bar_utils = (function () {
         .attr("y", function(d) { return yScale(d[1]); })
         .attr("height", function(d) { return h() - yScale(d[1]); });
     },
-    transitionXAxis: function (xAxis, yScale, h) {
+    transitionHorizontalAxis: function (horizontalAxis, yScale, h) {
       return this
         .attr("transform", "translate(0," + yScale.range()[0] + ")")
-        .call(xAxis);
+        .call(horizontalAxis);
     },
-    transitionYAxis: function (yAxis, delay, __) {
-      return this.call(yAxis)
+    transitionverticalAxis: function (verticalAxis, delay, __) {
+      return this.call(verticalAxis)
         .selectAll("g")
         .duration(__.duration)
         .delay(delay);
@@ -58,27 +58,28 @@ chart.bar_utils = (function () {
       return this.rangeRoundBands([w(), 0], __.padding)
         .domain(data.map(function(d) { return d[0]; }));
     },
-    createBars: function (xScale, yScale, h) {
+    createBars: function (xScale, yScale, h, __) {
       return this
         .enter().append("rect")
         .attr("class", "bar")
-        .attr("x", 3)
+        .attr("x", __.barOffSet)
         .attr("width", 0)
         .attr("y", function(d) { return yScale(d[0]); })
         .attr("height", yScale.rangeBand());
     },
-    transitionXAxis: function (xAxis, yScale, h) {
-      return this.attr("transform", "translate(0," + h() + ")").call(xAxis);
+    transitionHorizontalAxis: function (horizontalAxis, yScale, h, __) {
+      return this.attr("transform", "translate(" + __.barOffSet
+        + "," + h() + ")").call(horizontalAxis);
     },
-    transitionYAxis: function (yAxis, delay, __) {
-      return this.call(yAxis)
+    transitionverticalAxis: function (verticalAxis, delay, __) {
+      return this.call(verticalAxis)
         .selectAll("g")
     },
     transitionBars: function (xScale, yScale, w, h, delay, __) {
       return this
         .attr("y", function(d) { return yScale(d[0]); })
-        .attr("x", 3)
-        .attr("width", function(d) { return xScale(d[1]) + 3; });
+        .attr("x", __.barOffSet)
+        .attr("width", function(d) { return xScale(d[1]) + __.barOffSet; });
     },
     exitBar: function (h) {
       return this.attr("x", 0)
