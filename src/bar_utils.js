@@ -40,8 +40,6 @@ chart.bar_utils = (function () {
     },
     transitionBars: function (xScale, yScale, w, h, delay, __) {
       return this
-        .duration(__.duration)
-        .delay(delay)
         .attr("x", function(d, i) { return xScale(d[1]); })
         .attr("y", function(d) { return yScale(d[0]); })
         .attr("height", function(d) { return h() - yScale(d[0]); });
@@ -75,13 +73,9 @@ chart.bar_utils = (function () {
     transitionYAxis: function (yAxis, delay, __) {
       return this.call(yAxis)
         .selectAll("g")
-        .duration(__.duration)
-        .delay(delay);
     },
     transitionBars: function (xScale, yScale, w, h, delay, __) {
       return this
-        .duration(__.duration)
-        .delay(delay)
         .attr("y", function(d) { return yScale(d[0]); })
         .attr("x", 3)
         .attr("width", function(d) { return xScale(d[1]) + 3; });

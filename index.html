@@ -6,6 +6,7 @@
     <title>d3 charts</title>
     <meta name="description" content="d3 charts">
     <meta name="author" content="Decio Battaglia">
+    <link href='http://fonts.googleapis.com/css?family=PT+Mono' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="main.css?v=1.0">
   </head>
   <body>
@@ -43,9 +44,9 @@
             }
           }
           bar = chart.bar()
-              .margin({top: 10, right: 20, bottom: 20, left: 180})
-              .width(600)
-              .height(800)
+              .margin({top: 10, right: 20, bottom: 20, left: 340})
+              .width(1200)
+              .height(900)
               //.duration(1200)
               .step(400)
               .xValue( function(d) { return d['agglomeration']; } )

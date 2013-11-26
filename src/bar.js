@@ -49,7 +49,8 @@ chart.bar = (function () {
   
       // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
       xAxis = d3.svg.axis().scale(xScale).orient(__.x_orient);
-      yAxis = d3.svg.axis().scale(yScale).orient(__.y_orient);
+      // TODO: xy axis confusion on orient!!!!!!!!!!!!!!!!!!
+      yAxis = d3.svg.axis().outerTickSize(0).scale(yScale).orient(__.y_orient);
 
       selection.each(function(dat) {
 
@@ -103,14 +104,16 @@ chart.bar = (function () {
         bar_utils[__.orient].createBars.call(bars, xScale, yScale, h);
 
         // And transition them.
-        bar_utils[__.orient].transitionBars
+        var xx = bar_utils[__.orient].transitionBars
           .call(transition.selectAll('.bar'), xScale, yScale, w, h, delay, __)
           .call(utils.endall, data, __.handleTransitionEnd);
+
+        //debugger;
 
         // Exit phase.
         bars_ex = bars.exit()
           .transition()
-          .duration(__.duration);
+          //.duration(__.duration);
         bar_utils[__.orient].exitBar.call(bars_ex, h);
 
       });

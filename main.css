@@ -1,16 +1,23 @@
 body {
-  font: 10px sans-serif;
+  font-family: 'PT Mono', sans-serif;
+  font: 13px 'PT Mono';
+  background-color: #262626;
+}
+
+text {
+  fill: white;
+
 }
 
 .axis path,
 .axis line {
   fill: none;
-  stroke: #000;
+  stroke: #fff;
   shape-rendering: crispEdges;
 }
 
 .bar {
-  fill: steelblue;
+  fill: #EFEFEF;
   fill-opacity: .9;
 }
 
