@@ -52,8 +52,8 @@
               .xValue( function(d) { return d['agglomeration']; } )
               .yValue( function(d) { return d['population']; } )
               .handleTransitionEnd( handleTransitionEnd )
-              .orient( 'horizontal' );
-              //.orient( 'vertical' );
+              //.orient( 'horizontal' );
+              .orient( 'vertical' );
           selection.datum(data_by_year[current_year]).call(bar);
       });
     </script>

@@ -90,40 +90,46 @@ chart.bar_utils = (function () {
   var vertical = {
     xScale: d3.scale.ordinal,
     yScale: d3.scale.linear,
-    inflateYScale: function (data, w, __) {
-      return this.rangeRoundBands([0, w()], __.padding)
-        .domain(data.map(function(d) { return d[0]; }));
+    inflateXScale: function (params) {
+      return this.rangeRoundBands([0, params.w()], params.__.padding)
+        .domain(params.data.map(function(d) { return d[0]; }));
     },
-    inflateXScale: function (data, h, __) {
+    inflateYScale: function (params) {
       // Note the inverted range for the y-scale: bigger is up!
-      return this.range([h(), 0]).domain([0, d3.max(
-        data, function(d) {return parseFloat(d[1]); }) ]);
+      return this.range([params.h(), 0]).domain([0, d3.max(
+        params.data, function(d) {return parseFloat(d[1]); }) ]);
     },
-    createBars: function (xScale, yScale, h) {
+    createBars: function (params) {
       return this
         .enter().append("rect")
         .attr("class", "bar")
-        .attr("x", function(d) { return xScale(d[0]); })
-        .attr("width", xScale.rangeBand())
-        .attr("y", function(d) { return yScale(d[1]); })
-        .attr("height", function(d) { return h() - yScale(d[1]); });
+        .attr("x", function(d) { return params.xScale(d[1]); })
+        .attr("width", params.xScale.rangeBand())
+        .attr("y", params.h() + params.__.barOffSet)
+        .attr("height", 0);
     },
-    transitionXAxis: function (xAxis, yScale, h) {
+    transitionXAxis: function (params) {
       return this
-        .attr("transform", "translate(0," + yScale.range()[0] + ")")
-        .call(xAxis);
+        .attr("transform", "translate(0," + params.yScale.range()[0] + ")")
+        .call(params.xAxis);
     },
-    transitionYAxis: function (yAxis, delay, __) {
-      return this.call(yAxis)
-        .selectAll("g")
-        .duration(__.duration)
-        .delay(delay);
+    transitionYAxis: function (params) {
+      return this.call(params.yAxis)
+        .selectAll("g");
     },
-    transitionBars: function (xScale, yScale, w, h, delay, __) {
+    transitionBars: function (params) {
+     
       return this
-        .attr("x", function(d, i) { return xScale(d[1]); })
-        .attr("y", function(d) { return yScale(d[0]); })
-        .attr("height", function(d) { return h() - yScale(d[0]); });
+        .attr("x", function(d) { return params.xScale(d[0]); })
+        .attr("y", function(d) { return params.h() + params.__.barOffSet; })
+        .attr("height", function(d) { 
+           console.log(params.h(), params.yScale(d[1]));
+          return 350 ; });
+    },
+    exitBar: function (params) {
+      return this.attr("y", 0)
+        .attr("height", 0)
+        .remove();
     }
   }
 
@@ -166,7 +172,7 @@ chart.bar_utils = (function () {
     },
     exitBar: function (params) {
       return this.attr("x", 0)
-        .attr("height", 0)
+        .attr("width", 0)
         .remove();
     }
   }
