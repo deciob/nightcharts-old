@@ -28,7 +28,7 @@ chart.bar = (function () {
         yValue: function(d) { return d[1]; },
         handleTransitionEnd: function(d) { return d; }
       },
-      w, h, xScale, yScale, horizontalAxis, verticalAxis;
+      w, h, horizontalScale, verticalScale, horizontalAxis, verticalAxis;
 
     utils.extend(__, config);
 
@@ -46,14 +46,14 @@ chart.bar = (function () {
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
       // Scales are functions that map from an input domain to an output range.
-      xScale = bar_utils[__.orient].xScale();
-      yScale = bar_utils[__.orient].yScale();
+      horizontalScale = bar_utils[__.orient].horizontalScale();
+      verticalScale = bar_utils[__.orient].verticalScale();
   
       // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
       horizontalAxis = d3.svg.axis()
-        .outerTickSize(__.outerTickSize).scale(xScale).orient(__.x_orient);
+        .outerTickSize(__.outerTickSize).scale(horizontalScale).orient(__.x_orient);
       verticalAxis = d3.svg.axis()
-        .outerTickSize(__.outerTickSize).scale(yScale).orient(__.y_orient);
+        .outerTickSize(__.outerTickSize).scale(verticalScale).orient(__.y_orient);
 
       selection.each(function(dat) {
 
@@ -66,8 +66,8 @@ chart.bar = (function () {
           return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
         });
 
-        bar_utils[__.orient].inflateXScale.call(xScale, data, w, __);
-        bar_utils[__.orient].inflateYScale.call(yScale, data, h, __);
+        bar_utils[__.orient].inflateVerticalScale.call(horizontalScale, data, w, __);
+        bar_utils[__.orient].inflateOrizontalScale.call(verticalScale, data, h, __);
 
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
@@ -92,23 +92,23 @@ chart.bar = (function () {
         
         // Update the y axis.
         bar_utils[__.orient]
-          .transitionverticalAxis
+          .transitionVerticalAxis
           .call(transition.selectAll('.y.axis'), verticalAxis, delay, __);
 
         // Update the x axis.
         bar_utils[__.orient]
           .transitionHorizontalAxis
-          .call(transition.select(".x.axis"), horizontalAxis, yScale, h, __);
+          .call(transition.select(".x.axis"), horizontalAxis, verticalScale, h, __);
 
         // Select the bar elements, if they exists.
         bars = g.select(".bars").selectAll(".bar").data(data, dataIdentifier);
 
         // Otherwise, create them.
-        bar_utils[__.orient].createBars.call(bars, xScale, yScale, h, __);
+        bar_utils[__.orient].createBars.call(bars, horizontalScale, verticalScale, h, __);
 
         // And transition them.
         bar_utils[__.orient].transitionBars
-          .call(transition.selectAll('.bar'), xScale, yScale, w, h, delay, __)
+          .call(transition.selectAll('.bar'), horizontalScale, verticalScale, w, h, delay, __)
           .call(utils.endall, data, __.handleTransitionEnd);
 
         //debugger;

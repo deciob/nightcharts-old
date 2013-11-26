@@ -1,7 +1,8 @@
 body {
   font-family: 'PT Mono', sans-serif;
   font: 13px 'PT Mono';
-  background-color: #262626;
+  /*background-color: #262626;*/
+  background-color: #646c7f;
 }
 
 text {
@@ -17,7 +18,8 @@ text {
 }
 
 .bar {
-  fill: #EFEFEF;
+  /*fill: #EFEFEF;*/
+  fill: #ea6e4c;
   fill-opacity: .9;
 }
 
