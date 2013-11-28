@@ -39,11 +39,12 @@ chart.bar_utils = (function () {
     transitionBars: function (params) {
       return this
         .attr("x", function(d) { return params.xScale(d[0]); })
-        .attr("y", function(d) { return params.h() + params.__.barOffSet; })
+        .attr("y", function(d) { return params.yScale(d[1]); })
         .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
     },
     exitBar: function (params) {
-      return this.attr("y", 0)
+      return this
+        .attr("y", params.h())
         .attr("height", 0)
         .remove();
     }

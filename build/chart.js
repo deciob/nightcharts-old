@@ -86,7 +86,7 @@ chart.utils = (function () {
 
 chart.bar_utils = (function () {
 
-  // TODO: vertical implementation broken!!!
+  // TODO: vertical implementation of bars is broken!!!
   var vertical = {
     xScale: d3.scale.ordinal,
     yScale: d3.scale.linear,
@@ -118,16 +118,14 @@ chart.bar_utils = (function () {
         .selectAll("g");
     },
     transitionBars: function (params) {
-     
       return this
         .attr("x", function(d) { return params.xScale(d[0]); })
-        .attr("y", function(d) { return params.h() + params.__.barOffSet; })
-        .attr("height", function(d) { 
-           console.log(params.h(), params.yScale(d[1]));
-          return 350 ; });
+        .attr("y", function(d) { return params.yScale(d[1]); })
+        .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
     },
     exitBar: function (params) {
-      return this.attr("y", 0)
+      return this
+        .attr("y", params.h())
         .attr("height", 0)
         .remove();
     }
