@@ -34,7 +34,7 @@
           data_by_year = _.groupBy( data, function (obj) {
             return obj.year;
           });
-          selection = d3.select("#viz")
+          selection = d3.select("#viz");
           function handleTransitionEnd () {
             current_year += 5;
             if (data_by_year[current_year]) {

@@ -11,24 +11,7 @@ chart.bar = (function () {
     var config = config || {},
       utils = chart.utils,
       bar_orient = chart.bar_orient,
-      __ = {
-        margin: {top: 20, right: 20, bottom: 40, left: 40},
-        width: 500,
-        height: 400,
-        padding: .1,
-        duration: 900,
-        step: 600,
-        outerTickSize: 0,
-        barOffSet: 4,
-        max: void 0,
-        x_orient: 'bottom',
-        y_orient: 'left',
-        colour: 'LightSteelBlue',
-        orient: 'vertical',
-        xValue: function(d) { return d[0]; },
-        yValue: function(d) { return d[1]; },
-        handleTransitionEnd: function(d) { return d; }
-      },
+      __ = chart.bar_config,
       w, h, xScale, yScale, xAxis, yAxis;
 
     utils.extend(__, config);

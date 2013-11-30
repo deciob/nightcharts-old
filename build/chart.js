@@ -79,10 +79,31 @@ chart.utils = (function () {
 
 })();
 
+// The default configuration for barcharts.
+// It is in a separate module, because it is also used in the unit tests.
+chart.bar_config = {
+  margin: {top: 20, right: 20, bottom: 40, left: 40},
+  width: 500,
+  height: 400,
+  padding: .1,
+  duration: 900,
+  step: 600,
+  outerTickSize: 0,
+  barOffSet: 4,
+  max: void 0,
+  x_orient: 'bottom',
+  y_orient: 'left',
+  colour: 'LightSteelBlue',
+  orient: 'vertical',
+  xValue: function(d) { return d[0]; },
+  yValue: function(d) { return d[1]; },
+  handleTransitionEnd: function(d) { return d; }
+};
+
 // chart.bar_utils
 // ----------------
 
-// Differentiating these methods per barchart orientation.
+// Handling the barchart orientation.
 chart.bar_orient = (function () {
 
   function inflateLinearScale (params, range) {
@@ -101,7 +122,6 @@ chart.bar_orient = (function () {
       .domain(params.data.map(function(d) { return d[0]; }));
   }
 
-  // TODO: vertical implementation of bars is broken!!!
   var vertical = {
     xScale: d3.scale.ordinal,
     yScale: d3.scale.linear,
@@ -199,24 +219,7 @@ chart.bar = (function () {
     var config = config || {},
       utils = chart.utils,
       bar_orient = chart.bar_orient,
-      __ = {
-        margin: {top: 20, right: 20, bottom: 40, left: 40},
-        width: 500,
-        height: 400,
-        padding: .1,
-        duration: 900,
-        step: 600,
-        outerTickSize: 0,
-        barOffSet: 4,
-        max: void 0,
-        x_orient: 'bottom',
-        y_orient: 'left',
-        colour: 'LightSteelBlue',
-        orient: 'vertical',
-        xValue: function(d) { return d[0]; },
-        yValue: function(d) { return d[1]; },
-        handleTransitionEnd: function(d) { return d; }
-      },
+      __ = chart.bar_config,
       w, h, xScale, yScale, xAxis, yAxis;
 
     utils.extend(__, config);

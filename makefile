@@ -2,6 +2,7 @@ SRC = \
   ./module_wrappers/module_prefix.js\
   ./src/chart.js\
   ./src/utils.js\
+  ./src/bar_config.js\
   ./src/bar_orient.js\
   ./src/bar.js\
   ./module_wrappers/module_suffix.js\

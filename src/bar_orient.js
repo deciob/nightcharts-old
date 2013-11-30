@@ -1,7 +1,7 @@
 // chart.bar_utils
 // ----------------
 
-// Differentiating these methods per barchart orientation.
+// Handling the barchart orientation.
 chart.bar_orient = (function () {
 
   function inflateLinearScale (params, range) {
@@ -20,7 +20,6 @@ chart.bar_orient = (function () {
       .domain(params.data.map(function(d) { return d[0]; }));
   }
 
-  // TODO: vertical implementation of bars is broken!!!
   var vertical = {
     xScale: d3.scale.ordinal,
     yScale: d3.scale.linear,

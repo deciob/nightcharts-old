@@ -1,5 +1,5 @@
 var buster = require("buster");
-var assert = buster.assertions.assert;
+var assert = buster.referee.assert;
 
 var chart = require("../build/chart.js");
 
