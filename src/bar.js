@@ -20,6 +20,7 @@ chart.bar = (function () {
         step: 600,
         outerTickSize: 0,
         barOffSet: 4,
+        max: void 0,
         x_orient: 'bottom',
         y_orient: 'left',
         colour: 'LightSteelBlue',
@@ -34,10 +35,6 @@ chart.bar = (function () {
 
     function dataIdentifier (d) {
       return d[0];
-    }
-
-    function delay (d, i) { 
-      return i * 50; 
     }
 
     function bar (selection) {
@@ -57,7 +54,7 @@ chart.bar = (function () {
 
       selection.each(function(dat) {
 
-        var data, svg, gEnter, g, bars, transition, bars_t, bars_ex, delay, params;
+        var data, svg, gEnter, g, bars, transition, bars_t, bars_ex, params;
 
         // data structure:
         // 0: name
@@ -65,6 +62,10 @@ chart.bar = (function () {
         data = dat.map(function(d, i) {
           return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
         });
+
+        function delay (d, i) { 
+          return i / data.length * __.duration;
+        }
 
         params = {
           data: data,
@@ -99,7 +100,7 @@ chart.bar = (function () {
           __.margin.left + "," + __.margin.top + ")");
 
         // Transitions root.
-        transition = g.transition().duration(__.duration);
+        transition = g.transition().duration(__.duration).delay(delay);
         
         // Update the y axis.
         bar_utils[__.orient]
@@ -114,21 +115,17 @@ chart.bar = (function () {
         // Select the bar elements, if they exists.
         bars = g.select(".bars").selectAll(".bar").data(data, dataIdentifier);
 
+        // Exit phase (let us push out old bars before the new ones come in).
+        bars.exit()
+          .transition().duration(__.duration).style('opacity', 0).remove();
+
         // Otherwise, create them.
-        bar_utils[__.orient].createBars.call(bars, params);
+        bar_utils[__.orient].createBars.call(bars.enter(), params);
 
         // And transition them.
         bar_utils[__.orient].transitionBars
           .call(transition.selectAll('.bar'), params)
           .call(utils.endall, data, __.handleTransitionEnd);
-
-        //debugger;
-
-        // Exit phase.
-        bars_ex = bars.exit()
-          .transition()
-          //.duration(__.duration);
-        bar_utils[__.orient].exitBar.call(bars_ex, params);
 
       });
 

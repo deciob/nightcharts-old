@@ -44,16 +44,17 @@
             }
           }
           bar = chart.bar()
-              .margin({top: 10, right: 20, bottom: 20, left: 340})
-              .width(1200)
-              .height(900)
-              //.duration(1200)
+              .margin({top: 10, right: 20, bottom: 20, left: 300})
+              .width(1100)
+              .height(800)
+              //.duration(4800)
               .step(400)
+              .max(40)
               .xValue( function(d) { return d['agglomeration']; } )
               .yValue( function(d) { return d['population']; } )
               .handleTransitionEnd( handleTransitionEnd )
-              //.orient( 'horizontal' );
-              .orient( 'vertical' );
+              .orient( 'horizontal' );
+              //.orient( 'vertical' );
           selection.datum(data_by_year[current_year]).call(bar);
       });
     </script>

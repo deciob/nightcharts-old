@@ -20,7 +20,7 @@ chart.bar_utils = (function () {
     },
     createBars: function (params) {
       return this
-        .enter().append("rect")
+        .append("rect")
         .attr("class", "bar")
         .attr("x", function(d) { return params.xScale(d[1]); })
         .attr("width", params.xScale.rangeBand())
@@ -41,12 +41,6 @@ chart.bar_utils = (function () {
         .attr("x", function(d) { return params.xScale(d[0]); })
         .attr("y", function(d) { return params.yScale(d[1]); })
         .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
-    },
-    exitBar: function (params) {
-      return this
-        .attr("y", params.h())
-        .attr("height", 0)
-        .remove();
     }
   }
 
@@ -64,7 +58,7 @@ chart.bar_utils = (function () {
     },
     createBars: function (params) {
       return this
-        .enter().append("rect")
+        .append("rect")
         .attr("class", "bar")
         .attr("x", params.__.barOffSet)
         .attr("width", 0)
@@ -86,11 +80,6 @@ chart.bar_utils = (function () {
         .attr("width", function(d) { 
           return params.xScale(d[1]) + params.__.barOffSet; 
         });
-    },
-    exitBar: function (params) {
-      return this.attr("x", 0)
-        .attr("width", 0)
-        .remove();
     }
   }
 
