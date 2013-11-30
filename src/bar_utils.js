@@ -2,21 +2,36 @@
 // ----------------
 
 // Differentiating these methods per barchart orientation.
-
 chart.bar_utils = (function () {
+
+  function inflateLinearScale (params, range) {
+    var max;
+    if (params.__.max) {
+      max = params.__.max;
+    } else {
+      max = d3.max( params.data, function(d) {return parseFloat(d[1]); } );
+    }
+    return this.range(range).domain([0, max]);
+  }
+
+  function inflateOrdinalScale (params, range) {
+    return this
+      .rangeRoundBands(range, params.__.padding)
+      .domain(params.data.map(function(d) { return d[0]; }));
+  }
 
   // TODO: vertical implementation of bars is broken!!!
   var vertical = {
     xScale: d3.scale.ordinal,
     yScale: d3.scale.linear,
     inflateXScale: function (params) {
-      return this.rangeRoundBands([0, params.w()], params.__.padding)
-        .domain(params.data.map(function(d) { return d[0]; }));
+      var range = [0, params.w()];
+      return inflateOrdinalScale.call(this, params, range);
     },
     inflateYScale: function (params) {
       // Note the inverted range for the y-scale: bigger is up!
-      return this.range([params.h(), 0]).domain([0, d3.max(
-        params.data, function(d) {return parseFloat(d[1]); }) ]);
+      var range = [params.h(), 0];
+      return inflateLinearScale.call(this, params, range);
     },
     createBars: function (params) {
       return this
@@ -48,13 +63,13 @@ chart.bar_utils = (function () {
     xScale: d3.scale.linear,
     yScale: d3.scale.ordinal,
     inflateXScale: function (params) {
-      return this.range([0, params.w()]).domain([0, d3.max(
-        params.data, function(d) {return parseFloat(d[1]); }) ]);
+      var range = [0, params.w()];
+      return inflateLinearScale.call(this, params, range);
     },
     inflateYScale: function (params) {
       // Note the inverted range for the y-scale: bigger is up!
-      return this.rangeRoundBands([params.w(), 0], params.__.padding)
-        .domain(params.data.map(function(d) { return d[0]; }));
+      var range = [params.w(), 0];
+      return inflateOrdinalScale.call(this, params, range);
     },
     createBars: function (params) {
       return this
