@@ -3,15 +3,15 @@ var assert = buster.assertions.assert;
 
 var chart = require("../build/chart.js");
 
-buster.testCase("Utils", {
+buster.testCase("Bar orient", {
   
   "vertical bar": function () {
-    xScale = chart.bar_utils['vertical'].xScale();
+    xScale = chart.bar_orient['vertical'].xScale();
     assert.isFunction(xScale.rangeRoundBands);
   },
   
   "horizontal bar": function () {
-    xScale = chart.bar_utils['horizontal'].xScale();
+    xScale = chart.bar_orient['horizontal'].xScale();
     assert.isFunction(xScale.range);
   }
 

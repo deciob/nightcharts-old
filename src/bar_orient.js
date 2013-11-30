@@ -2,7 +2,7 @@
 // ----------------
 
 // Differentiating these methods per barchart orientation.
-chart.bar_utils = (function () {
+chart.bar_orient = (function () {
 
   function inflateLinearScale (params, range) {
     var max;

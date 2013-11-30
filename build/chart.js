@@ -83,7 +83,7 @@ chart.utils = (function () {
 // ----------------
 
 // Differentiating these methods per barchart orientation.
-chart.bar_utils = (function () {
+chart.bar_orient = (function () {
 
   function inflateLinearScale (params, range) {
     var max;
@@ -198,7 +198,7 @@ chart.bar = (function () {
 
     var config = config || {},
       utils = chart.utils,
-      bar_utils = chart.bar_utils,
+      bar_orient = chart.bar_orient,
       __ = {
         margin: {top: 20, right: 20, bottom: 40, left: 40},
         width: 500,
@@ -231,8 +231,8 @@ chart.bar = (function () {
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
       // Scales are functions that map from an input domain to an output range.
-      xScale = bar_utils[__.orient].xScale();
-      yScale = bar_utils[__.orient].yScale();
+      xScale = bar_orient[__.orient].xScale();
+      yScale = bar_orient[__.orient].yScale();
   
       // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
       xAxis = d3.svg.axis()
@@ -266,8 +266,8 @@ chart.bar = (function () {
           yAxis: yAxis
         }
 
-        bar_utils[__.orient].inflateYScale.call(yScale, params);
-        bar_utils[__.orient].inflateXScale.call(xScale, params);
+        bar_orient[__.orient].inflateYScale.call(yScale, params);
+        bar_orient[__.orient].inflateXScale.call(xScale, params);
 
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
@@ -291,12 +291,12 @@ chart.bar = (function () {
         transition = g.transition().duration(__.duration).delay(delay);
         
         // Update the y axis.
-        bar_utils[__.orient]
+        bar_orient[__.orient]
           .transitionYAxis
           .call(transition.selectAll('.y.axis'), params);
 
         // Update the x axis.
-        bar_utils[__.orient]
+        bar_orient[__.orient]
           .transitionXAxis
           .call(transition.select(".x.axis"), params);
 
@@ -308,10 +308,10 @@ chart.bar = (function () {
           .transition().duration(__.duration).style('opacity', 0).remove();
 
         // Otherwise, create them.
-        bar_utils[__.orient].createBars.call(bars.enter(), params);
+        bar_orient[__.orient].createBars.call(bars.enter(), params);
 
         // And transition them.
-        bar_utils[__.orient].transitionBars
+        bar_orient[__.orient].transitionBars
           .call(transition.selectAll('.bar'), params)
           .call(utils.endall, data, __.handleTransitionEnd);
 
