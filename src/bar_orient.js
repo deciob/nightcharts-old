@@ -67,7 +67,7 @@ chart.bar_orient = (function () {
     },
     inflateYScale: function (params) {
       // Note the inverted range for the y-scale: bigger is up!
-      var range = [params.w(), 0];
+      var range = [params.h(), 0];
       return inflateOrdinalScale.call(this, params, range);
     },
     createBars: function (params) {
