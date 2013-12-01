@@ -6,21 +6,27 @@
     <title>d3 charts</title>
     <meta name="description" content="d3 charts">
     <meta name="author" content="Decio Battaglia">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=PT+Mono' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="css/main.css?v=1.0">
   </head>
   <body>
     <header><p>The 30 largest urban agglomerations ranked by population size at each point in time, 1950-2025</p>
       <p>Source: UN, World Urbanization Prospects, the 2011 Revision</p></header>
-    <div id="info"></div>
-    <div id="viz"></div>
+    <div class="h">
+      <div id="viz"></div>
+      <div id="info"></div>
+    </div>
+
     <div id="controls">
       <button id="start">Start</button>
       <button id="stop">Stop</button>
       <button id="reset">Reset</button>
     </div>
+
     <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.0/lodash.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.3.10/d3.min.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Lato:100,300' rel='stylesheet' type='text/css'>
     <script src="build/chart.js"></script>
     <script>
       //var data = [{name: 'tot', value: 23}, {name: 'rot', value: 75}];
@@ -84,9 +90,9 @@
             },400); 
           });
           bar = chart.bar()
-              .margin({top: 10, right: 20, bottom: 20, left: 360})
+              .margin({top: 10, right: 20, bottom: 20, left: 400})
               .width(1100)
-              .height(760)
+              .height(700)
               //.duration(1600)
               .step(400)
               .max(40)
