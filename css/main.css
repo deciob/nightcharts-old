@@ -6,7 +6,7 @@ body {
 }
 
 svg {
-  font: 16px 'PT Mono';
+  font: 1em 'PT Mono';
 }
 
 #info {
@@ -14,10 +14,6 @@ svg {
   margin: 1em 0 0 5em;
   font-size: 3em;
   color: white;
-}
-
-button {
-  color: #262931;
 }
 
 text {
@@ -55,6 +51,7 @@ text {
 
 button {
   font-size: 1.6em;
-  padding: 5px;
-  margin: 0 30px;
+  padding: 0.2em;
+  margin: 0.6em 0 0 1em;
+  color: #262931;
 }
