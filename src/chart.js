@@ -9,4 +9,7 @@
 // http://bl.ocks.org/mbostock/3019563
 
 
-chart = {};
+chart = {
+  // Events for handling transitions.
+  dispatch: d3.dispatch("start", "stop", "next", "prev", "reset", "end")
+};

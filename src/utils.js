@@ -34,7 +34,10 @@ chart.utils = (function () {
       //.each(function() { ++n; }) 
       .each("end", function() { 
         if (!--n) {
-          callback.apply(this, arguments);
+          if (callback) {
+            callback.apply(this, arguments);
+          }
+          chart.dispatch.end();
         }
       }); 
   }

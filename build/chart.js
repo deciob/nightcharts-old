@@ -28,7 +28,10 @@
 // http://bl.ocks.org/mbostock/3019563
 
 
-chart = {};
+chart = {
+  // Events for handling transitions.
+  dispatch: d3.dispatch("start", "stop", "next", "prev", "reset", "end")
+};
 
 // chart.utils
 // ----------------
@@ -66,7 +69,10 @@ chart.utils = (function () {
       //.each(function() { ++n; }) 
       .each("end", function() { 
         if (!--n) {
-          callback.apply(this, arguments);
+          if (callback) {
+            callback.apply(this, arguments);
+          }
+          chart.dispatch.end();
         }
       }); 
   }
@@ -95,9 +101,9 @@ chart.bar_config = {
   y_orient: 'left',
   colour: 'LightSteelBlue',
   orient: 'vertical',
+  handleTransitionEnd: void 0,
   xValue: function(d) { return d[0]; },
-  yValue: function(d) { return d[1]; },
-  handleTransitionEnd: function(d) { return d; }
+  yValue: function(d) { return d[1]; }
 };
 
 // chart.bar_utils
@@ -316,7 +322,7 @@ chart.bar = (function () {
         // And transition them.
         bar_orient[__.orient].transitionBars
           .call(transition.selectAll('.bar'), params)
-          .call(utils.endall, data, __.handleTransitionEnd);
+          .call(utils.endall, data);
 
       });
 

@@ -108,7 +108,7 @@ chart.bar = (function () {
         // And transition them.
         bar_orient[__.orient].transitionBars
           .call(transition.selectAll('.bar'), params)
-          .call(utils.endall, data, __.handleTransitionEnd);
+          .call(utils.endall, data);
 
       });
 

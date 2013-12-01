@@ -1,0 +1,60 @@
+body {
+  font-family: 'PT Mono', sans-serif;
+  /*background-color: #262626;
+  background-color: #646c7f;*/
+  background-color: #4c5361;
+}
+
+svg {
+  font: 16px 'PT Mono';
+}
+
+#info {
+  /*text-align: right;*/
+  margin: 1em 0 0 5em;
+  font-size: 3em;
+  color: white;
+}
+
+button {
+  color: #262931;
+}
+
+text {
+  fill: white;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: #EFEFEF;
+  /*fill: #ea6e4c;*/
+  fill-opacity: .9;
+}
+
+.bar.active {
+  fill: darkRed;
+}
+
+.x.axis path {
+  display: none;
+}
+
+#year-label {
+  position: absolute;
+  top: 250px;
+  right: 350px;
+  float: right;
+  font-size: 8em;
+}
+
+button {
+  font-size: 1.6em;
+  padding: 5px;
+  margin: 0 30px;
+}

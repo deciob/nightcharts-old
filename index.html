@@ -7,10 +7,16 @@
     <meta name="description" content="d3 charts">
     <meta name="author" content="Decio Battaglia">
     <link href='http://fonts.googleapis.com/css?family=PT+Mono' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="main.css?v=1.0">
+    <link rel="stylesheet" href="css/main.css?v=1.0">
   </head>
   <body>
+    <div id="info"></div>
     <div id="viz"></div>
+    <div id="controls">
+      <button id="start">Start</button>
+      <button id="stop">Stop</button>
+      <button id="reset">Reset</button>
+    </div>
     <script src="../lib/lodash/dist/lodash.js"></script>
     <script src="lib/d3/d3.js"></script>
     <script src="build/chart.js"></script>
@@ -29,30 +35,62 @@
       }
       d3.csv("data/WUP2011-F11a-30_Largest_Cities.csv",
        accessor  , function(error, data) {
-          var current_year, data_by_year, selection, bar;
-          current_year = 1950;
+          var current_year, current_timeout, data_by_year, selection, bar,
+            info = d3.select("#info"), stop_transition = false, 
+            initial_year = 1950, current_year = initial_year;
           data_by_year = _.groupBy( data, function (obj) {
             return obj.year;
           });
           selection = d3.select("#viz");
-          function handleTransitionEnd () {
+          info.text(current_year);
+          d3.select("#start").on('click', function () {
+            stop_transition = false;
+            chart.dispatch.start();
+            chart.dispatch.on('end.bar', function () {
+              chart.dispatch.start();
+            });         
+          });
+          d3.select("#stop").on('click', function () {
+            chart.dispatch.stop();
+          });
+          d3.select("#reset").on('click', function () {
+            chart.dispatch.reset();
+          });
+          chart.dispatch.on('start.bar', function () { 
+            if (stop_transition) {return;}
             current_year += 5;
             if (data_by_year[current_year]) {
-              setTimeout(function(){
+              clearTimeout(current_timeout);
+              current_timeout = setTimeout(function(){
                 selection.datum(data_by_year[current_year]).call(bar);
+                info.text(current_year);
               },400);
             }
-          }
+          });
+          chart.dispatch.on('stop.bar', function () {
+            clearTimeout(current_timeout);
+            delete current_timeout;
+            stop_transition = true;
+          });
+          chart.dispatch.on('reset.bar', function () {
+            chart.dispatch.stop();
+            current_year = initial_year - 5;
+            stop_transition = false;
+            chart.dispatch.start();
+            setTimeout(function(){
+              chart.dispatch.stop();
+            },400); 
+          });
           bar = chart.bar()
-              .margin({top: 10, right: 20, bottom: 20, left: 300})
+              .margin({top: 10, right: 20, bottom: 50, left: 360})
               .width(1100)
-              .height(800)
-              //.duration(4800)
+              .height(400)
+              //.duration(1600)
               .step(400)
               .max(40)
               .xValue( function(d) { return d['agglomeration']; } )
               .yValue( function(d) { return d['population']; } )
-              .handleTransitionEnd( handleTransitionEnd )
+              //.handleTransitionEnd( handleTransitionEnd )
               .orient( 'horizontal' );
               //.orient( 'vertical' );
           selection.datum(data_by_year[current_year]).call(bar);

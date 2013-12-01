@@ -14,7 +14,7 @@ chart.bar_config = {
   y_orient: 'left',
   colour: 'LightSteelBlue',
   orient: 'vertical',
+  handleTransitionEnd: void 0,
   xValue: function(d) { return d[0]; },
-  yValue: function(d) { return d[1]; },
-  handleTransitionEnd: function(d) { return d; }
+  yValue: function(d) { return d[1]; }
 };
