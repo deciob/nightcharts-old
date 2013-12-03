@@ -3,10 +3,9 @@
 
 // Create barcharts.
 
-chart.bar = (function () {
-  'use strict'
+chart.bar = function (config) {
 
-  return function (config) {
+    
 
     var config = config || {},
       utils = chart.utils,
@@ -21,6 +20,7 @@ chart.bar = (function () {
     }
 
     function bar (selection) {
+
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
@@ -119,5 +119,3 @@ chart.bar = (function () {
     return bar;
 
   };
-
-})();
