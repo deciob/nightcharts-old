@@ -11,8 +11,10 @@ selection.datum(data_by_year[current_year]).call(bar)
 ////////////////////////////////////////////////////////
 
 bar = new chart.Bar().width(1100).height(760)
+
 bar.draw("#viz")
+
 bar.dispatch.on('start.bar', callback)  // mixin?
 bar.dispatch.start()
 
-bar_orient methods as mixins?
+//bar_orient methods as mixins?
