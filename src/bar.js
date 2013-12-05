@@ -1,11 +1,7 @@
-// chart.bar
-// ----------------
+(function(define) {
+  return define(["d3", "config"], function(d3, config) {
 
-// Create barcharts.
-
-chart.bar = function (config) {
-
-    
+    // Create barcharts.
 
     var config = config || {},
       utils = chart.utils,
@@ -119,3 +115,11 @@ chart.bar = function (config) {
     return bar;
 
   };
+
+})(typeof define === "function" && define.amd ? define : function(ids, factory) {
+  var deps;
+  deps = ids.map(function(id) {
+    return require(id);
+  });
+  return module.exports = factory.apply(null, deps);
+});
