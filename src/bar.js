@@ -19,8 +19,7 @@ chart.bar = function (config) {
       return d[0];
     }
 
-    function bar (selection) {
-
+    function bar (selection) { 
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };

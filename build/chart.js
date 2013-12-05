@@ -112,6 +112,8 @@ chart.bar_config = {
 // Handling the barchart orientation.
 chart.bar_orient = (function () {
 
+  var vertical, horizontal;
+
   function inflateLinearScale (params, range) {
     var max;
     if (params.__.max) {
@@ -128,7 +130,7 @@ chart.bar_orient = (function () {
       .domain(params.data.map(function(d) { return d[0]; }));
   }
 
-  var vertical = {
+  vertical = {
     xScale: d3.scale.ordinal,
     yScale: d3.scale.linear,
     inflateXScale: function (params) {
@@ -166,7 +168,7 @@ chart.bar_orient = (function () {
     }
   }
 
-  var horizontal = {
+  horizontal = {
     xScale: d3.scale.linear,
     yScale: d3.scale.ordinal,
     inflateXScale: function (params) {
@@ -233,8 +235,7 @@ chart.bar = function (config) {
       return d[0];
     }
 
-    function bar (selection) {
-
+    function bar (selection) { 
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
