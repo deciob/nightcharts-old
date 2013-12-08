@@ -17,6 +17,7 @@
       meld: { location: 'lib/meld', main: 'meld' },
       lodash: { location: 'lib/lodash/dist', main: 'lodash' },
       bar: { location: 'src/bar/', main: 'bar' },
+      transition: { location: 'src/transition', main: 'main' },
       utils: { location: 'src/utils', main: 'utils' },
       app: { location: 'examples/app', main: 'main' },
     }

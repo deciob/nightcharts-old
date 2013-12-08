@@ -3,8 +3,9 @@
     "d3", 
     "lodash", 
     "when", 
-    "bar"
-  ], function(d3, _, when, bar) {
+    "bar",
+    "transition"
+  ], function(d3, _, when, bar, transition) {
 
     var d = when.defer();
 
@@ -33,14 +34,10 @@
         selection = d3.select("#viz");
         info.text(current_year);
 
-        transition_conf = {
-          data: data_by_year,
-          start: initial_year,
-          step: 5
-        }
+        //function handleTransitionEnd () {
+        //  debugger;
+        //}
 
-
-        //barchart = chart.bar()
         barchart = bar()
           .margin({top: 10, right: 20, bottom: 20, left: 400})
           .width(1100)
@@ -52,9 +49,23 @@
           .yValue( function(d) { return d['population']; } )
           //.handleTransitionEnd( handleTransitionEnd )
           .orient( 'horizontal' );
-          //.orient( 'vertical' );
-          //.transition_conf( transition_conf );
-        selection.datum(data_by_year[current_year]).call(barchart);
+
+        //selection.datum(data_by_year[current_year]).call(barchart);
+
+        var transition_conf = {
+          position: initial_year,
+          step: 5
+        }
+
+        transition(selection, data_by_year, barchart, transition_conf);
+
+        d3.select("#start").on('click', function () {
+          //debugger;
+          transition.dispatch.start();
+        });
+        d3.select("#stop").on('click', function () {
+          transition.dispatch('stop');
+        });
 //
 //        d3.select("#start").on('click', function () {
 //          barchart.dispatch.start.apply(barchart, [selection]);
@@ -64,6 +75,10 @@
 
         d.resolve(data);
         //debugger
+
+        //barchart = transition(barchart);
+
+
 
 
     });
