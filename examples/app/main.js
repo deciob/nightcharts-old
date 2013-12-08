@@ -8,6 +8,8 @@
 
     var d = when.defer();
 
+    
+
     function accessor(d) {
       // csv headers:
       // year,rank,country,agglomeration,population
@@ -38,6 +40,7 @@
         }
 
 
+        //barchart = chart.bar()
         barchart = bar()
           .margin({top: 10, right: 20, bottom: 20, left: 400})
           .width(1100)
@@ -48,14 +51,16 @@
           .xValue( function(d) { return d['agglomeration']; } )
           .yValue( function(d) { return d['population']; } )
           //.handleTransitionEnd( handleTransitionEnd )
-          .orient( 'horizontal' )
+          .orient( 'horizontal' );
           //.orient( 'vertical' );
-          .transition_conf( transition_conf );
+          //.transition_conf( transition_conf );
         selection.datum(data_by_year[current_year]).call(barchart);
+//
+//        d3.select("#start").on('click', function () {
+//          barchart.dispatch.start.apply(barchart, [selection]);
+//        });
 
-        d3.select("#start").on('click', function () {
-          barchart.dispatch.start.apply(barchart, [selection]);
-        });
+        //debugger;
 
         d.resolve(data);
         //debugger

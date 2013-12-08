@@ -2,18 +2,14 @@
   return define([
     "d3", 
     "utils",
-    "utils/dispatch",
-    "bar/dispatch_aspects",
     "bar/config", 
     "bar/orientation",
-  ], function(d3, utils, dispatch, dispatch_aspects, __, orientation) {
+  ], function(d3, utils, __, orientation) {
 
     return function (user_config) {
 
       var config = user_config || {},
-        w, h, xScale, yScale, xAxis, yAxis,
-        dis = dispatch();
-        //stateMachine = new StateMachine(states.transition_states);
+        w, h, xScale, yScale, xAxis, yAxis;
   
       utils.extend(__, config);
   
@@ -105,19 +101,16 @@
   
           // Otherwise, create them.
           orientation[__.orient].createBars.call(bars.enter(), params);
-  
           // And transition them.
           orientation[__.orient].transitionBars
             .call(transition.selectAll('.bar'), params)
-            .call(utils.endall, data, dispatch);
+            .call(utils.endall, data, __.handleTransitionEnd);
   
         });
   
       }
   
       utils.getset(bar, __);
-      bar.dispatch = dis;
-      //debugger;
   
       return bar;
 

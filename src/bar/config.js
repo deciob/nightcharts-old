@@ -17,14 +17,9 @@
       y_orient: 'left',
       colour: 'LightSteelBlue',
       orient: 'vertical',
-      handleTransitionEnd: void 0,
+      handleTransitionEnd: function(d) { return void 0; },
       xValue: function(d) { return d[0]; },
-      yValue: function(d) { return d[1]; },
-      transition_conf: function(d) { return {
-        data: void 0,
-        start: void 0,
-        step: void 0
-      }; }
+      yValue: function(d) { return d[1]; }
     };
 
   });

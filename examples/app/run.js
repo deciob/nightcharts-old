@@ -16,7 +16,7 @@
       when: { location: 'lib/when', main: 'when' },
       meld: { location: 'lib/meld', main: 'meld' },
       lodash: { location: 'lib/lodash/dist', main: 'lodash' },
-      bar: { location: 'src/barchart/', main: 'bar' },
+      bar: { location: 'src/bar/', main: 'bar' },
       utils: { location: 'src/utils', main: 'utils' },
       app: { location: 'examples/app', main: 'main' },
     }
@@ -25,13 +25,14 @@
   curl(['app']).then(start, fail);
 
   function start(promise) {
+    //console.log('@@@@@@@')
     promise.then(function (data) {
-      console.log(data);
+      //console.log(data);
     });
   }
 
-  function fail(ex) {
-    // show a meaningful error to the user.
+  function fail(ex, x) {
+    console.log(ex, x);
   }
 
 }());

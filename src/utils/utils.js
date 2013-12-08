@@ -22,17 +22,17 @@
     }
   
     // https://groups.google.com/forum/#!msg/d3-js/WC_7Xi6VV50/j1HK0vIWI-EJ
-    function endall (transition, data, dispatch) {
+    function endall (elements_in_transition, data, callback) {
       // Assumes the data length never changes.
       // Incrementing n (++n) for each transition element does not work if we
       // have exits in the transition, because of a length mismatch between now
-      // and the end of the transitions. 
+      // and the end of the transitions.
       var n = data.length;
-      transition 
+      elements_in_transition 
         //.each(function() { ++n; }) 
         .each("end", function() { 
           if (!--n) {
-            dispatch.start();
+            callback.apply(this, arguments);
           }
         });
     }
