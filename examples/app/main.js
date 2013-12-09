@@ -52,19 +52,22 @@
 
         //selection.datum(data_by_year[current_year]).call(barchart);
 
-        var transition_conf = {
+        var transition_config = {
+          selection: selection,
+          data: data_by_year,
+          chart: barchart,
           position: initial_year,
           step: 5
         }
 
-        transition(selection, data_by_year, barchart, transition_conf);
+        transition(transition_config);
 
         d3.select("#start").on('click', function () {
           //debugger;
           transition.dispatch.start();
         });
         d3.select("#stop").on('click', function () {
-          transition.dispatch('stop');
+          transition.dispatch.stop();
         });
 //
 //        d3.select("#start").on('click', function () {

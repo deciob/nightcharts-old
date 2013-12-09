@@ -1,3 +1,5 @@
+// From http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/
+
 (function(define) {
   return define(function(require) {
 

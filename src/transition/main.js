@@ -15,52 +15,49 @@
       dispatch = d3.dispatch("start", "stop", "next", "prev", "reset", "end"),
       transition_methods = {},
       selection, 
-      data,
-      bar,
-      config;
+      chart,
+      step,
+      methods = {};
 
     function handleTransitionEnd () {
       dispatch.end();
     } 
 
-    transition_methods
-      .startTransition = function () {
-        var delay = bar.step();
-        //if ( state_machine.getStatus() === 'in_pause' ) {
-        //  return;
-        //}
-        clearTimeout(current_timeout);
-        if (data[position]) {
-          current_timeout = setTimeout(function(){
-            selection.datum(data[position]).call(bar);
-          }, delay);
-        } else {
-          state_machine.consumeEvent('in_pause');
-        }
-
+    function startTransition () {
+      var delay = chart.step();
+      clearTimeout(current_timeout);
+      if (data[position]) {
+        current_timeout = setTimeout(function(){
+          selection.datum(data[position]).call(chart);
+        }, delay);
+      } else {
+        state_machine.consumeEvent('in_pause');
       }
 
-    function setGlobals () {
-      selection = arguments[0];
-      data = arguments[1];
-      bar = arguments[2];
-      config = arguments[3];
     }
     
-    function transition (selection, data, bar, config) {
+    function transition (c) {
       var status = state_machine.getStatus();
-      if (arguments.length === 4) {
-        bar.handleTransitionEnd(handleTransitionEnd);
-        setGlobals(selection, data, bar, config);
+      // if no position, we start the dance!
+      if (!position) {
+        position = c.position;
+        selection = c.selection;
+        chart = c.chart;
+        step = c.step;
+        data = c.data;
+        chart.handleTransitionEnd(handleTransitionEnd);
+        c.selection.datum(c.data[position]).call(c.chart);
+        return;
       }
       
       if (status === 'in_transition') {
-        position += config.step;
+        old_position = position;
+        position += step;
       } else if (status === 'in_transition_reverse') {
-        position -= config.step;
+        old_position = position;
+        position -= step;
       }
-
-      transition_methods.startTransition.apply(this);
+      startTransition.apply(this);
     }
 
     dispatch.on('end', function () {
@@ -68,21 +65,19 @@
     });
 
     dispatch.on('stop', function () {
-      state_machine.consumeEvent('in_pause');
+      state_machine.consumeEvent('stop');
       transition();
     });
 
     dispatch.on('start', function () {
-      state_machine.consumeEvent('in_transition');
+      state_machine.consumeEvent('forward');
       transition();
     });
 
-
-
-    meld.before(transition_methods, 'startTransition', 
-      function(selection, data, bar, config) {
-
-      });
+    //methods.transition = transition;
+    //meld.around(methods, 'transition', function(methodCall) {
+    //  console.log('@@@@@@@@', this, methodCall)
+    //});
 
     transition.dispatch = dispatch;
     return transition;
