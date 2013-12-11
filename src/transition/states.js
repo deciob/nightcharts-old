@@ -8,6 +8,7 @@
         'events': {
           'forward': 'in_transition',
           'reverse': 'in_transition_reverse'
+          'reset': 'in_reset'
         }
       },
       {
@@ -23,6 +24,11 @@
           'stop': 'in_pause',
           'forward': 'in_transition_forward'
         }
+      },
+      {
+        'name': 'in_reset',
+        'events': {
+          'stop': 'in_pause'
       }
     ];
 

@@ -25,6 +25,12 @@
       this.chart.handleTransitionEnd(function () {self.dispatch.end();});
       this.selection.datum(this.data[this.position]).call(this.chart);
 
+      this.dispatch.on('reset', function () {
+        self.state_machine.consumeEvent('reset');
+        self.transition();
+        self.state_machine.consumeEvent('stop');
+      });
+
       this.dispatch.on('end', function () {
         self.transition();
       });
@@ -48,7 +54,7 @@
           self.selection.datum(self.data[self.position]).call(self.chart);
         }, self.delay);
       } else {
-        this.state_machine.consumeEvent('in_pause');
+        this.state_machine.consumeEvent('stop');
       }
     }
     
