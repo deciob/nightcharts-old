@@ -7,7 +7,7 @@
         'initial': true,
         'events': {
           'forward': 'in_transition',
-          'reverse': 'in_transition_reverse'
+          'reverse': 'in_transition_reverse',
           'reset': 'in_reset'
         }
       },
@@ -29,6 +29,7 @@
         'name': 'in_reset',
         'events': {
           'stop': 'in_pause'
+        }
       }
     ];
 

@@ -11,6 +11,7 @@
     var TransitionTrain = function (conf) {
       var self = this;
       
+      this.initial_position = conf.position;
       this.position = conf.position;
       this.selection = conf.selection;
       this.chart = conf.chart;
@@ -26,6 +27,7 @@
       this.selection.datum(this.data[this.position]).call(this.chart);
 
       this.dispatch.on('reset', function () {
+        self.state_machine.consumeEvent('stop');
         self.state_machine.consumeEvent('reset');
         self.transition();
         self.state_machine.consumeEvent('stop');
@@ -66,6 +68,9 @@
       } else if (status === 'in_transition_reverse') {
         this.old_position = this.position;
         this.position -= this.step;
+      } else if (status === 'in_reset') {
+        this.old_position = this.position;
+        this.position = this.initial_position;
       }
       this.startTransition();
     }

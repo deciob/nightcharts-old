@@ -62,6 +62,9 @@
         d3.select("#stop").on('click', function () {
           transition.dispatch.stop();
         });
+        d3.select("#reset").on('click', function () {
+          transition.dispatch.reset();
+        });
 
         d.resolve(data);
 
