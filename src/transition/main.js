@@ -7,80 +7,64 @@
     "transition/state_machine",
     "transition/dispatch"
   ], function(d3, meld, utils, states, StateMachine, dispatch) {
-  
-    var state_machine = new StateMachine(states.transition_states),
-      position, 
-      old_position,
-      current_timeout,
-      dispatch = d3.dispatch("start", "stop", "next", "prev", "reset", "end"),
-      transition_methods = {},
-      selection, 
-      chart,
-      step,
-      methods = {};
 
-    function handleTransitionEnd () {
-      dispatch.end();
-    } 
+    var TransitionTrain = function (conf) {
+      var self = this;
+      
+      this.position = conf.position;
+      this.selection = conf.selection;
+      this.chart = conf.chart;
+      this.step = conf.step;
+      this.data = conf.data;
 
-    function startTransition () {
-      var delay = chart.step();
-      clearTimeout(current_timeout);
-      if (data[position]) {
-        current_timeout = setTimeout(function(){
-          selection.datum(data[position]).call(chart);
-        }, delay);
+      this.state_machine = new StateMachine(states.transition_states);
+      this.old_position = void 0;
+      this.current_timeout = void 0;
+      this.dispatch = d3.dispatch("start", "stop", "next", "prev", "reset", "end");
+      
+      this.chart.handleTransitionEnd(function () {self.dispatch.end();});
+      this.selection.datum(this.data[this.position]).call(this.chart);
+
+      this.dispatch.on('end', function () {
+        self.transition();
+      });
+
+      this.dispatch.on('stop', function () {
+        self.state_machine.consumeEvent('stop');
+      });
+
+      this.dispatch.on('start', function () {
+        self.state_machine.consumeEvent('forward');
+        self.transition();
+      });
+    }
+
+    TransitionTrain.prototype.startTransition = function () {
+      var delay = this.chart.step(),
+        self = this;
+      clearTimeout(this.current_timeout);
+      if (this.data[this.position]) {
+        this.current_timeout = setTimeout(function(){
+          self.selection.datum(self.data[self.position]).call(self.chart);
+        }, self.delay);
       } else {
-        state_machine.consumeEvent('in_pause');
+        this.state_machine.consumeEvent('in_pause');
       }
-
     }
     
-    function transition (c) {
-      var status = state_machine.getStatus();
-      // if no position, we start the dance!
-      if (!position) {
-        position = c.position;
-        selection = c.selection;
-        chart = c.chart;
-        step = c.step;
-        data = c.data;
-        chart.handleTransitionEnd(handleTransitionEnd);
-        c.selection.datum(c.data[position]).call(c.chart);
-        return;
-      }
-      
+    TransitionTrain.prototype.transition = function () {
+      var status = this.state_machine.getStatus();
       if (status === 'in_transition') {
-        old_position = position;
-        position += step;
+        this.old_position = this.position;
+        this.position += this.step;
       } else if (status === 'in_transition_reverse') {
-        old_position = position;
-        position -= step;
+        this.old_position = this.position;
+        this.position -= this.step;
       }
-      startTransition.apply(this);
+      this.startTransition();
     }
 
-    dispatch.on('end', function () {
-      transition();
-    });
-
-    dispatch.on('stop', function () {
-      state_machine.consumeEvent('stop');
-      transition();
-    });
-
-    dispatch.on('start', function () {
-      state_machine.consumeEvent('forward');
-      transition();
-    });
-
-    //methods.transition = transition;
-    //meld.around(methods, 'transition', function(methodCall) {
-    //  console.log('@@@@@@@@', this, methodCall)
-    //});
-
-    transition.dispatch = dispatch;
-    return transition;
+    return TransitionTrain;
 
   });
 

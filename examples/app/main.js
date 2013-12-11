@@ -5,11 +5,9 @@
     "when", 
     "bar",
     "transition"
-  ], function(d3, _, when, bar, transition) {
+  ], function(d3, _, when, bar, TransitionTrain) {
 
     var d = when.defer();
-
-    
 
     function accessor(d) {
       // csv headers:
@@ -34,10 +32,6 @@
         selection = d3.select("#viz");
         info.text(current_year);
 
-        //function handleTransitionEnd () {
-        //  debugger;
-        //}
-
         barchart = bar()
           .margin({top: 10, right: 20, bottom: 20, left: 400})
           .width(1100)
@@ -60,29 +54,16 @@
           step: 5
         }
 
-        transition(transition_config);
+        var transition = new TransitionTrain(transition_config);
 
         d3.select("#start").on('click', function () {
-          //debugger;
           transition.dispatch.start();
         });
         d3.select("#stop").on('click', function () {
           transition.dispatch.stop();
         });
-//
-//        d3.select("#start").on('click', function () {
-//          barchart.dispatch.start.apply(barchart, [selection]);
-//        });
-
-        //debugger;
 
         d.resolve(data);
-        //debugger
-
-        //barchart = transition(barchart);
-
-
-
 
     });
 
