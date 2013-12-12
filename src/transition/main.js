@@ -23,17 +23,21 @@
       this.current_timeout = void 0;
       this.dispatch = d3.dispatch("start", "stop", "next", "prev", "reset", "end");
       
-      this.chart.handleTransitionEnd(function () {self.dispatch.end();});
+      this.chart.handleTransitionEnd( function () {
+        self.dispatch.end();
+      });
       this.selection.datum(this.data[this.position]).call(this.chart);
 
       this.dispatch.on('reset', function () {
         self.state_machine.consumeEvent('stop');
+        //self.transition();
         self.state_machine.consumeEvent('reset');
         self.transition();
         self.state_machine.consumeEvent('stop');
       });
 
       this.dispatch.on('end', function () {
+        // The end of a single transition block.
         self.transition();
       });
 
@@ -71,6 +75,8 @@
       } else if (status === 'in_reset') {
         this.old_position = this.position;
         this.position = this.initial_position;
+      } else if (status === 'in_pause') {
+        return;
       }
       this.startTransition();
     }

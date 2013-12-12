@@ -44,6 +44,9 @@
           });
   
           function delay (d, i) { 
+            // Why is always 0????
+            // this should go in utils and tested. 
+            console.log(data.length, i / data.length * __.duration);
             return i / data.length * __.duration;
           }
   
@@ -55,7 +58,8 @@
             yScale: yScale,
             xScale: xScale,
             xAxis: xAxis,
-            yAxis: yAxis
+            yAxis: yAxis,
+            delay: delay,
           }
   
           orientation[__.orient].inflateYScale.call(yScale, params);
@@ -80,7 +84,7 @@
             __.margin.left + "," + __.margin.top + ")");
   
           // Transitions root.
-          transition = g.transition().duration(__.duration).delay(delay);
+          transition = g.transition().duration(__.duration)//.delay(delay);
           
           // Update the y axis.
           orientation[__.orient]

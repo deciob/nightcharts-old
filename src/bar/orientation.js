@@ -87,7 +87,7 @@
           .selectAll("g")
       },
       transitionBars: function (params) {
-        return this
+        return this//.delay(params.delay)
           .attr("y", function(d) { return params.yScale(d[0]); })
           .attr("x", params.__.barOffSet)
           .attr("width", function(d) { 

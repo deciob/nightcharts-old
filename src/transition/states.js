@@ -1,6 +1,9 @@
 (function(define) {
   return define(function(require) {
 
+    // TODO:
+    // need to differentiate between a transition train and a single transition
+
     var transition_states = [
       {
         'name': 'in_pause',
