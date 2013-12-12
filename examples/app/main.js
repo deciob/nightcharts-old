@@ -36,7 +36,7 @@
           .margin({top: 10, right: 20, bottom: 20, left: 400})
           .width(1100)
           .height(700)
-          .duration(600)
+          .duration(700)
           .step(300)
           .max(40)
           .xValue( function(d) { return d['agglomeration']; } )
@@ -54,15 +54,18 @@
           step: 5
         }
 
-        var transition = new TransitionTrain(transition_config);
+        var transition = new TransitionTrain(transition_config),
+          start = d3.select("#start"), stop = d3.select("#stop"),
+          reset = d3.select("#reset");
 
-        d3.select("#start").on('click', function () {
+
+        start.on('click', function () {
           transition.dispatch.start();
         });
-        d3.select("#stop").on('click', function () {
+        stop.on('click', function () {
           transition.dispatch.stop();
         });
-        d3.select("#reset").on('click', function () {
+        reset.on('click', function () {
           transition.dispatch.reset();
         });
 

@@ -43,11 +43,10 @@
             return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
           });
   
-          function delay (d, i) { 
-            // Why is always 0????
-            // this should go in utils and tested. 
-            console.log(data.length, i / data.length * __.duration);
-            return i / data.length * __.duration;
+          function delay (d, i) {
+            // Attention, delay can not be longer of transition time! Test!
+            //return i / data.length * __.duration;
+            return i * (data.length/2);
           }
   
           params = {
@@ -84,7 +83,7 @@
             __.margin.left + "," + __.margin.top + ")");
   
           // Transitions root.
-          transition = g.transition().duration(__.duration)//.delay(delay);
+          transition = g.transition().duration(__.duration)
           
           // Update the y axis.
           orientation[__.orient]

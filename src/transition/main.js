@@ -4,9 +4,8 @@
     "meld",
     "utils",
     "transition/states",
-    "transition/state_machine",
-    "transition/dispatch"
-  ], function(d3, meld, utils, states, StateMachine, dispatch) {
+    "transition/state_machine"
+  ], function(d3, meld, utils, states, StateMachine) {
 
     var TransitionTrain = function (conf) {
       var self = this;

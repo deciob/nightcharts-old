@@ -47,10 +47,11 @@
       },
       transitionYAxis: function (params) {
         return this.call(params.yAxis)
-          .selectAll("g");
+          .selectAll("g")
+          .delay(params.delay);
       },
       transitionBars: function (params) {
-        return this
+        return this.delay(params.delay)
           .attr("x", function(d) { return params.xScale(d[0]); })
           .attr("y", function(d) { return params.yScale(d[1]); })
           .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
@@ -85,9 +86,10 @@
       transitionYAxis: function (params) {
         return this.call(params.yAxis)
           .selectAll("g")
+          .delay(params.delay);
       },
       transitionBars: function (params) {
-        return this//.delay(params.delay)
+        return this.delay(params.delay)
           .attr("y", function(d) { return params.yScale(d[0]); })
           .attr("x", params.__.barOffSet)
           .attr("width", function(d) { 
