@@ -24,6 +24,8 @@
       return this.currentState.name;
     }
 
+    // getLastEvent();
+
     return StateMachine;
 
   });
