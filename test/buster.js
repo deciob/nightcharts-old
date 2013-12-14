@@ -1,9 +1,5 @@
-var config = module.exports;
-
-config["Chart tests"] = {
-    environment: "node",
-    rootPath: "../",
-    tests: [
-        "test/**/*-test.js"
-    ]
+module.exports['node'] = {
+  rootPath: '../',
+  environment: 'node',
+  tests: ['test/**/*-test.js']
 };
