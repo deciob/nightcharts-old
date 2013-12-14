@@ -35,35 +35,17 @@
         self.handleTransition();
       });
 
-      this.dispatch.on('stop', function () {
-        self.state_machine.consumeEvent('stop');
-      });
+      this.dispatch.on('stop', self.handleStop);
 
-      this.dispatch.on('start', function () {
-        self.state_machine.consumeEvent('start');
-        self.handleTransition();
-      });
+      this.dispatch.on('start', self.handleStart);
 
-      this.dispatch.on('next', function () {
-        self.state_machine.consumeEvent('next');
-        self.handleTransition();
-      });
+      this.dispatch.on('next', self.handleNext);
 
-      this.dispatch.on('prev', function () {
-        self.state_machine.consumeEvent('prev');
-        self.handleTransition();
-      });
+      this.dispatch.on('prev', self.handlePrev);
 
-      this.dispatch.on('reset', function () {
-        self.state_machine.consumeEvent('reset');
-        if (self.state_machine.getStatus() === 'in_transition_reset') {
-          self.handleTransition();
-        } else {
-          console.log('State not in pause when reset event was fired.');
-        }
-      });
-
+      this.dispatch.on('reset', self.handleReset);
     }
+
 
     TransitionTrain.prototype.startTransition = function () {
       var delay = this.chart.step(),
@@ -78,6 +60,54 @@
         this.state_machine.consumeEvent('stop');
       }
     }
+
+    TransitionTrain.prototype.handleStop = function () {
+      this.state_machine.consumeEvent('stop');
+      return this;
+    }
+
+    // TODO: there is a lot of repetition here!
+
+    TransitionTrain.prototype.handleStart = function () {
+      this.state_machine.consumeEvent('start');
+      if (self.state_machine.getStatus() === 'in_transition_start') {
+        self.handleTransition();
+      } else {
+        console.log('State not in pause when start event was fired.');
+      }
+      return this;
+    }
+
+    TransitionTrain.prototype.handleNext = function () {
+      this.state_machine.consumeEvent('next');
+      if (self.state_machine.getStatus() === 'in_transition_next') {
+        self.handleTransition();
+      } else {
+        console.log('State not in pause when next event was fired.');
+      }
+      return this;
+    }
+
+    TransitionTrain.prototype.handlePrev = function () {
+      this.state_machine.consumeEvent('prev');
+      if (self.state_machine.getStatus() === 'in_transition_prev') {
+        self.handleTransition();
+      } else {
+        console.log('State not in pause when prev event was fired.');
+      }
+      return this;
+    }
+
+    TransitionTrain.prototype.handleReset = function () {
+      this.state_machine.consumeEvent('reset');
+      if (self.state_machine.getStatus() === 'in_transition_reset') {
+        self.handleTransition();
+      } else {
+        console.log('State not in pause when reset event was fired.');
+      }
+      return this;
+    }
+
     
     TransitionTrain.prototype.handleTransition = function () {
       var self = this, status = this.state_machine.getStatus();
@@ -106,6 +136,7 @@
     }
 
     return TransitionTrain;
+
 
   });
 

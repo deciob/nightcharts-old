@@ -60,13 +60,13 @@
 
 
         start.on('click', function () {
-          transition.dispatch.start();
+          transition.dispatch.start.call(transition);
         });
         stop.on('click', function () {
-          transition.dispatch.stop();
+          transition.dispatch.stop.call(transition);
         });
         reset.on('click', function () {
-          transition.dispatch.reset();
+          transition.dispatch.reset.call(transition);
         });
 
         d.resolve(data);
