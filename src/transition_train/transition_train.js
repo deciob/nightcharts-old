@@ -68,12 +68,13 @@
 
     // TODO: there is a lot of repetition here!
 
-    // TODO:
-    // This one is problematic, need to find an elegant way of stopping 
-    // the transitions on subsequent calls...
     TransitionTrain.prototype.handleStart = function () {
-      this.state_machine.consumeEvent('start');
-      this.handleTransition();
+      if (this.state_machine.getStatus() === 'in_pause') {
+        this.state_machine.consumeEvent('start');
+        this.handleTransition();
+      } else {
+        console.log('State already in in_transition_start.');
+      }
       return this;
     }
 
