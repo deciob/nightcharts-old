@@ -37,12 +37,12 @@ define(function(require) {
       assert.equals(this.state_machine.getStatus(), 'in_transition_reset');
       this.state_machine.consumeEvent('stop');
       assert.equals(this.state_machine.getStatus(), 'in_pause');
-      this.state_machine.consumeEvent('forward');
-      assert.equals(this.state_machine.getStatus(), 'in_transition_forward');
+      this.state_machine.consumeEvent('next');
+      assert.equals(this.state_machine.getStatus(), 'in_transition_next');
       this.state_machine.consumeEvent('stop');
       assert.equals(this.state_machine.getStatus(), 'in_pause');
-      this.state_machine.consumeEvent('reverse');
-      assert.equals(this.state_machine.getStatus(), 'in_transition_reverse');
+      this.state_machine.consumeEvent('prev');
+      assert.equals(this.state_machine.getStatus(), 'in_transition_prev');
     },
 
   });

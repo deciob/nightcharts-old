@@ -27,17 +27,12 @@
       });
       this.selection.datum(this.data[this.position]).call(this.chart);
 
-      this.dispatch.on('reset', function () {
-        self.state_machine.consumeEvent('stop');
-        //self.transition();
-        self.state_machine.consumeEvent('reset');
-        self.transition();
-        self.state_machine.consumeEvent('stop');
-      });
-
+      // This event is dependent on the chart.handleTransitionEnd method and
+      // fires on the end of every chart single transition block.
+      // It is the only dispatch event that does not have a state_machine 
+      // equivalent event.
       this.dispatch.on('end', function () {
-        // The end of a single transition block.
-        self.transition();
+        self.handleTransition();
       });
 
       this.dispatch.on('stop', function () {
@@ -45,9 +40,29 @@
       });
 
       this.dispatch.on('start', function () {
-        self.state_machine.consumeEvent('forward');
-        self.transition();
+        self.state_machine.consumeEvent('start');
+        self.handleTransition();
       });
+
+      this.dispatch.on('next', function () {
+        self.state_machine.consumeEvent('next');
+        self.handleTransition();
+      });
+
+      this.dispatch.on('prev', function () {
+        self.state_machine.consumeEvent('prev');
+        self.handleTransition();
+      });
+
+      this.dispatch.on('reset', function () {
+        self.state_machine.consumeEvent('reset');
+        if (self.state_machine.getStatus() === 'in_transition_reset') {
+          self.handleTransition();
+        } else {
+          console.log('State not in pause when reset event was fired.');
+        }
+      });
+
     }
 
     TransitionTrain.prototype.startTransition = function () {
@@ -59,25 +74,35 @@
           self.selection.datum(self.data[self.position]).call(self.chart);
         }, self.delay);
       } else {
+        // When no data is left to consume, let us stop the train!
         this.state_machine.consumeEvent('stop');
       }
     }
     
-    TransitionTrain.prototype.transition = function () {
-      var status = this.state_machine.getStatus();
-      if (status === 'in_transition') {
+    TransitionTrain.prototype.handleTransition = function () {
+      var self = this, status = this.state_machine.getStatus();
+      if (status === 'in_transition_start') {
         this.old_position = this.position;
         this.position += this.step;
-      } else if (status === 'in_transition_reverse') {
+        this.startTransition();
+      } else if (status === 'in_transition_prev') {
         this.old_position = this.position;
         this.position -= this.step;
-      } else if (status === 'in_reset') {
+        this.startTransition();
+        self.state_machine.consumeEvent('stop');
+      } else if (status === 'in_transition_next') {
+        this.old_position = this.position;
+        this.position += this.step;
+        this.startTransition();
+        self.state_machine.consumeEvent('stop');
+      } else if (status === 'in_transition_reset') {
         this.old_position = this.position;
         this.position = this.initial_position;
+        this.startTransition();
+        self.state_machine.consumeEvent('stop');
       } else if (status === 'in_pause') {
         return;
-      }
-      this.startTransition();
+      } 
     }
 
     return TransitionTrain;
