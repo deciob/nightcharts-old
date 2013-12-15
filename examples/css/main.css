@@ -19,8 +19,9 @@ svg {
 }
 
 #info {
-  /*text-align: right;*/
-  font-family: 'Lato', sans-serif;
+  /*text-align: right;
+  font-family: 'Lato', sans-serif;*/
+  font-family: 'Candal', sans-serif;
   margin: 1 1 0 1em;
   font-size: 10em;
   /*font-weight: 100;*/
