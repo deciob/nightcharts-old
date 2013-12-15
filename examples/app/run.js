@@ -7,7 +7,7 @@
         location: 'lib/d3/d3.js',
         config: {
           loader: 'lib/curl/src/curl/loader/legacy',
-          exports: 'd3',  // leaving trailing comma! :)
+          exports: 'd3'
         }
       }
     },

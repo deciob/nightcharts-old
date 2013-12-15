@@ -23,7 +23,8 @@
   "dependencies": {},
   "devDependencies": {
     "serv": "",
-    "bower": ""
+    "bower": "",
+    "jsdom": ""
   },
   "scripts": {
     "postinstall": "bower install",

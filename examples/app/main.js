@@ -56,14 +56,23 @@
 
         var transition = new TransitionTrain(transition_config),
           start = d3.select("#start"), stop = d3.select("#stop"),
+          next = d3.select("#next"), prev = d3.select("#prev"),
           reset = d3.select("#reset");
 
-
+        transition.dispatch.on('end', function() {
+          d3.select('#info').html(transition.position);
+        }) 
         start.on('click', function () {
           transition.dispatch.start.call(transition);
         });
         stop.on('click', function () {
           transition.dispatch.stop.call(transition);
+        });
+        next.on('click', function () {
+          transition.dispatch.next.call(transition);
+        });
+        prev.on('click', function () {
+          transition.dispatch.prev.call(transition);
         });
         reset.on('click', function () {
           transition.dispatch.reset.call(transition);

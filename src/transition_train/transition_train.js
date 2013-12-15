@@ -1,11 +1,10 @@
 (function(define) {
   return define([
     "d3",
-    "meld",
     "utils",
     "transition/states",
     "transition/state_machine"
-  ], function(d3, meld, utils, states, StateMachine) {
+  ], function(d3, utils, states, StateMachine) {
 
     var TransitionTrain = function (conf) {
       var self = this;
@@ -23,7 +22,7 @@
       this.dispatch = d3.dispatch("start", "stop", "next", "prev", "reset", "end");
       
       this.chart.handleTransitionEnd( function () {
-        self.dispatch.end();
+        self.dispatch.end.call(self);
       });
       this.selection.datum(this.data[this.position]).call(this.chart);
 
@@ -31,9 +30,15 @@
       // fires on the end of every chart single transition block.
       // It is the only dispatch event that does not have a state_machine 
       // equivalent event.
-      this.dispatch.on('end', function () {
-        self.handleTransition();
-      });
+      //
+      // The `.transition_train` is an arbitrary namespace, as explained in the 
+      // d3 docs, https://github.com/mbostock/d3/wiki/Internals#events
+      //
+      // If an event listener was already registered for the same type, 
+      // the existing listener is removed before the new listener is added. 
+      // To register multiple listeners for the same event type, the type may
+      // be followed by an optional namespace, such as "click.foo" and "click.bar".
+      this.dispatch.on('end.transition_train', self.handleWagonEnd);
 
       this.dispatch.on('stop', self.handleStop);
 
@@ -44,6 +49,9 @@
       this.dispatch.on('prev', self.handlePrev);
 
       this.dispatch.on('reset', self.handleReset);
+
+      // TODO
+      //this.dispatch.on('jump_to', self.handleJumpTo);
     }
 
 
@@ -59,6 +67,11 @@
         // When no data is left to consume, let us stop the train!
         this.state_machine.consumeEvent('stop');
       }
+    }
+
+    TransitionTrain.prototype.handleWagonEnd = function () {
+      this.handleTransition();
+      return this;
     }
 
     TransitionTrain.prototype.handleStop = function () {
@@ -77,6 +90,10 @@
       }
       return this;
     }
+
+    // TODO:
+    // for next and prev we are allowing multiple prev-next events to be 
+    // fired without waiting the ongoing transition block to finish. Change?
 
     TransitionTrain.prototype.handleNext = function () {
       this.state_machine.consumeEvent('next');
@@ -136,7 +153,6 @@
     }
 
     return TransitionTrain;
-
 
   });
 
