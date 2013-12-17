@@ -1,4 +1,5 @@
-(function () {
+
+;(function () {
 
   curl.config({
     baseUrl: '../../',
@@ -9,8 +10,7 @@
           loader: 'lib/curl/src/curl/loader/legacy',
           exports: 'd3'
         }
-      },
-      app: { location: 'examples/app/main.js' }
+      }
     },
     packages: {
       curl: { location: 'lib/curl/src/curl/' },
@@ -19,22 +19,22 @@
       lodash: { location: 'lib/lodash/dist', main: 'lodash' },
       bar: { location: 'src/bar/', main: 'bar' },
       transition: { location: 'src/transition_train', main: 'transition_train' },
-      utils: { location: 'src/utils', main: 'utils' }
-      
+      utils: { location: 'src/utils', main: 'utils' },
+      //app: { location: 'examples/app', main: 'main' },
     }
   });
 
-  curl(['app']).then(start, fail);
+  curl().then();
 
-  function start(promise) {
-    //console.log('@@@@@@@')
-    promise.then(function (data) {
-      //console.log(data);
-    });
-  }
+//  function start(promise) {
+//    //console.log('@@@@@@@')
+//    //promise.then(function (data) {
+//      //console.log(data);
+//    //});
+//  }
 
-  function fail(ex, x) {
-    console.log(ex, x);
-  }
+//  function fail(ex, x) {
+//    console.log(ex, x);
+//  }
 
 }());
