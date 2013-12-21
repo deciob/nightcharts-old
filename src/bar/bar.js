@@ -1,7 +1,7 @@
 (function(define) {
   return define([
     "d3", 
-    "utils",
+    "utils/utils",
     "bar/config", 
     "bar/orientation",
   ], function(d3, utils, __, orientation) {

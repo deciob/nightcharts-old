@@ -1,9 +1,9 @@
 (function(define) {
   return define([
     "d3",
-    "utils",
-    "transition/states",
-    "transition/state_machine"
+    "utils/utils",
+    "transition_train/states",
+    "transition_train/state_machine"
   ], function(d3, utils, states, StateMachine) {
 
     var TransitionTrain = function (conf) {

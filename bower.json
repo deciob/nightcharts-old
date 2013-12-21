@@ -1,11 +1,7 @@
 {
-  "name": "charts",
+  "name": "nightcharts",
   "version": "0.0.1",
   "dependencies": {
-    "d3": "",
-    "lodash": "1.2.1",
-    "curl": "~0.8.4",
-    "when": "~2",
-    "meld": "~1"
+    "d3": ""
   }
 }

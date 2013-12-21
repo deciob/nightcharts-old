@@ -1,5 +1,5 @@
 {
-  "name": "charts",
+  "name": "nightcharts",
   "version": "0.0.1",
   "description": "Reusable charts based on d3.js",
   "keywords": ["charts", "d3"],
@@ -9,10 +9,10 @@
       "url": "http://www.opensource.org/licenses/mit-license.php"
     }
   ],
-  "repositories": [
+  "repository": [
     {
       "type": "git",
-      "url": "https://github.com/deciob/charts"
+      "url": "https://github.com/deciob/nighcharts"
     }
   ],
   "maintainers": [
