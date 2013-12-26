@@ -490,6 +490,8 @@
       } else {
         // When no data is left to consume, let us stop the train!
         this.state_machine.consumeEvent('stop');
+        // and reset the position.
+        this.position = this.old_position;
       }
     }
 
