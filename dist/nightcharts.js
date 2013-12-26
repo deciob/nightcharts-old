@@ -482,7 +482,7 @@
     TransitionTrain.prototype.startTransition = function () {
       var delay = this.chart.step(),
         self = this;
-      this.state_machine.consumeEvent('at_beginning_of_transition');
+      self.dispatch.at_beginning_of_transition.call(self);
       clearTimeout(this.current_timeout);
       if (this.data[this.position]) {
         this.current_timeout = setTimeout(function(){
