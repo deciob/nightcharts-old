@@ -1,9 +1,9 @@
 (function(define) {
   return define([
-    "d3",
-    "utils/utils",
-    "transition_train/states",
-    "transition_train/state_machine"
+    'd3',
+    'utils/utils',
+    'transition_train/states',
+    'transition_train/state_machine'
   ], function(d3, utils, states, StateMachine) {
 
     var TransitionTrain = function (conf) {
@@ -19,7 +19,7 @@
       this.state_machine = new StateMachine(states.transition_states);
       this.old_position = void 0;
       this.current_timeout = void 0;
-      this.dispatch = d3.dispatch("start", "stop", "next", "prev", "reset", "end");
+      this.dispatch = d3.dispatch('start', 'stop', 'next', 'prev', 'reset', 'end', 'at_beginning_of_transition');
       
       this.chart.handleTransitionEnd( function () {
         self.dispatch.end.call(self);
@@ -37,7 +37,7 @@
       // If an event listener was already registered for the same type, 
       // the existing listener is removed before the new listener is added. 
       // To register multiple listeners for the same event type, the type may
-      // be followed by an optional namespace, such as "click.foo" and "click.bar".
+      // be followed by an optional namespace, such as 'click.foo' and 'click.bar'.
       this.dispatch.on('end.transition_train', self.handleWagonEnd);
 
       this.dispatch.on('stop', self.handleStop);
@@ -58,6 +58,7 @@
     TransitionTrain.prototype.startTransition = function () {
       var delay = this.chart.step(),
         self = this;
+      this.state_machine.consumeEvent('at_beginning_of_transition');
       clearTimeout(this.current_timeout);
       if (this.data[this.position]) {
         this.current_timeout = setTimeout(function(){
@@ -158,7 +159,7 @@
 
   });
 
-})(typeof define === "function" && define.amd ? define : function(ids, factory) {
+})(typeof define === 'function' && define.amd ? define : function(ids, factory) {
   var deps;
   deps = ids.map(function(id) {
     return require(id);
