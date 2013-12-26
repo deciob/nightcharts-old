@@ -58,7 +58,6 @@
     TransitionTrain.prototype.startTransition = function () {
       var delay = this.chart.step(),
         self = this;
-      self.dispatch.at_beginning_of_transition.call(self);
       clearTimeout(this.current_timeout);
       if (this.data[this.position]) {
         this.current_timeout = setTimeout(function(){
@@ -70,6 +69,7 @@
         // and reset the position.
         this.position = this.old_position;
       }
+      self.dispatch.at_beginning_of_transition.call(self);
     }
 
     TransitionTrain.prototype.handleWagonEnd = function () {
