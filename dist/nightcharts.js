@@ -72,9 +72,10 @@
       y_orient: 'left',
       colour: 'LightSteelBlue',
       orient: 'vertical',
+      handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
-      xValue: function(d) { return d[0]; },
-      yValue: function(d) { return d[1]; }
+      xValue: function (d) { return d[0]; },
+      yValue: function (d) { return d[1]; }
     };
 
   });
@@ -293,7 +294,9 @@
             .call(transition.select(".x.axis"), params);
   
           // Select the bar elements, if they exists.
-          bars = g.select(".bars").selectAll(".bar").data(data, dataIdentifier);
+          bars = g.select(".bars").selectAll(".bar")
+            .data(data, dataIdentifier)
+            .on('click', __.handleClick);
   
           // Exit phase (let us push out old bars before the new ones come in).
           bars.exit()
