@@ -295,15 +295,15 @@
   
           // Select the bar elements, if they exists.
           bars = g.select(".bars").selectAll(".bar")
-            .data(data, dataIdentifier)
-            .on('click', __.handleClick);
+            .data(data, dataIdentifier);
   
           // Exit phase (let us push out old bars before the new ones come in).
           bars.exit()
             .transition().duration(__.duration).style('opacity', 0).remove();
   
           // Otherwise, create them.
-          orientation[__.orient].createBars.call(bars.enter(), params);
+          orientation[__.orient].createBars.call(bars.enter(), params)
+            .on('click', __.handleClick);
           // And transition them.
           orientation[__.orient].transitionBars
             .call(transition.selectAll('.bar'), params)
