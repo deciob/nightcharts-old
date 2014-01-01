@@ -72,6 +72,7 @@
       y_orient: 'left',
       colour: 'LightSteelBlue',
       orient: 'vertical',
+      invert_data: false,
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
       xValue: function (d) { return d[0]; },
@@ -240,6 +241,9 @@
           data = dat.map(function(d, i) {
             return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
           });
+          if (invert_data) {
+            data = data.reverse();
+          }
   
           function delay (d, i) {
             // Attention, delay can not be longer of transition time! Test!

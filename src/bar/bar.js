@@ -42,6 +42,9 @@
           data = dat.map(function(d, i) {
             return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
           });
+          if (invert_data) {
+            data = data.reverse();
+          }
   
           function delay (d, i) {
             // Attention, delay can not be longer of transition time! Test!

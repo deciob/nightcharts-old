@@ -17,6 +17,7 @@
       y_orient: 'left',
       colour: 'LightSteelBlue',
       orient: 'vertical',
+      invert_data: false,
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
       xValue: function (d) { return d[0]; },
