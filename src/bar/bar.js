@@ -42,7 +42,7 @@
           data = dat.map(function(d, i) {
             return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
           });
-          if (invert_data) {
+          if (__.invert_data) {
             data = data.reverse();
           }
   
