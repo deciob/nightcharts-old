@@ -2,7 +2,10 @@
   "name": "nightcharts",
   "version": "0.0.1",
   "description": "Reusable charts based on d3.js",
-  "keywords": ["charts", "d3"],
+  "keywords": [
+    "charts",
+    "d3"
+  ],
   "licenses": [
     {
       "type": "MIT",
@@ -24,7 +27,7 @@
   "devDependencies": {
     "serv": "",
     "bower": "",
-    "jsdom": ""
+    "karma-mocha": ""
   },
   "scripts": {
     "postinstall": "bower install",
