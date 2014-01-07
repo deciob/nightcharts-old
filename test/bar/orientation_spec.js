@@ -15,11 +15,42 @@ define(['chai', 'bar/config','bar/orientation'], function(chai, __, orientation)
         w: w
       };
   });
+
+  before( function() {
+    // Resetting default values.
+    params.__.max = void 0;
+  });
   
   describe('bar/orientation', function(){
   
     it('should be a function', function(){
-      assert.isFunction(xScale);
+      assert.isFunction(xScale.rangeRoundBands);
+    });
+
+    it('calling yScale with a big value should return a small value if the orientation is vertical', function(){
+      var yScale = orientation['vertical'].yScale();
+      // Set range and domain on yScale
+      orientation['vertical'].inflateYScale.call(yScale, params);
+      // The max value in data is 322. Passing this value to yScale 
+      // should return a very small value because the y scale is inverted.
+      assert.isTrue(yScale(322) < 1);
+    });
+
+    it('setting a new value in params should override the default one', function(){
+      var yScale = orientation['vertical'].yScale();
+      params.__.max = 500;
+      // Set range and domain on yScale
+      orientation['vertical'].inflateYScale.call(yScale, params);
+      assert.isTrue(yScale(322) > 1);
+    });
+
+    it('calling xScale with a small value should return a small value if the orientation is horizontal', function(){
+      var xScale = orientation['horizontal'].xScale();
+      // Set range and domain on xScale
+      orientation['horizontal'].inflateXScale.call(xScale, params);
+      // This time the linear scale is on the x axis and so the scale
+      // is not inverted.
+      assert.isTrue(xScale(0) < 1);
     });
 
   });

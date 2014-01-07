@@ -1,8 +1,9 @@
 (function(define) {
   return define(["d3"], function(d3) {
 
-  // Handling the barchart orientation.
+    // Handling the barchart orientation.
 
+    // Sets the range and domain for the linear scale.
     function inflateLinearScale (params, range) {
       var max;
       if (params.__.max) {
@@ -13,6 +14,7 @@
       return this.range(range).domain([0, max]);
     }
   
+    // Sets the range and domain for the ordinal scale.
     function inflateOrdinalScale (params, range) {
       return this
         .rangeRoundBands(range, params.__.padding)
