@@ -1,4 +1,6 @@
-###Example: http://deciob.github.io/wup/
+###### Why nightcharts?
 
-###TODO:
-* get tests to work on master again.
+When work has ended and children are resting and all is dark and quiet, I code.
+
+
+Example: http://deciob.github.io/wup/
