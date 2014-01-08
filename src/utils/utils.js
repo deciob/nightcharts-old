@@ -10,6 +10,7 @@
       return target;
     }
   
+    // Todo: some docs on this function.
     function getset (obj, state) {
       d3.keys(state).forEach( function(key) {
         obj[key] = function (x) {

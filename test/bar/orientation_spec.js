@@ -16,7 +16,7 @@ define(['chai', 'bar/config','bar/orientation'], function(chai, __, orientation)
       };
   });
 
-  before( function() {
+  after( function() {
     // Resetting default values.
     params.__.max = void 0;
   });
@@ -25,6 +25,11 @@ define(['chai', 'bar/config','bar/orientation'], function(chai, __, orientation)
   
     it('should be a function', function(){
       assert.isFunction(xScale.rangeRoundBands);
+    });
+
+    it('should be a function', function(){
+      var xScale = orientation['horizontal'].xScale();
+      assert.isFunction(xScale.range);
     });
 
     it('calling yScale with a big value should return a small value if the orientation is vertical', function(){
