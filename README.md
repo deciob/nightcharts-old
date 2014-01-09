@@ -1,4 +1,4 @@
-###### Why nightcharts?
+###### Why call it nightcharts?
 
 When work has ended and children are resting and all is dark and quiet, I code.
 
