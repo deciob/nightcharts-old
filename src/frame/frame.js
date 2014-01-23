@@ -18,13 +18,21 @@
       this.data = conf.data;
 
       this.state_machine = new StateMachine(states.transition_states);
-      this.dispatch = d3.dispatch('start', 'stop', 'next', 'prev', 'reset', 'end', 'at_beginning_of_transition');
+      this.dispatch = d3.dispatch(
+        'start', 
+        'stop', 
+        'next', 
+        'prev', 
+        'reset', 
+        'end', 
+        'at_beginning_of_transition'
+      );
       
       this.chart.handleTransitionEnd( function () {
         self.dispatch.end.call(self);
         return self;
       });
-      // Initial frame. The chart is rendered.
+      // Initial frame. The chart is rendered for the first time.
       this.selection.datum(this.data[this.frame]).call(this.chart);
 
       // Fired when all the chart related transitions within a frame are 
