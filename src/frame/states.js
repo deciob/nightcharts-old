@@ -1,6 +1,8 @@
 (function(define) {
   return define(function(require) {
 
+    // Namespaced, might add other states if needed.
+
     var transition_states = [
       {
         'name': 'in_pause',

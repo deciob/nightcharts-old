@@ -2,43 +2,44 @@
   return define([
     'd3',
     'utils/utils',
-    'transition_train/states',
-    'transition_train/state_machine'
+    'frame/states',
+    'frame/state_machine'
   ], function(d3, utils, states, StateMachine) {
 
-    var TransitionTrain = function (conf) {
+    var Frame = function (conf) {
       var self = this;
       
-      this.initial_position = conf.position;
-      this.position = conf.position;
+      this.initial_frame = this.frame = conf.frame;
+      this.old_frame = void 0;
+      this.current_timeout = void 0;
       this.selection = conf.selection;
       this.chart = conf.chart;
-      this.step = conf.step;
+      this.delta = conf.delta;
       this.data = conf.data;
 
       this.state_machine = new StateMachine(states.transition_states);
-      this.old_position = void 0;
-      this.current_timeout = void 0;
       this.dispatch = d3.dispatch('start', 'stop', 'next', 'prev', 'reset', 'end', 'at_beginning_of_transition');
       
       this.chart.handleTransitionEnd( function () {
         self.dispatch.end.call(self);
+        return self;
       });
-      this.selection.datum(this.data[this.position]).call(this.chart);
+      // Initial frame. The chart is rendered.
+      this.selection.datum(this.data[this.frame]).call(this.chart);
 
-      // This event is dependent on the chart.handleTransitionEnd method and
-      // fires on the end of every chart single transition block.
+      // Fired when all the chart related transitions within a frame are 
+      // terminated.
       // It is the only dispatch event that does not have a state_machine 
       // equivalent event.
+      // `frame` is an arbitrary namespace, in order to register multiple 
+      // listeners for the same event type.
       //
-      // The `.transition_train` is an arbitrary namespace, as explained in the 
-      // d3 docs, https://github.com/mbostock/d3/wiki/Internals#events
-      //
-      // If an event listener was already registered for the same type, 
-      // the existing listener is removed before the new listener is added. 
-      // To register multiple listeners for the same event type, the type may
-      // be followed by an optional namespace, such as 'click.foo' and 'click.bar'.
-      this.dispatch.on('end.transition_train', self.handleWagonEnd);
+      // https://github.com/mbostock/d3/wiki/Internals#events:
+      // If an event listener was already registered for the same type, the 
+      // existing listener is removed before the new listener is added. To 
+      // register multiple listeners for the same event type, the type may be 
+      // followed by an optional namespace, such as 'click.foo' and 'click.bar'.
+      this.dispatch.on('end.frame', self.handleFrameEnd);
 
       this.dispatch.on('stop', self.handleStop);
 
@@ -55,36 +56,36 @@
     }
 
 
-    TransitionTrain.prototype.startTransition = function () {
-      var delay = this.chart.step(),
-        self = this;
+    Frame.prototype.startTransition = function () {
+      var self = this,
+        step = this.chart.step();
       clearTimeout(this.current_timeout);
-      if (this.data[this.position]) {
-        this.current_timeout = setTimeout(function(){
-          self.selection.datum(self.data[self.position]).call(self.chart);
-        }, self.delay);
+      if (this.data[this.frame]) {
+        this.current_timeout = setTimeout( function () {
+          // Re-render the chart
+          self.selection.datum(self.data[self.frame]).call(self.chart);
+        }, self.step);
       } else {
-        // When no data is left to consume, let us stop the train!
+        // When no data is left to consume, let us stop the running frames!
         this.state_machine.consumeEvent('stop');
-        // and reset the position.
-        this.position = this.old_position;
+        this.frame = this.old_frame;
       }
       self.dispatch.at_beginning_of_transition.call(self);
     }
 
-    TransitionTrain.prototype.handleWagonEnd = function () {
+    Frame.prototype.handleFrameEnd = function () {
       this.handleTransition();
       return this;
     }
 
-    TransitionTrain.prototype.handleStop = function () {
+    Frame.prototype.handleStop = function () {
       this.state_machine.consumeEvent('stop');
       return this;
     }
 
     // TODO: there is a lot of repetition here!
 
-    TransitionTrain.prototype.handleStart = function () {
+    Frame.prototype.handleStart = function () {
       if (this.state_machine.getStatus() === 'in_pause') {
         this.state_machine.consumeEvent('start');
         this.handleTransition();
@@ -96,9 +97,9 @@
 
     // TODO:
     // for next and prev we are allowing multiple prev-next events to be 
-    // fired without waiting the ongoing transition block to finish. Change?
+    // fired without waiting for the current frame to end. Change?
 
-    TransitionTrain.prototype.handleNext = function () {
+    Frame.prototype.handleNext = function () {
       this.state_machine.consumeEvent('next');
       if (this.state_machine.getStatus() === 'in_transition_next') {
         this.handleTransition();
@@ -108,7 +109,7 @@
       return this;
     }
 
-    TransitionTrain.prototype.handlePrev = function () {
+    Frame.prototype.handlePrev = function () {
       this.state_machine.consumeEvent('prev');
       if (this.state_machine.getStatus() === 'in_transition_prev') {
         this.handleTransition();
@@ -118,7 +119,7 @@
       return this;
     }
 
-    TransitionTrain.prototype.handleReset = function () {
+    Frame.prototype.handleReset = function () {
       this.state_machine.consumeEvent('reset');
       if (this.state_machine.getStatus() === 'in_transition_reset') {
         this.handleTransition();
@@ -129,25 +130,25 @@
     }
 
     
-    TransitionTrain.prototype.handleTransition = function () {
+    Frame.prototype.handleTransition = function () {
       var self = this, status = this.state_machine.getStatus();
       if (status === 'in_transition_start') {
-        this.old_position = this.position;
-        this.position += this.step;
+        this.old_frame = this.frame;
+        this.frame += this.delta;
         this.startTransition();
       } else if (status === 'in_transition_prev') {
-        this.old_position = this.position;
-        this.position -= this.step;
+        this.old_frame = this.frame;
+        this.frame -= this.delta;
         this.startTransition();
         self.state_machine.consumeEvent('stop');
       } else if (status === 'in_transition_next') {
-        this.old_position = this.position;
-        this.position += this.step;
+        this.old_frame = this.frame;
+        this.frame += this.delta;
         this.startTransition();
         self.state_machine.consumeEvent('stop');
       } else if (status === 'in_transition_reset') {
-        this.old_position = this.position;
-        this.position = this.initial_position;
+        this.old_frame = this.frame;
+        this.frame = this.initial_frame;
         this.startTransition();
         self.state_machine.consumeEvent('stop');
       } else if (status === 'in_pause') {
@@ -155,7 +156,7 @@
       } 
     }
 
-    return TransitionTrain;
+    return Frame;
 
   });
 

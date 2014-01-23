@@ -4,16 +4,16 @@
     "bar/bar",
     "bar/config", 
     "bar/orientation",
-    "transition_train/transition_train",
-    "transition_train/states",
-    "transition_train/state_machine"
-  ], function(utils, bar, __, orientation, TransitionTrain, states, StateMachine) {
+    "frame/frame",
+    "frame/states",
+    "frame/state_machine"
+  ], function(utils, bar, __, orientation, Frame, states, StateMachine) {
     return {
       utils: utils, 
       bar:bar,
       __: __, 
       orientation: orientation,
-      TransitionTrain: TransitionTrain,
+      Frame: Frame,
       states: states, 
       StateMachine: StateMachine
     };
