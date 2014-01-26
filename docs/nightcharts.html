@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>nightcharts.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>nightcharts.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+define(<span class="string">'draw'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span>
+  
+
+  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(chart, selection)</span> {</span>
+    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(data)</span> {</span>
+      selection.datum(data).call(chart);
+    }
+  }
+
+});
+
+
+define(<span class="string">'utils/utils'</span>,[<span class="string">"d3"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p><strong>Useful functions that can be shared across modules</strong></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  
+  <span class="function"><span class="keyword">function</span> <span class="title">extend</span> <span class="params">(target, source)</span> {</span>
+    <span class="keyword">for</span>(prop <span class="keyword">in</span> source) {
+      target[prop] = source[prop];
+    }
+    <span class="keyword">return</span> target;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Todo: some docs on this function.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">getset</span> <span class="params">(obj, state)</span> {</span>
+    d3.keys(state).forEach( <span class="function"><span class="keyword">function</span><span class="params">(key)</span> {</span>
+      obj[key] = <span class="function"><span class="keyword">function</span> <span class="params">(x)</span> {</span>
+        <span class="keyword">if</span> (!arguments.length) <span class="keyword">return</span> state[key];
+        <span class="keyword">var</span> old = state[key];
+        state[key] = x;
+        <span class="keyword">return</span> obj;
+      }
+    });
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Fires a callback when all transitions of a chart have ended.
+The solution is inspired from a reply in 
+<a href="https://groups.google.com/forum/#!msg/d3-js/WC_7Xi6VV50/j1HK0vIWI-EJ">Single event at end of transition?</a>. 
+The original suggestion assumes the data length never changes, this 
+instead also accounts for exits during the transition.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">endall</span> <span class="params">(elements_in_transition, data, callback)</span> {</span>
+    <span class="keyword">var</span> n = data.length;
+    elements_in_transition 
+      .each(<span class="string">"end"</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span> 
+        <span class="keyword">if</span> (!--n) {
+          callback.apply(<span class="keyword">this</span>, arguments);
+        }
+      });
+  }
+
+  <span class="keyword">return</span> {
+    extend: extend,
+    getset: getset,
+    endall: endall
+  };
+
+});
+
+
+define(<span class="string">'bar/config'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p><strong>The default configuration module for the bar.bar module</strong></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    
+    <span class="keyword">return</span> {
+      margin: {top: <span class="number">20</span>, right: <span class="number">20</span>, bottom: <span class="number">40</span>, left: <span class="number">40</span>},
+      width: <span class="number">500</span>,
+      height: <span class="number">400</span>,
+      padding: <span class="number">.1</span>,
+      duration: <span class="number">900</span>,
+      outerTickSize: <span class="number">0</span>,
+      barOffSet: <span class="number">4</span>,
+      max: <span class="keyword">void</span> <span class="number">0</span>, <span class="comment">// Max value for the linear scale.</span>
+      x_orient: <span class="string">'bottom'</span>,
+      y_orient: <span class="string">'left'</span>,
+      colour: <span class="string">'LightSteelBlue'</span>,
+      orient: <span class="string">'vertical'</span>,
+      invert_data: <span class="literal">false</span>,  <span class="comment">// Data sorting.</span>
+      handleClick: <span class="function"><span class="keyword">function</span> <span class="params">(d, i)</span> {</span> <span class="keyword">return</span> <span class="keyword">void</span> <span class="number">0</span>; },
+      handleTransitionEnd: <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> <span class="keyword">void</span> <span class="number">0</span>; },
+      xValue: <span class="function"><span class="keyword">function</span> <span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">0</span>]; },
+      yValue: <span class="function"><span class="keyword">function</span> <span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">1</span>]; }
+    };
+  
+});
+
+
+define(<span class="string">'bar/orientation'</span>,[<span class="string">"d3"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p><strong>The bar.orientation module</strong></p>
+<p>It handles the barchart orientation: vertical or horizontal.</p>
+<p>Sets the range and domain for the linear scale.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">inflateLinearScale</span> <span class="params">(params, range)</span> {</span>
+    <span class="keyword">var</span> max;
+    <span class="keyword">if</span> (params.__.max) {
+      max = params.__.max;
+    } <span class="keyword">else</span> {
+      max = d3.max( params.data, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span><span class="keyword">return</span> parseFloat(d[<span class="number">1</span>]); } );
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>.range(range).domain([<span class="number">0</span>, max]);
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Sets the range and domain for the ordinal scale.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">inflateOrdinalScale</span> <span class="params">(params, range)</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">this</span>
+      .rangeRoundBands(range, params.__.padding)
+      .domain(params.data.map(<span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">0</span>]; }));
+  }
+
+  <span class="keyword">var</span> vertical = {
+    xScale: d3.scale.ordinal,
+    yScale: d3.scale.linear,
+    inflateXScale: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span>
+      <span class="keyword">var</span> range = [<span class="number">0</span>, params.w()];
+      <span class="keyword">return</span> inflateOrdinalScale.call(<span class="keyword">this</span>, params, range);
+    },
+    inflateYScale: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Note the inverted range for the y-scale: bigger is up!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> range = [params.h(), <span class="number">0</span>];
+      <span class="keyword">return</span> inflateLinearScale.call(<span class="keyword">this</span>, params, range);
+    },
+    createBars: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span>
+      <span class="keyword">return</span> <span class="keyword">this</span>
+        .append(<span class="string">"rect"</span>)
+        .attr(<span class="string">"class"</span>, <span class="string">"bar"</span>)
+        .attr(<span class="string">"x"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> params.xScale(d[<span class="number">1</span>]); })
+        .attr(<span class="string">"width"</span>, params.xScale.rangeBand())
+        .attr(<span class="string">"y"</span>, params.h() + params.__.barOffSet)
+        .attr(<span class="string">"height"</span>, <span class="number">0</span>);
+    },
+    transitionXAxis: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span>
+      <span class="keyword">return</span> <span class="keyword">this</span>
+        .attr(<span class="string">"transform"</span>, <span class="string">"translate(0,"</span> + params.yScale.range()[<span class="number">0</span>] + <span class="string">")"</span>)
+        .call(params.xAxis);
+    },
+    transitionYAxis: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span>
+      <span class="keyword">return</span> <span class="keyword">this</span>.call(params.yAxis)
+        .selectAll(<span class="string">"g"</span>)
+        .delay(params.delay);
+    },
+    transitionBars: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span>
+      <span class="keyword">return</span> <span class="keyword">this</span>.delay(params.delay)
+        .attr(<span class="string">"x"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> params.xScale(d[<span class="number">0</span>]); })
+        .attr(<span class="string">"y"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> params.yScale(d[<span class="number">1</span>]); })
+        .attr(<span class="string">"height"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> params.h() - params.yScale(d[<span class="number">1</span>]); });
+    }
+  }
+
+  <span class="keyword">var</span> horizontal = {
+    xScale: d3.scale.linear,
+    yScale: d3.scale.ordinal,
+    inflateXScale: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span>
+      <span class="keyword">var</span> range = [<span class="number">0</span>, params.w()];
+      <span class="keyword">return</span> inflateLinearScale.call(<span class="keyword">this</span>, params, range);
+    },
+    inflateYScale: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Note the inverted range for the y-scale: bigger is up!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> range = [params.h(), <span class="number">0</span>];
+      <span class="keyword">return</span> inflateOrdinalScale.call(<span class="keyword">this</span>, params, range);
+    },
+    createBars: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span>
+      <span class="keyword">return</span> <span class="keyword">this</span>
+        .append(<span class="string">"rect"</span>)
+        .attr(<span class="string">"class"</span>, <span class="string">"bar"</span>)
+        .attr(<span class="string">"x"</span>, params.__.barOffSet)
+        .attr(<span class="string">"width"</span>, <span class="number">0</span>)
+        .attr(<span class="string">"y"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> params.yScale(d[<span class="number">0</span>]); })
+        .attr(<span class="string">"height"</span>, params.yScale.rangeBand());
+    },
+    transitionXAxis: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span>
+      <span class="keyword">return</span> <span class="keyword">this</span>.attr(<span class="string">"transform"</span>, <span class="string">"translate("</span> + params.__.barOffSet
+        + <span class="string">","</span> + params.h() + <span class="string">")"</span>).call(params.xAxis);
+    },
+    transitionYAxis: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span>
+      <span class="keyword">return</span> <span class="keyword">this</span>.call(params.yAxis)
+        .selectAll(<span class="string">"g"</span>)
+        .delay(params.delay);
+    },
+    transitionBars: <span class="function"><span class="keyword">function</span> <span class="params">(params)</span> {</span>
+      <span class="keyword">return</span> <span class="keyword">this</span>.delay(params.delay)
+        .attr(<span class="string">"y"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> params.yScale(d[<span class="number">0</span>]); })
+        .attr(<span class="string">"x"</span>, params.__.barOffSet)
+        .attr(<span class="string">"width"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> 
+          <span class="keyword">return</span> params.xScale(d[<span class="number">1</span>]) + params.__.barOffSet; 
+        });
+    }
+  }
+
+  <span class="keyword">return</span> {
+    vertical: vertical,
+    horizontal: horizontal
+  };
+
+});
+
+
+define(<span class="string">'bar/bar'</span>,[
+    <span class="string">"d3"</span>, 
+    <span class="string">"utils/utils"</span>,
+    <span class="string">"bar/config"</span>, 
+    <span class="string">"bar/orientation"</span>,
+  ], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils, __, orientation)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p><strong>The bar.bar module</strong></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  
+  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(user_config)</span> {</span>
+
+    <span class="keyword">var</span> config = user_config || {},
+      w, h, xScale, yScale, xAxis, yAxis;
+
+    utils.extend(__, config);
+
+    <span class="function"><span class="keyword">function</span> <span class="title">dataIdentifier</span> <span class="params">(d)</span> {</span>
+      <span class="keyword">return</span> d[<span class="number">0</span>];
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">bar</span> <span class="params">(selection)</span> {</span> 
+
+      w = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> __.width - __.margin.right - __.margin.left; };
+      h = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> __.height - __.margin.top - __.margin.bottom; };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Scales are functions that map from an input domain to an output range.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      xScale = orientation[__.orient].xScale();
+      yScale = orientation[__.orient].yScale();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">https://github.com/mbostock/d3/wiki/SVG-Axes</a></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      xAxis = d3.svg.axis()
+        .outerTickSize(__.outerTickSize).scale(xScale).orient(__.x_orient);
+      yAxis = d3.svg.axis()
+        .outerTickSize(__.outerTickSize).scale(yScale).orient(__.y_orient);
+
+      selection.each(<span class="function"><span class="keyword">function</span><span class="params">(dat)</span> {</span>
+
+        <span class="keyword">var</span> data, svg, gEnter, g, bars, transition, bars_t, bars_ex, params;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>data structure:
+0: name
+1: value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        data = dat.map(<span class="function"><span class="keyword">function</span><span class="params">(d, i)</span> {</span>
+          <span class="keyword">return</span> [__.xValue.call(dat, d), __.yValue.call(dat, d)];
+        });
+        <span class="keyword">if</span> (__.invert_data) {
+          data = data.reverse();
+        }
+
+        <span class="function"><span class="keyword">function</span> <span class="title">delay</span> <span class="params">(d, i)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Attention, delay can not be longer of transition time! Test!
+return i / data.length * __.duration;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">return</span> i * (data.length/<span class="number">2</span>);
+        }
+
+        params = {
+          data: data,
+          __: __,
+          h: h,
+          w: w,
+          yScale: yScale,
+          xScale: xScale,
+          xAxis: xAxis,
+          yAxis: yAxis,
+          delay: delay,
+        }
+
+        orientation[__.orient].inflateYScale.call(yScale, params);
+        orientation[__.orient].inflateXScale.call(xScale, params);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Select the svg element, if it exists.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        svg = d3.select(<span class="keyword">this</span>).selectAll(<span class="string">"svg"</span>).data([data]);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Otherwise, create the skeletal chart.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        gEnter = svg.enter().append(<span class="string">"svg"</span>).append(<span class="string">"g"</span>);
+        gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, <span class="string">"bars"</span>);
+        gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, <span class="string">"x axis"</span>);
+        gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, <span class="string">"y axis"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Update the outer dimensions.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        svg.attr(<span class="string">"width"</span>, __.width)
+          .attr(<span class="string">"height"</span>, __.height);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Update the inner dimensions.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        g = svg.select(<span class="string">"g"</span>)
+          .attr(<span class="string">"transform"</span>, <span class="string">"translate("</span> + 
+          __.margin.left + <span class="string">","</span> + __.margin.top + <span class="string">")"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Transitions root.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        transition = g.transition().duration(__.duration)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Update the y axis.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        orientation[__.orient]
+          .transitionYAxis
+          .call(transition.selectAll(<span class="string">'.y.axis'</span>), params);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Update the x axis.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        orientation[__.orient]
+          .transitionXAxis
+          .call(transition.select(<span class="string">".x.axis"</span>), params);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Select the bar elements, if they exists.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        bars = g.select(<span class="string">".bars"</span>).selectAll(<span class="string">".bar"</span>)
+          .data(data, dataIdentifier);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Exit phase (let us push out old bars before the new ones come in).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        bars.exit()
+          .transition().duration(__.duration).style(<span class="string">'opacity'</span>, <span class="number">0</span>).remove();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>Otherwise, create them.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        orientation[__.orient].createBars.call(bars.enter(), params)
+          .on(<span class="string">'click'</span>, __.handleClick);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>And transition them.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        orientation[__.orient].transitionBars
+          .call(transition.selectAll(<span class="string">'.bar'</span>), params)
+          .call(utils.endall, data, __.handleTransitionEnd);
+
+      });
+
+    }
+
+    utils.getset(bar, __);
+
+    <span class="keyword">return</span> bar;
+
+  }
+
+});
+
+
+define(<span class="string">'frame/states'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p><strong>frame.states module</strong></p>
+<p>Used by the <em>frame.state_machine</em> module.
+Name-spaced, might add other states if needed.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> transition_states = [
+    {
+      <span class="string">'name'</span>: <span class="string">'in_pause'</span>,
+      <span class="string">'initial'</span>: <span class="literal">true</span>,
+      <span class="string">'events'</span>: {
+        <span class="string">'start'</span>: <span class="string">'in_transition_start'</span>,
+        <span class="string">'next'</span>: <span class="string">'in_transition_next'</span>,
+        <span class="string">'prev'</span>: <span class="string">'in_transition_prev'</span>,
+        <span class="string">'reset'</span>: <span class="string">'in_transition_reset'</span>
+      }
+    },
+    {
+      <span class="string">'name'</span>: <span class="string">'in_transition_start'</span>,
+      <span class="string">'events'</span>: {
+        <span class="string">'stop'</span>: <span class="string">'in_pause'</span>
+      }
+    },
+    {
+      <span class="string">'name'</span>: <span class="string">'in_transition_next'</span>,
+      <span class="string">'events'</span>: {
+        <span class="string">'stop'</span>: <span class="string">'in_pause'</span>
+      }
+    },
+    {
+      <span class="string">'name'</span>: <span class="string">'in_transition_prev'</span>,
+      <span class="string">'events'</span>: {
+        <span class="string">'stop'</span>: <span class="string">'in_pause'</span>
+      }
+    },
+    {
+      <span class="string">'name'</span>: <span class="string">'in_transition_reset'</span>,
+      <span class="string">'events'</span>: {
+        <span class="string">'stop'</span>: <span class="string">'in_pause'</span>
+      }
+    }
+  ];
+
+  <span class="keyword">return</span> { transition_states: transition_states};
+
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>From <a href="http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/">http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/</a></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'frame/state_machine'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p><strong>frame.state_machine module</strong></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">StateMachine</span> <span class="params">(states)</span> {</span>
+    <span class="keyword">this</span>.states = states;
+    <span class="keyword">this</span>.indexes = {};
+    <span class="keyword">for</span>( <span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>.states.length; i++) {
+      <span class="keyword">this</span>.indexes[<span class="keyword">this</span>.states[i].name] = i;
+      <span class="keyword">if</span> (<span class="keyword">this</span>.states[i].initial){
+        <span class="keyword">this</span>.currentState = <span class="keyword">this</span>.states[i];
+      }
+    }
+  }
+
+  StateMachine.prototype.consumeEvent = <span class="function"><span class="keyword">function</span> <span class="params">(e)</span> {</span>
+    <span class="keyword">if</span>(<span class="keyword">this</span>.currentState.events[e]){
+      <span class="keyword">this</span>.currentState = <span class="keyword">this</span>.states[<span class="keyword">this</span>.indexes[<span class="keyword">this</span>.currentState.events[e]]];
+    }
+  }
+
+  StateMachine.prototype.getStatus = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">this</span>.currentState.name;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>getLastEvent();</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">return</span> StateMachine;
+
+});
+
+
+define(<span class="string">'frame/frame'</span>,[
+  <span class="string">'d3'</span>,
+  <span class="string">'utils/utils'</span>,
+  <span class="string">'frame/states'</span>,
+  <span class="string">'frame/state_machine'</span>
+], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils, states, StateMachine)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p><strong>frame.frame module</strong></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> Frame = <span class="function"><span class="keyword">function</span> <span class="params">(conf)</span> {</span>
+    <span class="keyword">var</span> self = <span class="keyword">this</span>;
+    
+    <span class="keyword">this</span>.initial_frame = <span class="keyword">this</span>.frame = conf.frame;
+    <span class="keyword">this</span>.old_frame = <span class="keyword">void</span> <span class="number">0</span>;
+    <span class="keyword">this</span>.current_timeout = <span class="keyword">void</span> <span class="number">0</span>;
+    <span class="keyword">this</span>.selection = conf.selection;
+    <span class="keyword">this</span>.chart = conf.chart;
+    <span class="keyword">this</span>.drawChart = conf.drawChart;
+    <span class="keyword">this</span>.delta = conf.delta;
+    <span class="keyword">this</span>.step = conf.step;
+    <span class="keyword">this</span>.data = conf.data;
+
+    <span class="keyword">this</span>.state_machine = <span class="keyword">new</span> StateMachine(states.transition_states);
+    <span class="keyword">this</span>.dispatch = d3.dispatch(
+      <span class="string">'start'</span>, 
+      <span class="string">'stop'</span>, 
+      <span class="string">'next'</span>, 
+      <span class="string">'prev'</span>, 
+      <span class="string">'reset'</span>, 
+      <span class="string">'end'</span>, 
+      <span class="string">'at_beginning_of_transition'</span>
+    );
+    
+    <span class="keyword">this</span>.chart.handleTransitionEnd( <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+      self.dispatch.end.call(self);
+      <span class="keyword">return</span> self;
+    });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>Initial frame. The chart is rendered for the first time.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.drawChart(<span class="keyword">this</span>.data[<span class="keyword">this</span>.frame]);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>Fired when all the chart related transitions within a frame are 
+terminated.
+It is the only dispatch event that does not have a state_machine 
+equivalent event.
+<code>frame</code> is an arbitrary namespace, in order to register multiple 
+listeners for the same event type.</p>
+<p><a href="https://github.com/mbostock/d3/wiki/Internals#events">https://github.com/mbostock/d3/wiki/Internals#events</a>:
+If an event listener was already registered for the same type, the 
+existing listener is removed before the new listener is added. To 
+register multiple listeners for the same event type, the type may be 
+followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.bar&#39;.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.dispatch.on(<span class="string">'end.frame'</span>, self.handleFrameEnd);
+
+    <span class="keyword">this</span>.dispatch.on(<span class="string">'stop'</span>, self.handleStop);
+
+    <span class="keyword">this</span>.dispatch.on(<span class="string">'start'</span>, self.handleStart);
+
+    <span class="keyword">this</span>.dispatch.on(<span class="string">'next'</span>, self.handleNext);
+
+    <span class="keyword">this</span>.dispatch.on(<span class="string">'prev'</span>, self.handlePrev);
+
+    <span class="keyword">this</span>.dispatch.on(<span class="string">'reset'</span>, self.handleReset);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>TODO
+this.dispatch.on(&#39;jump_to&#39;, self.handleJumpTo);</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  }
+
+
+  Frame.prototype.startTransition = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">var</span> self = <span class="keyword">this</span>;
+    clearTimeout(<span class="keyword">this</span>.current_timeout);
+    <span class="keyword">if</span> (<span class="keyword">this</span>.data[<span class="keyword">this</span>.frame]) {
+      <span class="keyword">this</span>.current_timeout = setTimeout( <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>Re-render the chart</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        self.drawChart(self.data[self.frame]);
+      }, self.step);
+    } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>When no data is left to consume, let us stop the running frames!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'stop'</span>);
+      <span class="keyword">this</span>.frame = <span class="keyword">this</span>.old_frame;
+    }
+    self.dispatch.at_beginning_of_transition.call(self);
+  }
+
+  Frame.prototype.handleFrameEnd = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">this</span>.handleTransition();
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }
+
+  Frame.prototype.handleStop = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'stop'</span>);
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>TODO: there is a lot of repetition here!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Frame.prototype.handleStart = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">if</span> (<span class="keyword">this</span>.state_machine.getStatus() === <span class="string">'in_pause'</span>) {
+      <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'start'</span>);
+      <span class="keyword">this</span>.handleTransition();
+    } <span class="keyword">else</span> {
+      console.log(<span class="string">'State already in in_transition_start.'</span>);
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>TODO:
+for next and prev we are allowing multiple prev-next events to be 
+fired without waiting for the current frame to end. Change?</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Frame.prototype.handleNext = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'next'</span>);
+    <span class="keyword">if</span> (<span class="keyword">this</span>.state_machine.getStatus() === <span class="string">'in_transition_next'</span>) {
+      <span class="keyword">this</span>.handleTransition();
+    } <span class="keyword">else</span> {
+      console.log(<span class="string">'State not in pause when next event was fired.'</span>);
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }
+
+  Frame.prototype.handlePrev = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'prev'</span>);
+    <span class="keyword">if</span> (<span class="keyword">this</span>.state_machine.getStatus() === <span class="string">'in_transition_prev'</span>) {
+      <span class="keyword">this</span>.handleTransition();
+    } <span class="keyword">else</span> {
+      console.log(<span class="string">'State not in pause when prev event was fired.'</span>);
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }
+
+  Frame.prototype.handleReset = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'reset'</span>);
+    <span class="keyword">if</span> (<span class="keyword">this</span>.state_machine.getStatus() === <span class="string">'in_transition_reset'</span>) {
+      <span class="keyword">this</span>.handleTransition();
+    } <span class="keyword">else</span> {
+      console.log(<span class="string">'State not in pause when reset event was fired.'</span>);
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }
+
+  
+  Frame.prototype.handleTransition = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">var</span> self = <span class="keyword">this</span>, status = <span class="keyword">this</span>.state_machine.getStatus();
+    <span class="keyword">if</span> (status === <span class="string">'in_transition_start'</span>) {
+      <span class="keyword">this</span>.old_frame = <span class="keyword">this</span>.frame;
+      <span class="keyword">this</span>.frame += <span class="keyword">this</span>.delta;
+      <span class="keyword">this</span>.startTransition();
+    } <span class="keyword">else</span> <span class="keyword">if</span> (status === <span class="string">'in_transition_prev'</span>) {
+      <span class="keyword">this</span>.old_frame = <span class="keyword">this</span>.frame;
+      <span class="keyword">this</span>.frame -= <span class="keyword">this</span>.delta;
+      <span class="keyword">this</span>.startTransition();
+      self.state_machine.consumeEvent(<span class="string">'stop'</span>);
+    } <span class="keyword">else</span> <span class="keyword">if</span> (status === <span class="string">'in_transition_next'</span>) {
+      <span class="keyword">this</span>.old_frame = <span class="keyword">this</span>.frame;
+      <span class="keyword">this</span>.frame += <span class="keyword">this</span>.delta;
+      <span class="keyword">this</span>.startTransition();
+      self.state_machine.consumeEvent(<span class="string">'stop'</span>);
+    } <span class="keyword">else</span> <span class="keyword">if</span> (status === <span class="string">'in_transition_reset'</span>) {
+      <span class="keyword">this</span>.old_frame = <span class="keyword">this</span>.frame;
+      <span class="keyword">this</span>.frame = <span class="keyword">this</span>.initial_frame;
+      <span class="keyword">this</span>.startTransition();
+      self.state_machine.consumeEvent(<span class="string">'stop'</span>);
+    } <span class="keyword">else</span> <span class="keyword">if</span> (status === <span class="string">'in_pause'</span>) {
+      <span class="keyword">return</span>;
+    } 
+  }
+
+  <span class="keyword">return</span> Frame;
+  
+});
+
+
+define(<span class="string">'chart'</span>,[
+  <span class="string">"draw"</span>,
+  <span class="string">"utils/utils"</span>,
+  <span class="string">"bar/config"</span>, 
+  <span class="string">"bar/bar"</span>,
+  <span class="string">"bar/orientation"</span>,
+  <span class="string">"frame/states"</span>,
+  <span class="string">"frame/state_machine"</span>,
+  <span class="string">"frame/frame"</span>
+], <span class="function"><span class="keyword">function</span><span class="params">(draw, utils, __, bar, orientation, states, StateMachine, Frame)</span> {</span>
+
+  <span class="keyword">return</span> {
+    utils: utils, 
+    bar:bar,
+    __: __, 
+    orientation: orientation,
+    Frame: Frame,
+    states: states, 
+    StateMachine: StateMachine,
+    draw: draw,
+  };
+
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
