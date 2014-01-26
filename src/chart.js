@@ -1,13 +1,14 @@
 define([
+  "draw",
   "utils/utils",
-  "bar/bar",
   "bar/config", 
+  "bar/bar",
   "bar/orientation",
-  "frame/frame",
   "frame/states",
   "frame/state_machine",
-  "draw"
-], function(utils, bar, __, orientation, Frame, states, StateMachine, draw) {
+  "frame/frame"
+], function(draw, utils, __, bar, orientation, states, StateMachine, Frame) {
+
   return {
     utils: utils, 
     bar:bar,
@@ -18,4 +19,6 @@ define([
     StateMachine: StateMachine,
     draw: draw,
   };
+
 });
+

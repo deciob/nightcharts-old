@@ -2,6 +2,8 @@
 
 define(function(require) {
 
+  // **frame.state_machine module**
+
   function StateMachine (states) {
     this.states = states;
     this.indexes = {};
@@ -28,3 +30,4 @@ define(function(require) {
   return StateMachine;
 
 });
+

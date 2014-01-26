@@ -5,13 +5,14 @@ define([
   'frame/state_machine'
 ], function(d3, utils, states, StateMachine) {
 
+  // **frame.frame module**
+
   var Frame = function (conf) {
     var self = this;
     
     this.initial_frame = this.frame = conf.frame;
     this.old_frame = void 0;
     this.current_timeout = void 0;
-    this.selection = conf.selection;
     this.chart = conf.chart;
     this.drawChart = conf.drawChart;
     this.delta = conf.delta;
@@ -167,3 +168,4 @@ define([
   return Frame;
   
 });
+

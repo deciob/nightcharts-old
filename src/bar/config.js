@@ -1,7 +1,7 @@
 define(function(require) {
   
-    // The default configuration for barcharts.
-    // It is in a separate module, because it is also used in the unit tests.
+    // **The default configuration module for the bar.bar module**
+    
     return {
       margin: {top: 20, right: 20, bottom: 40, left: 40},
       width: 500,
@@ -23,3 +23,4 @@ define(function(require) {
     };
   
 });
+

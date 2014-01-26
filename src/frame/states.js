@@ -1,6 +1,9 @@
 define(function(require) {
 
-  // Namespaced, might add other states if needed.
+  // **frame.states module**
+
+  // Used by the *frame.state_machine* module.
+  // Name-spaced, might add other states if needed.
 
   var transition_states = [
     {
@@ -42,3 +45,4 @@ define(function(require) {
   return { transition_states: transition_states};
 
 });
+

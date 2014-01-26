@@ -1,5 +1,8 @@
 define(["d3"], function(d3) {
-  // Handling the barchart orientation.
+
+  // **The bar.orientation module**
+
+  // It handles the barchart orientation: vertical or horizontal.
 
   // Sets the range and domain for the linear scale.
   function inflateLinearScale (params, range) {
@@ -104,3 +107,4 @@ define(["d3"], function(d3) {
   };
 
 });
+

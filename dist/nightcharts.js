@@ -1,63 +1,67 @@
 
-(function(define) {
-  return define('utils/utils',["d3"], function(d3) {
-
-    // Useful functions that can be shared across modules.
-    
-    function extend (target, source) {
-      for(prop in source) {
-        target[prop] = source[prop];
-      }
-      return target;
-    }
+define('draw',['require'],function(require) {
   
-    // Todo: some docs on this function.
-    function getset (obj, state) {
-      d3.keys(state).forEach( function(key) {
-        obj[key] = function (x) {
-          if (!arguments.length) return state[key];
-          var old = state[key];
-          state[key] = x;
-          return obj;
+
+  return function (chart, selection) {
+    return function (data) {
+      selection.datum(data).call(chart);
+    }
+  }
+
+});
+
+
+define('utils/utils',["d3"], function(d3) {
+
+  // **Useful functions that can be shared across modules**
+  
+  function extend (target, source) {
+    for(prop in source) {
+      target[prop] = source[prop];
+    }
+    return target;
+  }
+
+  // Todo: some docs on this function.
+  function getset (obj, state) {
+    d3.keys(state).forEach( function(key) {
+      obj[key] = function (x) {
+        if (!arguments.length) return state[key];
+        var old = state[key];
+        state[key] = x;
+        return obj;
+      }
+    });
+  }
+
+  // Fires a callback when all transitions of a chart have ended.
+  // The solution is inspired from a reply in 
+  // [Single event at end of transition?](https://groups.google.com/forum/#!msg/d3-js/WC_7Xi6VV50/j1HK0vIWI-EJ). 
+  // The original suggestion assumes the data length never changes, this 
+  // instead also accounts for exits during the transition.
+  function endall (elements_in_transition, data, callback) {
+    var n = data.length;
+    elements_in_transition 
+      .each("end", function() { 
+        if (!--n) {
+          callback.apply(this, arguments);
         }
       });
-    }
-  
-    // https://groups.google.com/forum/#!msg/d3-js/WC_7Xi6VV50/j1HK0vIWI-EJ
-    function endall (elements_in_transition, data, callback) {
-      // Assumes the data length never changes.
-      // Incrementing n (++n) for each transition element does not work if we
-      // have exits in the transition, because of a length mismatch between now
-      // and the end of the transitions.
-      var n = data.length;
-      elements_in_transition 
-        //.each(function() { ++n; }) 
-        .each("end", function() { 
-          if (!--n) {
-            callback.apply(this, arguments);
-          }
-        });
-    }
-  
-    return {
-      extend: extend,
-      getset: getset,
-      endall: endall
-    };
-  
-  });
+  }
 
-})(typeof define === "function" && define.amd ? define : function(ids, factory) {
-  var deps;
-  deps = ids.map(function(id) {
-    return require(id);
-  });
-  return module.exports = factory.apply(null, deps);
+  return {
+    extend: extend,
+    getset: getset,
+    endall: endall
+  };
+
 });
+
+
 define('bar/config',['require'],function(require) {
   
-    // The default configuration for barcharts.
-    // It is in a separate module, because it is also used in the unit tests.
+    // **The default configuration module for the bar.bar module**
+    
     return {
       margin: {top: 20, right: 20, bottom: 40, left: 40},
       width: 500,
@@ -79,8 +83,13 @@ define('bar/config',['require'],function(require) {
     };
   
 });
+
+
 define('bar/orientation',["d3"], function(d3) {
-  // Handling the barchart orientation.
+
+  // **The bar.orientation module**
+
+  // It handles the barchart orientation: vertical or horizontal.
 
   // Sets the range and domain for the linear scale.
   function inflateLinearScale (params, range) {
@@ -186,144 +195,143 @@ define('bar/orientation',["d3"], function(d3) {
 
 });
 
-(function(define) {
-  return define('bar/bar',[
+
+define('bar/bar',[
     "d3", 
     "utils/utils",
     "bar/config", 
     "bar/orientation",
   ], function(d3, utils, __, orientation) {
 
-    return function (user_config) {
+  // **The bar.bar module**
+  
+  return function (user_config) {
 
-      var config = user_config || {},
-        w, h, xScale, yScale, xAxis, yAxis;
+    var config = user_config || {},
+      w, h, xScale, yScale, xAxis, yAxis;
+
+    utils.extend(__, config);
+
+    function dataIdentifier (d) {
+      return d[0];
+    }
+
+    function bar (selection) { 
+
+      w = function () { return __.width - __.margin.right - __.margin.left; };
+      h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
-      utils.extend(__, config);
+      // Scales are functions that map from an input domain to an output range.
+      xScale = orientation[__.orient].xScale();
+      yScale = orientation[__.orient].yScale();
   
-      function dataIdentifier (d) {
-        return d[0];
-      }
-  
-      function bar (selection) { 
-  
-        w = function () { return __.width - __.margin.right - __.margin.left; };
-        h = function () { return __.height - __.margin.top - __.margin.bottom; };
-    
-        // Scales are functions that map from an input domain to an output range.
-        xScale = orientation[__.orient].xScale();
-        yScale = orientation[__.orient].yScale();
-    
-        // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
-        xAxis = d3.svg.axis()
-          .outerTickSize(__.outerTickSize).scale(xScale).orient(__.x_orient);
-        yAxis = d3.svg.axis()
-          .outerTickSize(__.outerTickSize).scale(yScale).orient(__.y_orient);
-  
-        selection.each(function(dat) {
-  
-          var data, svg, gEnter, g, bars, transition, bars_t, bars_ex, params;
-  
-          // data structure:
-          // 0: name
-          // 1: value
-          data = dat.map(function(d, i) {
-            return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
-          });
-          if (__.invert_data) {
-            data = data.reverse();
-          }
-  
-          function delay (d, i) {
-            // Attention, delay can not be longer of transition time! Test!
-            //return i / data.length * __.duration;
-            return i * (data.length/2);
-          }
-  
-          params = {
-            data: data,
-            __: __,
-            h: h,
-            w: w,
-            yScale: yScale,
-            xScale: xScale,
-            xAxis: xAxis,
-            yAxis: yAxis,
-            delay: delay,
-          }
-  
-          orientation[__.orient].inflateYScale.call(yScale, params);
-          orientation[__.orient].inflateXScale.call(xScale, params);
-  
-          // Select the svg element, if it exists.
-          svg = d3.select(this).selectAll("svg").data([data]);
-  
-          // Otherwise, create the skeletal chart.
-          gEnter = svg.enter().append("svg").append("g");
-          gEnter.append("g").attr("class", "bars");
-          gEnter.append("g").attr("class", "x axis");
-          gEnter.append("g").attr("class", "y axis");
-  
-          // Update the outer dimensions.
-          svg.attr("width", __.width)
-            .attr("height", __.height);
-  
-          // Update the inner dimensions.
-          g = svg.select("g")
-            .attr("transform", "translate(" + 
-            __.margin.left + "," + __.margin.top + ")");
-  
-          // Transitions root.
-          transition = g.transition().duration(__.duration)
-          
-          // Update the y axis.
-          orientation[__.orient]
-            .transitionYAxis
-            .call(transition.selectAll('.y.axis'), params);
-  
-          // Update the x axis.
-          orientation[__.orient]
-            .transitionXAxis
-            .call(transition.select(".x.axis"), params);
-  
-          // Select the bar elements, if they exists.
-          bars = g.select(".bars").selectAll(".bar")
-            .data(data, dataIdentifier);
-  
-          // Exit phase (let us push out old bars before the new ones come in).
-          bars.exit()
-            .transition().duration(__.duration).style('opacity', 0).remove();
-  
-          // Otherwise, create them.
-          orientation[__.orient].createBars.call(bars.enter(), params)
-            .on('click', __.handleClick);
-          // And transition them.
-          orientation[__.orient].transitionBars
-            .call(transition.selectAll('.bar'), params)
-            .call(utils.endall, data, __.handleTransitionEnd);
-  
+      // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
+      xAxis = d3.svg.axis()
+        .outerTickSize(__.outerTickSize).scale(xScale).orient(__.x_orient);
+      yAxis = d3.svg.axis()
+        .outerTickSize(__.outerTickSize).scale(yScale).orient(__.y_orient);
+
+      selection.each(function(dat) {
+
+        var data, svg, gEnter, g, bars, transition, bars_t, bars_ex, params;
+
+        // data structure:
+        // 0: name
+        // 1: value
+        data = dat.map(function(d, i) {
+          return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
         });
-  
-      }
-  
-      utils.getset(bar, __);
-  
-      return bar;
+        if (__.invert_data) {
+          data = data.reverse();
+        }
+
+        function delay (d, i) {
+          // Attention, delay can not be longer of transition time! Test!
+          //return i / data.length * __.duration;
+          return i * (data.length/2);
+        }
+
+        params = {
+          data: data,
+          __: __,
+          h: h,
+          w: w,
+          yScale: yScale,
+          xScale: xScale,
+          xAxis: xAxis,
+          yAxis: yAxis,
+          delay: delay,
+        }
+
+        orientation[__.orient].inflateYScale.call(yScale, params);
+        orientation[__.orient].inflateXScale.call(xScale, params);
+
+        // Select the svg element, if it exists.
+        svg = d3.select(this).selectAll("svg").data([data]);
+
+        // Otherwise, create the skeletal chart.
+        gEnter = svg.enter().append("svg").append("g");
+        gEnter.append("g").attr("class", "bars");
+        gEnter.append("g").attr("class", "x axis");
+        gEnter.append("g").attr("class", "y axis");
+
+        // Update the outer dimensions.
+        svg.attr("width", __.width)
+          .attr("height", __.height);
+
+        // Update the inner dimensions.
+        g = svg.select("g")
+          .attr("transform", "translate(" + 
+          __.margin.left + "," + __.margin.top + ")");
+
+        // Transitions root.
+        transition = g.transition().duration(__.duration)
+        
+        // Update the y axis.
+        orientation[__.orient]
+          .transitionYAxis
+          .call(transition.selectAll('.y.axis'), params);
+
+        // Update the x axis.
+        orientation[__.orient]
+          .transitionXAxis
+          .call(transition.select(".x.axis"), params);
+
+        // Select the bar elements, if they exists.
+        bars = g.select(".bars").selectAll(".bar")
+          .data(data, dataIdentifier);
+
+        // Exit phase (let us push out old bars before the new ones come in).
+        bars.exit()
+          .transition().duration(__.duration).style('opacity', 0).remove();
+
+        // Otherwise, create them.
+        orientation[__.orient].createBars.call(bars.enter(), params)
+          .on('click', __.handleClick);
+        // And transition them.
+        orientation[__.orient].transitionBars
+          .call(transition.selectAll('.bar'), params)
+          .call(utils.endall, data, __.handleTransitionEnd);
+
+      });
 
     }
 
-  });
+    utils.getset(bar, __);
 
-})(typeof define === "function" && define.amd ? define : function(ids, factory) {
-  var deps;
-  deps = ids.map(function(id) {
-    return require(id);
-  });
-  return module.exports = factory.apply(null, deps);
+    return bar;
+
+  }
+
 });
+
+
 define('frame/states',['require'],function(require) {
 
-  // Namespaced, might add other states if needed.
+  // **frame.states module**
+
+  // Used by the *frame.state_machine* module.
+  // Name-spaced, might add other states if needed.
 
   var transition_states = [
     {
@@ -365,9 +373,13 @@ define('frame/states',['require'],function(require) {
   return { transition_states: transition_states};
 
 });
+
+
 // From http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/
 
 define('frame/state_machine',['require'],function(require) {
+
+  // **frame.state_machine module**
 
   function StateMachine (states) {
     this.states = states;
@@ -396,12 +408,15 @@ define('frame/state_machine',['require'],function(require) {
 
 });
 
+
 define('frame/frame',[
   'd3',
   'utils/utils',
   'frame/states',
   'frame/state_machine'
 ], function(d3, utils, states, StateMachine) {
+
+  // **frame.frame module**
 
   var Frame = function (conf) {
     var self = this;
@@ -565,26 +580,19 @@ define('frame/frame',[
   return Frame;
   
 });
-define('draw',['require'],function(require) {
-  
 
-  return function (chart, selection) {
-    return function (data) {
-      selection.datum(data).call(chart);
-    }
-  }
 
-});
 define('chart',[
+  "draw",
   "utils/utils",
-  "bar/bar",
   "bar/config", 
+  "bar/bar",
   "bar/orientation",
-  "frame/frame",
   "frame/states",
   "frame/state_machine",
-  "draw"
-], function(utils, bar, __, orientation, Frame, states, StateMachine, draw) {
+  "frame/frame"
+], function(draw, utils, __, bar, orientation, states, StateMachine, Frame) {
+
   return {
     utils: utils, 
     bar:bar,
@@ -595,4 +603,6 @@ define('chart',[
     StateMachine: StateMachine,
     draw: draw,
   };
+
 });
+
