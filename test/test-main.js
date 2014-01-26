@@ -13,7 +13,8 @@ requirejs.config({
 
     paths: {
         'chai': '../lib/chai/chai',
-        'd3': '../lib/d3/d3'
+        'd3': '../lib/d3/d3',
+        'data': '../test/data'
     },
 
     shim: {
