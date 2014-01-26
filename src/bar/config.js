@@ -9,15 +9,14 @@
       height: 400,
       padding: .1,
       duration: 900,
-      step: 600,
       outerTickSize: 0,
       barOffSet: 4,
-      max: void 0,
+      max: void 0, // Max value for the linear scale.
       x_orient: 'bottom',
       y_orient: 'left',
       colour: 'LightSteelBlue',
       orient: 'vertical',
-      invert_data: false,
+      invert_data: false,  // Data sorting.
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
       xValue: function (d) { return d[0]; },

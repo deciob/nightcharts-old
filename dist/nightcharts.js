@@ -65,15 +65,14 @@
       height: 400,
       padding: .1,
       duration: 900,
-      step: 600,
       outerTickSize: 0,
       barOffSet: 4,
-      max: void 0,
+      max: void 0, // Max value for the linear scale.
       x_orient: 'bottom',
       y_orient: 'left',
       colour: 'LightSteelBlue',
       orient: 'vertical',
-      invert_data: false,
+      invert_data: false,  // Data sorting.
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
       xValue: function (d) { return d[0]; },
@@ -450,7 +449,9 @@
       this.current_timeout = void 0;
       this.selection = conf.selection;
       this.chart = conf.chart;
+      this.drawChart = conf.drawChart;
       this.delta = conf.delta;
+      this.step = conf.step;
       this.data = conf.data;
 
       this.state_machine = new StateMachine(states.transition_states);
@@ -469,7 +470,8 @@
         return self;
       });
       // Initial frame. The chart is rendered for the first time.
-      this.selection.datum(this.data[this.frame]).call(this.chart);
+      //this.selection.datum(this.data[this.frame]).call(this.chart);
+      this.drawChart(this.data[this.frame]);
 
       // Fired when all the chart related transitions within a frame are 
       // terminated.
@@ -501,13 +503,13 @@
 
 
     Frame.prototype.startTransition = function () {
-      var self = this,
-        step = this.chart.step();
+      var self = this;
       clearTimeout(this.current_timeout);
       if (this.data[this.frame]) {
         this.current_timeout = setTimeout( function () {
           // Re-render the chart
-          self.selection.datum(self.data[self.frame]).call(self.chart);
+          //self.selection.datum(self.data[self.frame]).call(self.chart);
+          self.drawChart(self.data[self.frame]);
         }, self.step);
       } else {
         // When no data is left to consume, let us stop the running frames!
@@ -611,16 +613,27 @@
   });
   return module.exports = factory.apply(null, deps);
 });
+define('draw',[], function() {
+  
+
+  return function (chart, selection) {
+    return function (d) {
+      selection.datum(d).call(chart);
+    }
+  }
+
+});
 (function(define) {
   return define('chart',[
-    "utils/utils", 
+    "utils/utils",
     "bar/bar",
     "bar/config", 
     "bar/orientation",
     "frame/frame",
     "frame/states",
-    "frame/state_machine"
-  ], function(utils, bar, __, orientation, Frame, states, StateMachine) {
+    "frame/state_machine",
+    "draw"
+  ], function(utils, bar, __, orientation, Frame, states, StateMachine, draw) {
     return {
       utils: utils, 
       bar:bar,
@@ -628,7 +641,8 @@
       orientation: orientation,
       Frame: Frame,
       states: states, 
-      StateMachine: StateMachine
+      StateMachine: StateMachine,
+      draw: draw,
     };
   });
 

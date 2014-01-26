@@ -14,7 +14,9 @@
       this.current_timeout = void 0;
       this.selection = conf.selection;
       this.chart = conf.chart;
+      this.drawChart = conf.drawChart;
       this.delta = conf.delta;
+      this.step = conf.step;
       this.data = conf.data;
 
       this.state_machine = new StateMachine(states.transition_states);
@@ -33,7 +35,7 @@
         return self;
       });
       // Initial frame. The chart is rendered for the first time.
-      this.selection.datum(this.data[this.frame]).call(this.chart);
+      this.drawChart(this.data[this.frame]);
 
       // Fired when all the chart related transitions within a frame are 
       // terminated.
@@ -65,13 +67,12 @@
 
 
     Frame.prototype.startTransition = function () {
-      var self = this,
-        step = this.chart.step();
+      var self = this;
       clearTimeout(this.current_timeout);
       if (this.data[this.frame]) {
         this.current_timeout = setTimeout( function () {
           // Re-render the chart
-          self.selection.datum(self.data[self.frame]).call(self.chart);
+          self.drawChart(self.data[self.frame]);
         }, self.step);
       } else {
         // When no data is left to consume, let us stop the running frames!
