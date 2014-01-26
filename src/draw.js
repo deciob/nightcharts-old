@@ -1,4 +1,4 @@
-define([], function() {
+define(function(require) {
   'use strict';
 
   return function (chart, selection) {

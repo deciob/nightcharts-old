@@ -54,9 +54,8 @@
   });
   return module.exports = factory.apply(null, deps);
 });
-(function(define) {
-  return define('bar/config',['require'],function(require) {
-
+define('bar/config',['require'],function(require) {
+  
     // The default configuration for barcharts.
     // It is in a separate module, because it is also used in the unit tests.
     return {
@@ -78,127 +77,115 @@
       xValue: function (d) { return d[0]; },
       yValue: function (d) { return d[1]; }
     };
-
-  });
-})(typeof define === "function" && define.amd ? define : function(factory) {
-  return module.exports = factory(require);
-});
-(function(define) {
-  return define('bar/orientation',["d3"], function(d3) {
-
-    // Handling the barchart orientation.
-
-    // Sets the range and domain for the linear scale.
-    function inflateLinearScale (params, range) {
-      var max;
-      if (params.__.max) {
-        max = params.__.max;
-      } else {
-        max = d3.max( params.data, function(d) {return parseFloat(d[1]); } );
-      }
-      return this.range(range).domain([0, max]);
-    }
   
-    // Sets the range and domain for the ordinal scale.
-    function inflateOrdinalScale (params, range) {
+});
+define('bar/orientation',["d3"], function(d3) {
+  // Handling the barchart orientation.
+
+  // Sets the range and domain for the linear scale.
+  function inflateLinearScale (params, range) {
+    var max;
+    if (params.__.max) {
+      max = params.__.max;
+    } else {
+      max = d3.max( params.data, function(d) {return parseFloat(d[1]); } );
+    }
+    return this.range(range).domain([0, max]);
+  }
+
+  // Sets the range and domain for the ordinal scale.
+  function inflateOrdinalScale (params, range) {
+    return this
+      .rangeRoundBands(range, params.__.padding)
+      .domain(params.data.map(function(d) { return d[0]; }));
+  }
+
+  var vertical = {
+    xScale: d3.scale.ordinal,
+    yScale: d3.scale.linear,
+    inflateXScale: function (params) {
+      var range = [0, params.w()];
+      return inflateOrdinalScale.call(this, params, range);
+    },
+    inflateYScale: function (params) {
+      // Note the inverted range for the y-scale: bigger is up!
+      var range = [params.h(), 0];
+      return inflateLinearScale.call(this, params, range);
+    },
+    createBars: function (params) {
       return this
-        .rangeRoundBands(range, params.__.padding)
-        .domain(params.data.map(function(d) { return d[0]; }));
+        .append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return params.xScale(d[1]); })
+        .attr("width", params.xScale.rangeBand())
+        .attr("y", params.h() + params.__.barOffSet)
+        .attr("height", 0);
+    },
+    transitionXAxis: function (params) {
+      return this
+        .attr("transform", "translate(0," + params.yScale.range()[0] + ")")
+        .call(params.xAxis);
+    },
+    transitionYAxis: function (params) {
+      return this.call(params.yAxis)
+        .selectAll("g")
+        .delay(params.delay);
+    },
+    transitionBars: function (params) {
+      return this.delay(params.delay)
+        .attr("x", function(d) { return params.xScale(d[0]); })
+        .attr("y", function(d) { return params.yScale(d[1]); })
+        .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
     }
-  
-    var vertical = {
-      xScale: d3.scale.ordinal,
-      yScale: d3.scale.linear,
-      inflateXScale: function (params) {
-        var range = [0, params.w()];
-        return inflateOrdinalScale.call(this, params, range);
-      },
-      inflateYScale: function (params) {
-        // Note the inverted range for the y-scale: bigger is up!
-        var range = [params.h(), 0];
-        return inflateLinearScale.call(this, params, range);
-      },
-      createBars: function (params) {
-        return this
-          .append("rect")
-          .attr("class", "bar")
-          .attr("x", function(d) { return params.xScale(d[1]); })
-          .attr("width", params.xScale.rangeBand())
-          .attr("y", params.h() + params.__.barOffSet)
-          .attr("height", 0);
-      },
-      transitionXAxis: function (params) {
-        return this
-          .attr("transform", "translate(0," + params.yScale.range()[0] + ")")
-          .call(params.xAxis);
-      },
-      transitionYAxis: function (params) {
-        return this.call(params.yAxis)
-          .selectAll("g")
-          .delay(params.delay);
-      },
-      transitionBars: function (params) {
-        return this.delay(params.delay)
-          .attr("x", function(d) { return params.xScale(d[0]); })
-          .attr("y", function(d) { return params.yScale(d[1]); })
-          .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
-      }
-    }
-  
-    var horizontal = {
-      xScale: d3.scale.linear,
-      yScale: d3.scale.ordinal,
-      inflateXScale: function (params) {
-        var range = [0, params.w()];
-        return inflateLinearScale.call(this, params, range);
-      },
-      inflateYScale: function (params) {
-        // Note the inverted range for the y-scale: bigger is up!
-        var range = [params.h(), 0];
-        return inflateOrdinalScale.call(this, params, range);
-      },
-      createBars: function (params) {
-        return this
-          .append("rect")
-          .attr("class", "bar")
-          .attr("x", params.__.barOffSet)
-          .attr("width", 0)
-          .attr("y", function(d) { return params.yScale(d[0]); })
-          .attr("height", params.yScale.rangeBand());
-      },
-      transitionXAxis: function (params) {
-        return this.attr("transform", "translate(" + params.__.barOffSet
-          + "," + params.h() + ")").call(params.xAxis);
-      },
-      transitionYAxis: function (params) {
-        return this.call(params.yAxis)
-          .selectAll("g")
-          .delay(params.delay);
-      },
-      transitionBars: function (params) {
-        return this.delay(params.delay)
-          .attr("y", function(d) { return params.yScale(d[0]); })
-          .attr("x", params.__.barOffSet)
-          .attr("width", function(d) { 
-            return params.xScale(d[1]) + params.__.barOffSet; 
-          });
-      }
-    }
-  
-    return {
-      vertical: vertical,
-      horizontal: horizontal
-    };
+  }
 
-  });
+  var horizontal = {
+    xScale: d3.scale.linear,
+    yScale: d3.scale.ordinal,
+    inflateXScale: function (params) {
+      var range = [0, params.w()];
+      return inflateLinearScale.call(this, params, range);
+    },
+    inflateYScale: function (params) {
+      // Note the inverted range for the y-scale: bigger is up!
+      var range = [params.h(), 0];
+      return inflateOrdinalScale.call(this, params, range);
+    },
+    createBars: function (params) {
+      return this
+        .append("rect")
+        .attr("class", "bar")
+        .attr("x", params.__.barOffSet)
+        .attr("width", 0)
+        .attr("y", function(d) { return params.yScale(d[0]); })
+        .attr("height", params.yScale.rangeBand());
+    },
+    transitionXAxis: function (params) {
+      return this.attr("transform", "translate(" + params.__.barOffSet
+        + "," + params.h() + ")").call(params.xAxis);
+    },
+    transitionYAxis: function (params) {
+      return this.call(params.yAxis)
+        .selectAll("g")
+        .delay(params.delay);
+    },
+    transitionBars: function (params) {
+      return this.delay(params.delay)
+        .attr("y", function(d) { return params.yScale(d[0]); })
+        .attr("x", params.__.barOffSet)
+        .attr("width", function(d) { 
+          return params.xScale(d[1]) + params.__.barOffSet; 
+        });
+    }
+  }
 
-})(typeof define === "function" && define.amd ? define : function(ids, factory) {
-  var deps;
-  deps = ids.map(function(id) {
-    return require(id);
-  });
-  return module.exports = factory.apply(null, deps);
+  return {
+    vertical: vertical,
+    horizontal: horizontal
+  };
+
 });
+
 (function(define) {
   return define('bar/bar',[
     "d3", 
@@ -334,286 +321,251 @@
   });
   return module.exports = factory.apply(null, deps);
 });
-(function(define) {
-  return define('frame/states',['require'],function(require) {
+define('frame/states',['require'],function(require) {
 
-    // Namespaced, might add other states if needed.
+  // Namespaced, might add other states if needed.
 
-    var transition_states = [
-      {
-        'name': 'in_pause',
-        'initial': true,
-        'events': {
-          'start': 'in_transition_start',
-          'next': 'in_transition_next',
-          'prev': 'in_transition_prev',
-          'reset': 'in_transition_reset'
-        }
-      },
-      {
-        'name': 'in_transition_start',
-        'events': {
-          'stop': 'in_pause'
-        }
-      },
-      {
-        'name': 'in_transition_next',
-        'events': {
-          'stop': 'in_pause'
-        }
-      },
-      {
-        'name': 'in_transition_prev',
-        'events': {
-          'stop': 'in_pause'
-        }
-      },
-      {
-        'name': 'in_transition_reset',
-        'events': {
-          'stop': 'in_pause'
-        }
+  var transition_states = [
+    {
+      'name': 'in_pause',
+      'initial': true,
+      'events': {
+        'start': 'in_transition_start',
+        'next': 'in_transition_next',
+        'prev': 'in_transition_prev',
+        'reset': 'in_transition_reset'
       }
-    ];
+    },
+    {
+      'name': 'in_transition_start',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_next',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_prev',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_reset',
+      'events': {
+        'stop': 'in_pause'
+      }
+    }
+  ];
 
-    return { transition_states: transition_states};
+  return { transition_states: transition_states};
 
-  });
-
-})(typeof define === "function" && define.amd ? define : function(factory) {
-  return module.exports = factory(require);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // From http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/
 
-(function(define) {
-  return define('frame/state_machine',['require'],function(require) {
+define('frame/state_machine',['require'],function(require) {
 
-    function StateMachine (states) {
-      this.states = states;
-      this.indexes = {};
-      for( var i = 0; i < this.states.length; i++) {
-        this.indexes[this.states[i].name] = i;
-        if (this.states[i].initial){
-          this.currentState = this.states[i];
-        }
+  function StateMachine (states) {
+    this.states = states;
+    this.indexes = {};
+    for( var i = 0; i < this.states.length; i++) {
+      this.indexes[this.states[i].name] = i;
+      if (this.states[i].initial){
+        this.currentState = this.states[i];
       }
     }
+  }
 
-    StateMachine.prototype.consumeEvent = function (e) {
-      if(this.currentState.events[e]){
-        this.currentState = this.states[this.indexes[this.currentState.events[e]]];
-      }
+  StateMachine.prototype.consumeEvent = function (e) {
+    if(this.currentState.events[e]){
+      this.currentState = this.states[this.indexes[this.currentState.events[e]]];
     }
+  }
 
-    StateMachine.prototype.getStatus = function () {
-      return this.currentState.name;
-    }
+  StateMachine.prototype.getStatus = function () {
+    return this.currentState.name;
+  }
 
-    // getLastEvent();
+  // getLastEvent();
 
-    return StateMachine;
+  return StateMachine;
 
-  });
-
-})(typeof define === "function" && define.amd ? define : function(factory) {
-  return module.exports = factory(require);
 });
 
-(function(define) {
-  return define('frame/frame',[
-    'd3',
-    'utils/utils',
-    'frame/states',
-    'frame/state_machine'
-  ], function(d3, utils, states, StateMachine) {
+define('frame/frame',[
+  'd3',
+  'utils/utils',
+  'frame/states',
+  'frame/state_machine'
+], function(d3, utils, states, StateMachine) {
 
-    var Frame = function (conf) {
-      var self = this;
-      
-      this.initial_frame = this.frame = conf.frame;
-      this.old_frame = void 0;
-      this.current_timeout = void 0;
-      this.selection = conf.selection;
-      this.chart = conf.chart;
-      this.drawChart = conf.drawChart;
-      this.delta = conf.delta;
-      this.step = conf.step;
-      this.data = conf.data;
-
-      this.state_machine = new StateMachine(states.transition_states);
-      this.dispatch = d3.dispatch(
-        'start', 
-        'stop', 
-        'next', 
-        'prev', 
-        'reset', 
-        'end', 
-        'at_beginning_of_transition'
-      );
-      
-      this.chart.handleTransitionEnd( function () {
-        self.dispatch.end.call(self);
-        return self;
-      });
-      // Initial frame. The chart is rendered for the first time.
-      //this.selection.datum(this.data[this.frame]).call(this.chart);
-      this.drawChart(this.data[this.frame]);
-
-      // Fired when all the chart related transitions within a frame are 
-      // terminated.
-      // It is the only dispatch event that does not have a state_machine 
-      // equivalent event.
-      // `frame` is an arbitrary namespace, in order to register multiple 
-      // listeners for the same event type.
-      //
-      // https://github.com/mbostock/d3/wiki/Internals#events:
-      // If an event listener was already registered for the same type, the 
-      // existing listener is removed before the new listener is added. To 
-      // register multiple listeners for the same event type, the type may be 
-      // followed by an optional namespace, such as 'click.foo' and 'click.bar'.
-      this.dispatch.on('end.frame', self.handleFrameEnd);
-
-      this.dispatch.on('stop', self.handleStop);
-
-      this.dispatch.on('start', self.handleStart);
-
-      this.dispatch.on('next', self.handleNext);
-
-      this.dispatch.on('prev', self.handlePrev);
-
-      this.dispatch.on('reset', self.handleReset);
-
-      // TODO
-      //this.dispatch.on('jump_to', self.handleJumpTo);
-    }
-
-
-    Frame.prototype.startTransition = function () {
-      var self = this;
-      clearTimeout(this.current_timeout);
-      if (this.data[this.frame]) {
-        this.current_timeout = setTimeout( function () {
-          // Re-render the chart
-          //self.selection.datum(self.data[self.frame]).call(self.chart);
-          self.drawChart(self.data[self.frame]);
-        }, self.step);
-      } else {
-        // When no data is left to consume, let us stop the running frames!
-        this.state_machine.consumeEvent('stop');
-        this.frame = this.old_frame;
-      }
-      self.dispatch.at_beginning_of_transition.call(self);
-    }
-
-    Frame.prototype.handleFrameEnd = function () {
-      this.handleTransition();
-      return this;
-    }
-
-    Frame.prototype.handleStop = function () {
-      this.state_machine.consumeEvent('stop');
-      return this;
-    }
-
-    // TODO: there is a lot of repetition here!
-
-    Frame.prototype.handleStart = function () {
-      if (this.state_machine.getStatus() === 'in_pause') {
-        this.state_machine.consumeEvent('start');
-        this.handleTransition();
-      } else {
-        console.log('State already in in_transition_start.');
-      }
-      return this;
-    }
-
-    // TODO:
-    // for next and prev we are allowing multiple prev-next events to be 
-    // fired without waiting for the current frame to end. Change?
-
-    Frame.prototype.handleNext = function () {
-      this.state_machine.consumeEvent('next');
-      if (this.state_machine.getStatus() === 'in_transition_next') {
-        this.handleTransition();
-      } else {
-        console.log('State not in pause when next event was fired.');
-      }
-      return this;
-    }
-
-    Frame.prototype.handlePrev = function () {
-      this.state_machine.consumeEvent('prev');
-      if (this.state_machine.getStatus() === 'in_transition_prev') {
-        this.handleTransition();
-      } else {
-        console.log('State not in pause when prev event was fired.');
-      }
-      return this;
-    }
-
-    Frame.prototype.handleReset = function () {
-      this.state_machine.consumeEvent('reset');
-      if (this.state_machine.getStatus() === 'in_transition_reset') {
-        this.handleTransition();
-      } else {
-        console.log('State not in pause when reset event was fired.');
-      }
-      return this;
-    }
-
+  var Frame = function (conf) {
+    var self = this;
     
-    Frame.prototype.handleTransition = function () {
-      var self = this, status = this.state_machine.getStatus();
-      if (status === 'in_transition_start') {
-        this.old_frame = this.frame;
-        this.frame += this.delta;
-        this.startTransition();
-      } else if (status === 'in_transition_prev') {
-        this.old_frame = this.frame;
-        this.frame -= this.delta;
-        this.startTransition();
-        self.state_machine.consumeEvent('stop');
-      } else if (status === 'in_transition_next') {
-        this.old_frame = this.frame;
-        this.frame += this.delta;
-        this.startTransition();
-        self.state_machine.consumeEvent('stop');
-      } else if (status === 'in_transition_reset') {
-        this.old_frame = this.frame;
-        this.frame = this.initial_frame;
-        this.startTransition();
-        self.state_machine.consumeEvent('stop');
-      } else if (status === 'in_pause') {
-        return;
-      } 
+    this.initial_frame = this.frame = conf.frame;
+    this.old_frame = void 0;
+    this.current_timeout = void 0;
+    this.selection = conf.selection;
+    this.chart = conf.chart;
+    this.drawChart = conf.drawChart;
+    this.delta = conf.delta;
+    this.step = conf.step;
+    this.data = conf.data;
+
+    this.state_machine = new StateMachine(states.transition_states);
+    this.dispatch = d3.dispatch(
+      'start', 
+      'stop', 
+      'next', 
+      'prev', 
+      'reset', 
+      'end', 
+      'at_beginning_of_transition'
+    );
+    
+    this.chart.handleTransitionEnd( function () {
+      self.dispatch.end.call(self);
+      return self;
+    });
+    // Initial frame. The chart is rendered for the first time.
+    this.drawChart(this.data[this.frame]);
+
+    // Fired when all the chart related transitions within a frame are 
+    // terminated.
+    // It is the only dispatch event that does not have a state_machine 
+    // equivalent event.
+    // `frame` is an arbitrary namespace, in order to register multiple 
+    // listeners for the same event type.
+    //
+    // https://github.com/mbostock/d3/wiki/Internals#events:
+    // If an event listener was already registered for the same type, the 
+    // existing listener is removed before the new listener is added. To 
+    // register multiple listeners for the same event type, the type may be 
+    // followed by an optional namespace, such as 'click.foo' and 'click.bar'.
+    this.dispatch.on('end.frame', self.handleFrameEnd);
+
+    this.dispatch.on('stop', self.handleStop);
+
+    this.dispatch.on('start', self.handleStart);
+
+    this.dispatch.on('next', self.handleNext);
+
+    this.dispatch.on('prev', self.handlePrev);
+
+    this.dispatch.on('reset', self.handleReset);
+
+    // TODO
+    //this.dispatch.on('jump_to', self.handleJumpTo);
+  }
+
+
+  Frame.prototype.startTransition = function () {
+    var self = this;
+    clearTimeout(this.current_timeout);
+    if (this.data[this.frame]) {
+      this.current_timeout = setTimeout( function () {
+        // Re-render the chart
+        self.drawChart(self.data[self.frame]);
+      }, self.step);
+    } else {
+      // When no data is left to consume, let us stop the running frames!
+      this.state_machine.consumeEvent('stop');
+      this.frame = this.old_frame;
     }
+    self.dispatch.at_beginning_of_transition.call(self);
+  }
 
-    return Frame;
+  Frame.prototype.handleFrameEnd = function () {
+    this.handleTransition();
+    return this;
+  }
 
-  });
+  Frame.prototype.handleStop = function () {
+    this.state_machine.consumeEvent('stop');
+    return this;
+  }
 
-})(typeof define === 'function' && define.amd ? define : function(ids, factory) {
-  var deps;
-  deps = ids.map(function(id) {
-    return require(id);
-  });
-  return module.exports = factory.apply(null, deps);
+  // TODO: there is a lot of repetition here!
+
+  Frame.prototype.handleStart = function () {
+    if (this.state_machine.getStatus() === 'in_pause') {
+      this.state_machine.consumeEvent('start');
+      this.handleTransition();
+    } else {
+      console.log('State already in in_transition_start.');
+    }
+    return this;
+  }
+
+  // TODO:
+  // for next and prev we are allowing multiple prev-next events to be 
+  // fired without waiting for the current frame to end. Change?
+
+  Frame.prototype.handleNext = function () {
+    this.state_machine.consumeEvent('next');
+    if (this.state_machine.getStatus() === 'in_transition_next') {
+      this.handleTransition();
+    } else {
+      console.log('State not in pause when next event was fired.');
+    }
+    return this;
+  }
+
+  Frame.prototype.handlePrev = function () {
+    this.state_machine.consumeEvent('prev');
+    if (this.state_machine.getStatus() === 'in_transition_prev') {
+      this.handleTransition();
+    } else {
+      console.log('State not in pause when prev event was fired.');
+    }
+    return this;
+  }
+
+  Frame.prototype.handleReset = function () {
+    this.state_machine.consumeEvent('reset');
+    if (this.state_machine.getStatus() === 'in_transition_reset') {
+      this.handleTransition();
+    } else {
+      console.log('State not in pause when reset event was fired.');
+    }
+    return this;
+  }
+
+  
+  Frame.prototype.handleTransition = function () {
+    var self = this, status = this.state_machine.getStatus();
+    if (status === 'in_transition_start') {
+      this.old_frame = this.frame;
+      this.frame += this.delta;
+      this.startTransition();
+    } else if (status === 'in_transition_prev') {
+      this.old_frame = this.frame;
+      this.frame -= this.delta;
+      this.startTransition();
+      self.state_machine.consumeEvent('stop');
+    } else if (status === 'in_transition_next') {
+      this.old_frame = this.frame;
+      this.frame += this.delta;
+      this.startTransition();
+      self.state_machine.consumeEvent('stop');
+    } else if (status === 'in_transition_reset') {
+      this.old_frame = this.frame;
+      this.frame = this.initial_frame;
+      this.startTransition();
+      self.state_machine.consumeEvent('stop');
+    } else if (status === 'in_pause') {
+      return;
+    } 
+  }
+
+  return Frame;
+  
 });
-define('draw',[], function() {
+define('draw',['require'],function(require) {
   
 
   return function (chart, selection) {
@@ -623,33 +575,24 @@ define('draw',[], function() {
   }
 
 });
-(function(define) {
-  return define('chart',[
-    "utils/utils",
-    "bar/bar",
-    "bar/config", 
-    "bar/orientation",
-    "frame/frame",
-    "frame/states",
-    "frame/state_machine",
-    "draw"
-  ], function(utils, bar, __, orientation, Frame, states, StateMachine, draw) {
-    return {
-      utils: utils, 
-      bar:bar,
-      __: __, 
-      orientation: orientation,
-      Frame: Frame,
-      states: states, 
-      StateMachine: StateMachine,
-      draw: draw,
-    };
-  });
-
-})(typeof define === "function" && define.amd ? define : function(ids, factory) {
-  var deps;
-  deps = ids.map(function(id) {
-    return require(id);
-  });
-  return module.exports = factory.apply(null, deps);
+define('chart',[
+  "utils/utils",
+  "bar/bar",
+  "bar/config", 
+  "bar/orientation",
+  "frame/frame",
+  "frame/states",
+  "frame/state_machine",
+  "draw"
+], function(utils, bar, __, orientation, Frame, states, StateMachine, draw) {
+  return {
+    utils: utils, 
+    bar:bar,
+    __: __, 
+    orientation: orientation,
+    Frame: Frame,
+    states: states, 
+    StateMachine: StateMachine,
+    draw: draw,
+  };
 });

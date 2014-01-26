@@ -1,6 +1,5 @@
-(function(define) {
-  return define(function(require) {
-
+define(function(require) {
+  
     // The default configuration for barcharts.
     // It is in a separate module, because it is also used in the unit tests.
     return {
@@ -22,8 +21,5 @@
       xValue: function (d) { return d[0]; },
       yValue: function (d) { return d[1]; }
     };
-
-  });
-})(typeof define === "function" && define.amd ? define : function(factory) {
-  return module.exports = factory(require);
+  
 });
