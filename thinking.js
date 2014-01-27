@@ -18,3 +18,10 @@ bar.dispatch.on('start.bar', callback)  // mixin?
 bar.dispatch.start()
 
 //bar_orient methods as mixins?
+
+
+/////////////////////////////////////////////////////
+
+// reasons for d3:
+// you first think about a visualization and then create it, not the other 
+// way round. 

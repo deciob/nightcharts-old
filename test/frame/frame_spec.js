@@ -41,6 +41,11 @@ define(['chai', 'data', 'frame/frame'], function(chai, data, Frame) {
       assert.isTrue(transition.frame === 1950);
     });
 
+    it('should jump to 1990', function () {
+      transition.dispatch.jump.call(transition, 1990);
+      assert.isTrue(transition.frame === 1990);
+    });
+
     // This one is more complicated... because it is tightly coupled with
     // the real chart functionality.
     //

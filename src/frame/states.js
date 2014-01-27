@@ -13,6 +13,7 @@ define(function(require) {
         'start': 'in_transition_start',
         'next': 'in_transition_next',
         'prev': 'in_transition_prev',
+        'jump': 'in_transition_jump',
         'reset': 'in_transition_reset'
       }
     },
@@ -30,6 +31,12 @@ define(function(require) {
     },
     {
       'name': 'in_transition_prev',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_jump',
       'events': {
         'stop': 'in_pause'
       }

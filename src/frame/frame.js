@@ -26,7 +26,8 @@ define([
       'next', 
       'prev', 
       'reset', 
-      'end', 
+      'end',
+      'jump',
       'at_beginning_of_transition'
     );
     
@@ -61,8 +62,7 @@ define([
 
     this.dispatch.on('reset', self.handleReset);
 
-    // TODO
-    //this.dispatch.on('jump_to', self.handleJumpTo);
+    this.dispatch.on('jump', self.handleJump);
   }
 
 
@@ -138,8 +138,18 @@ define([
     return this;
   }
 
+  Frame.prototype.handleJump = function (value) {
+    this.state_machine.consumeEvent('jump');
+    if (this.state_machine.getStatus() === 'in_transition_jump') {
+      this.handleTransition(value);
+    } else {
+      console.log('State not in pause when jump event was fired.');
+    }
+    return this;
+  }
+
   
-  Frame.prototype.handleTransition = function () {
+  Frame.prototype.handleTransition = function (value) {
     var self = this, status = this.state_machine.getStatus();
     if (status === 'in_transition_start') {
       this.old_frame = this.frame;
@@ -153,6 +163,12 @@ define([
     } else if (status === 'in_transition_next') {
       this.old_frame = this.frame;
       this.frame += this.delta;
+      this.startTransition();
+      self.state_machine.consumeEvent('stop');
+    } else if (status === 'in_transition_jump') {
+      if (!value) return new Error('need to pass a value to jump!');
+      this.old_frame = this.frame;
+      this.frame = value;
       this.startTransition();
       self.state_machine.consumeEvent('stop');
     } else if (status === 'in_transition_reset') {
