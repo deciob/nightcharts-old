@@ -636,7 +636,7 @@ return i / data.length * __.duration;</p>
           .call(utils.endall, data, __.handleTransitionEnd);
 
       });
-
+      
     }
 
     utils.getset(bar, __);
@@ -804,9 +804,8 @@ define(<span class="string">'frame/frame'</span>,[
     <span class="keyword">var</span> self = <span class="keyword">this</span>;
     
     <span class="keyword">this</span>.initial_frame = <span class="keyword">this</span>.frame = conf.frame;
-    <span class="keyword">this</span>.old_frame = <span class="keyword">void</span> <span class="number">0</span>;
+    <span class="keyword">this</span>.old_frame =   <span class="keyword">void</span> <span class="number">0</span>;
     <span class="keyword">this</span>.current_timeout = <span class="keyword">void</span> <span class="number">0</span>;
-    <span class="keyword">this</span>.chart = conf.chart;
     <span class="keyword">this</span>.drawChart = conf.drawChart;
     <span class="keyword">this</span>.delta = conf.delta;
     <span class="keyword">this</span>.step = conf.step;
@@ -822,12 +821,7 @@ define(<span class="string">'frame/frame'</span>,[
       <span class="string">'end'</span>,
       <span class="string">'jump'</span>,
       <span class="string">'at_beginning_of_transition'</span>
-    );
-    
-    <span class="keyword">this</span>.chart.handleTransitionEnd( <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
-      self.dispatch.end.call(self);
-      <span class="keyword">return</span> self;
-    });</pre></div></div>
+    );</pre></div></div>
             
         </li>
         

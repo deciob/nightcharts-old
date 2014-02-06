@@ -10054,7 +10054,7 @@ define('bar/bar',[
           .call(utils.endall, data, __.handleTransitionEnd);
 
       });
-
+      
     }
 
     utils.getset(bar, __);
@@ -10169,9 +10169,8 @@ define('frame/frame',[
     var self = this;
     
     this.initial_frame = this.frame = conf.frame;
-    this.old_frame = void 0;
+    this.old_frame =   void 0;
     this.current_timeout = void 0;
-    this.chart = conf.chart;
     this.drawChart = conf.drawChart;
     this.delta = conf.delta;
     this.step = conf.step;
@@ -10189,10 +10188,6 @@ define('frame/frame',[
       'at_beginning_of_transition'
     );
     
-    this.chart.handleTransitionEnd( function () {
-      self.dispatch.end.call(self);
-      return self;
-    });
     // Initial frame. The chart is rendered for the first time.
     this.drawChart(this.data[this.frame]);
 
