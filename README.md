@@ -25,7 +25,9 @@ The `frame` module expects an object with arrays of objects:
 
 ```js
 selection = d3.select('#viz');
-barchart = chart.bar();
+barchart = chart.bar()
+  .xValue( function(d) { return d['name']; } )
+  .yValue( function(d) { return d['value']; } );
 draw = chart.draw(barchart, selection);
 draw(data);
 ```
