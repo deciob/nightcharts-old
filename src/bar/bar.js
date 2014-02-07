@@ -41,7 +41,10 @@ define([
         // 0: name
         // 1: value
         data = dat.map(function(d, i) {
-          return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
+          return [
+            __.categoricalValue.call(dat, d), 
+            __.quantativeValue.call(dat, d)
+          ];
         });
         if (__.invert_data) {
           data = data.reverse();

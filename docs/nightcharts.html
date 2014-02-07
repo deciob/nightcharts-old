@@ -158,8 +158,8 @@ define(<span class="string">'bar/config'</span>,[<span class="string">'require'<
       invert_data: <span class="literal">false</span>,  <span class="comment">// Data sorting.</span>
       handleClick: <span class="function"><span class="keyword">function</span> <span class="params">(d, i)</span> {</span> <span class="keyword">return</span> <span class="keyword">void</span> <span class="number">0</span>; },
       handleTransitionEnd: <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> <span class="keyword">void</span> <span class="number">0</span>; },
-      xValue: <span class="function"><span class="keyword">function</span> <span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">0</span>]; },
-      yValue: <span class="function"><span class="keyword">function</span> <span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">1</span>]; }
+      categoricalValue: <span class="function"><span class="keyword">function</span> <span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">0</span>]; },
+      quantativeValue: <span class="function"><span class="keyword">function</span> <span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">1</span>]; }
     };
   
 });
@@ -415,7 +415,10 @@ define(<span class="string">'bar/bar'</span>,[
             </div>
             
             <div class="content"><div class='highlight'><pre>        data = dat.map(<span class="function"><span class="keyword">function</span><span class="params">(d, i)</span> {</span>
-          <span class="keyword">return</span> [__.xValue.call(dat, d), __.yValue.call(dat, d)];
+          <span class="keyword">return</span> [
+            __.categoricalValue.call(dat, d), 
+            __.quantativeValue.call(dat, d)
+          ];
         });
         <span class="keyword">if</span> (__.invert_data) {
           data = data.reverse();
@@ -636,7 +639,7 @@ return i / data.length * __.duration;</p>
           .call(utils.endall, data, __.handleTransitionEnd);
 
       });
-      
+
     }
 
     utils.getset(bar, __);

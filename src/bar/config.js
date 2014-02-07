@@ -18,8 +18,8 @@ define(function(require) {
       invert_data: false,  // Data sorting.
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
-      xValue: function (d) { return d[0]; },
-      yValue: function (d) { return d[1]; }
+      categoricalValue: function (d) { return d[0]; },
+      quantativeValue: function (d) { return d[1]; }
     };
   
 });

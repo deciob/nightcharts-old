@@ -78,8 +78,8 @@ define('bar/config',['require'],function(require) {
       invert_data: false,  // Data sorting.
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
-      xValue: function (d) { return d[0]; },
-      yValue: function (d) { return d[1]; }
+      categoricalValue: function (d) { return d[0]; },
+      quantativeValue: function (d) { return d[1]; }
     };
   
 });
@@ -239,7 +239,10 @@ define('bar/bar',[
         // 0: name
         // 1: value
         data = dat.map(function(d, i) {
-          return [__.xValue.call(dat, d), __.yValue.call(dat, d)];
+          return [
+            __.categoricalValue.call(dat, d), 
+            __.quantativeValue.call(dat, d)
+          ];
         });
         if (__.invert_data) {
           data = data.reverse();
@@ -314,7 +317,7 @@ define('bar/bar',[
           .call(utils.endall, data, __.handleTransitionEnd);
 
       });
-      
+
     }
 
     utils.getset(bar, __);
