@@ -254,8 +254,7 @@ define('bar/bar',[
 
         function delay (d, i) {
           // Attention, delay can not be longer of transition time! Test!
-          //return i / data.length * __.duration;
-          return i * (data.length/2);
+          return i / data.length * __.duration;
         }
 
         params = {
