@@ -3,20 +3,20 @@
 	var config = {
 		// baseUrl: '',
 		paths: {
-      d3: {
-        location: 'bower_components/d3/d3.js',
-        config: {
-          loader: 'lib/curl/src/curl/loader/legacy',
-          exports: 'd3'
-        }
-      },
+      d3: 'bower_components/d3/d3.js',
       underscore: 'bower_components/lodash/dist/lodash.js',
       chart: 'dist/nightcharts.js',
 		},
 		packages: [
 			// Define application-level packages
 			{
-				name: 'welcome', location: 'app/welcome'
+				name: 'chart', location: 'app/chart', main: 'chart_constructor',
+			},
+			{
+				name: 'welcome', location: 'app/welcome',
+			},
+			{
+        name: 'inline', location: 'app/inline',
 			},
 
 			// Define a theme package, and configure it to always use the css module loader

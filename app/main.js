@@ -15,6 +15,14 @@ define({
 		insert: { at: 'dom.first!body' }
 	},
 
+	chartConstructor: {
+		create: {
+			module: 'chart',
+		}
+	},
+
+	//inline_example: 
+
 	// Wire.js plugins
 	plugins: [
 		{ module: 'wire/dom', classes: { init: 'loading' } },
