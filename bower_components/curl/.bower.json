@@ -1,0 +1,20 @@
+{
+  "name": "curl",
+  "version": "0.8.8",
+  "description": "curl.js is small, fast, extensible module loader that handles AMD, CommonJS Modules/1.1, CSS, HTML/text, and legacy scripts.",
+  "ignore": [
+    "bin",
+    "docs",
+    "test"
+  ],
+  "homepage": "https://github.com/cujojs/curl",
+  "_release": "0.8.8",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.8.8",
+    "commit": "2491b6f879860142b1d718e429370b5637994ced"
+  },
+  "_source": "git://github.com/cujojs/curl.git",
+  "_target": "~0.8",
+  "_originalSource": "curl"
+}

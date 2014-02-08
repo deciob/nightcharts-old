@@ -1,36 +1,36 @@
 {
-  "name": "nightcharts",
-  "version": "0.0.1",
-  "description": "Reusable charts based on d3.js",
-  "keywords": [
-    "charts",
-    "d3"
-  ],
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://www.opensource.org/licenses/mit-license.php"
-    }
-  ],
-  "repository": [
-    {
-      "type": "git",
-      "url": "https://github.com/deciob/nighcharts"
-    }
-  ],
-  "maintainers": [
-    {
-      "name": "Decio Battaglia"
-    }
-  ],
-  "dependencies": {},
-  "devDependencies": {
-    "serv": "",
-    "bower": "",
-    "karma-mocha": ""
-  },
-  "scripts": {
-    "postinstall": "bower install",
-    "start": "serv --port 8080"
-  }
+	"name": "my-awesome-cujoJS-app",
+	"version": "0.3.0",
+	"description": "An application created with cujoJS! http://github.com/cujojs/seed.",
+	"keywords": ["modules", "ioc", "promises", "aop", "rest", "cujo", "cujojs"],
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "http://www.opensource.org/licenses/mit-license.php"
+		}
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/cujojs/quickstart"
+	},
+	"maintainers": [
+		{
+			"name": "Brian Cavalier",
+			"web": "http://hovercraftstudios.com"
+		},
+		{
+			"name": "John Hann",
+			"web": "http://unscriptable.com"
+		}
+	],
+	"dependencies": {},
+	"devDependencies": {
+		"serv": "",
+		"bower": "",
+		"cram": "~0.7"
+	},
+	"scripts": {
+		"start": "serv --port 8000",
+		"cram": "cram index.html --include curl/plugin/domReady --include curl/plugin/locale"
+	}
 }
