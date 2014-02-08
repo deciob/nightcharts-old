@@ -2,9 +2,17 @@
 
 	var config = {
 		// baseUrl: '',
-		//paths: {
-			// Configure paths here
-		//},
+		paths: {
+      d3: {
+        location: 'bower_components/d3/d3.js',
+        config: {
+          loader: 'lib/curl/src/curl/loader/legacy',
+          exports: 'd3'
+        }
+      },
+      underscore: 'bower_components/lodash/dist/lodash.js',
+      chart: 'dist/nightcharts.js',
+		},
 		packages: [
 			// Define application-level packages
 			{
@@ -26,13 +34,13 @@
 			{ name: 'msgs', location: 'bower_components/msgs', main: 'msgs' },
 			{ name: 'when', location: 'bower_components/when', main: 'when' },
 			{ name: 'meld', location: 'bower_components/meld', main: 'meld' },
-			{ name: 'poly', location: 'bower_components/poly' }
+			//{ name: 'poly', location: 'bower_components/poly' }
 		],
 		// Turn off i18n locale sniffing. Change or remove this line if you want
 		// to test specific locales or try automatic locale-sniffing.
 		locale: false,
 		// Polyfill everything ES5-ish
-		preloads: ['poly/all']
+		//preloads: ['poly/all']
 		// Or, select individual polyfills if you prefer
 		//preloads: ['poly/array', 'poly/function', 'poly/json', 'poly/object', 'poly/string', 'poly/xhr']
 	};
