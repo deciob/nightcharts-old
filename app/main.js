@@ -18,7 +18,7 @@ define({
 			replace: { module: 'i18n!inline/strings' },
 			css: { module: 'css!inline/structure.css' }
 		},
-		insert: { at: 'dom.first!body' }
+		insert: { at: 'dom.first!.inline' }
 	},
 
   inline_controller: {
@@ -27,7 +27,6 @@ define({
       args: {
         chart: {$ref: "chart_constructor"},
         data_url: 'app/inline/data.json',
-        //el: {$ref: 'id!inline-viz', at: 'inline_example'}
         el: {$ref: "inline_example"},
         selector: '#inline-viz'
       }

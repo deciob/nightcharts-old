@@ -244,13 +244,15 @@ define('bar/bar',[
         // 1: value
         data = dat.map(function(d, i) {
           return [
-            __.categoricalValue.call(dat, d), 
-            __.quantativeValue.call(dat, d)
+            __.categoricalValue.call(dat, d, i), 
+            __.quantativeValue.call(dat, d, i)
           ];
         });
         if (__.invert_data) {
           data = data.reverse();
         }
+
+        console.log(data);
 
         function delay (d, i) {
           // Attention, delay can not be longer of transition time! Test!
