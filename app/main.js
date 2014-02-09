@@ -4,24 +4,35 @@ define({
 	// configured in run.js, curl knows to load this as CSS.
 	theme: { module: 'theme/basic.css' },
 
-	// Create a simple view by rendering html, replacing some i18n strings
-	// and loading CSS.  Then, insert into the DOM
-	message: {
-		render: {
-			template: { module: 'text!welcome/template.html' },
-			replace: { module: 'i18n!welcome/strings' },
-			css: { module: 'css!welcome/structure.css' }
-		},
-		insert: { at: 'dom.first!body' }
-	},
-
-	chartConstructor: {
+	chart_constructor: {
 		create: {
 			module: 'chart',
 		}
 	},
 
-	//inline_example: 
+	// Create a simple view by rendering html, replacing some i18n strings
+	// and loading CSS.  Then, insert into the DOM
+	inline_example: {
+		render: {
+			template: { module: 'text!inline/template.html' },
+			replace: { module: 'i18n!inline/strings' },
+			css: { module: 'css!inline/structure.css' }
+		},
+		insert: { at: 'dom.first!body' }
+	},
+
+  inline_controller: {
+  	create: {
+      module: 'inline/controller',
+      args: {
+        chart: {$ref: "chart_constructor"},
+        data_url: 'app/inline/data.json',
+        //el: {$ref: 'id!inline-viz', at: 'inline_example'}
+        el: {$ref: "inline_example"},
+        selector: '#inline-viz'
+      }
+    }
+  },
 
 	// Wire.js plugins
 	plugins: [
