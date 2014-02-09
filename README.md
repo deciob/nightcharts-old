@@ -11,6 +11,7 @@ Example:  [data-story.org/wup/](http://data-story.org/wup/) ([source code](https
 The `bar` module expects an array of arrays or objects:
 ```js
  data = [ ['a',10], ['b',20] ];
+ // or
  data = [ {value: 10, name: 'a'}, {value: 20, name: 'b'} ];
 ```
 
@@ -27,5 +28,5 @@ The `frame` module expects an object with arrays of arrays or objects:
 ```js
 selection = d3.select('#viz');
 barchart = chart.bar();
-draw = chart.draw(barchart, selection, data);
+chart.draw(barchart, selection, data);
 ```
