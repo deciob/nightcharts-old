@@ -34,7 +34,10 @@
 define(<span class="string">'draw'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span>
   
 
-  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(chart, selection)</span> {</span>
+  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(chart, selection, data)</span> {</span>
+    <span class="keyword">if</span> (data) {
+      <span class="keyword">return</span> selection.datum(data).call(chart);
+    }
     <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(data)</span> {</span>
       selection.datum(data).call(chart);
     }
