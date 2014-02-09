@@ -2,7 +2,10 @@
 define('draw',['require'],function(require) {
   
 
-  return function (chart, selection) {
+  return function (chart, selection, data) {
+    if (data) {
+      return selection.datum(data).call(chart);
+    }
     return function (data) {
       selection.datum(data).call(chart);
     }
@@ -244,15 +247,13 @@ define('bar/bar',[
         // 1: value
         data = dat.map(function(d, i) {
           return [
-            __.categoricalValue.call(dat, d, i), 
-            __.quantativeValue.call(dat, d, i)
+            __.categoricalValue.call(dat, d), 
+            __.quantativeValue.call(dat, d)
           ];
         });
         if (__.invert_data) {
           data = data.reverse();
         }
-
-        console.log(data);
 
         function delay (d, i) {
           // Attention, delay can not be longer of transition time! Test!
