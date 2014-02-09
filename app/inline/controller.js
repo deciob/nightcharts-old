@@ -22,11 +22,8 @@ define([
         .width(100)
         .height(20)
         .padding(0)
-        .duration(0)
-        .categoricalValue( function(d, i) { return d[0]; } )
-        .quantativeValue( function(d, i) { return d[1]; } );
-      draw = chart.draw(barchart, selection);
-      draw(data);
+        .duration(0);
+      chart.draw(barchart, selection, data);
     });
 
   };
