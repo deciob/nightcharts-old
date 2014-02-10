@@ -9766,10 +9766,17 @@ define('utils/utils',["d3"], function(d3) {
       });
   }
 
+  function tip () {
+    return d3.tip()
+      .attr('class', 'd3-tip')
+      .html(function(d) { return d; });
+  }
+
   return {
     extend: extend,
     getset: getset,
-    endall: endall
+    endall: endall,
+    tip: tip
   };
 
 });
@@ -9992,6 +9999,9 @@ define('bar/bar',[
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
 
+        // Tooltips.
+        svg.call(tip);
+
         // Otherwise, create the skeletal chart.
         gEnter = svg.enter().append("svg").append("g");
         gEnter.append("g").attr("class", "bars");
@@ -10030,7 +10040,10 @@ define('bar/bar',[
 
         // Otherwise, create them.
         orientation[__.orient].createBars.call(bars.enter(), params)
-          .on('click', __.handleClick);
+          .on('click', __.handleClick)
+          .on('mouseover', tip.show)
+          .on('mouseout', tip.hide);
+          
         // And transition them.
         orientation[__.orient].transitionBars
           .call(transition.selectAll('.bar'), params)

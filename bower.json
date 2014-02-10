@@ -4,6 +4,7 @@
   "dependencies": {
     "d3": "",
     "chai": "",
-    "almond": ""
+    "almond": "",
+    "d3-tip": ""
   }
 }

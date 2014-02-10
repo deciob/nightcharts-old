@@ -120,10 +120,17 @@ instead also accounts for exits during the transition.</p>
       });
   }
 
+  <span class="function"><span class="keyword">function</span> <span class="title">tip</span> <span class="params">()</span> {</span>
+    <span class="keyword">return</span> d3.tip()
+      .attr(<span class="string">'class'</span>, <span class="string">'d3-tip'</span>)
+      .html(<span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d; });
+  }
+
   <span class="keyword">return</span> {
     extend: extend,
     getset: getset,
-    endall: endall
+    endall: endall,
+    tip: tip
   };
 
 });
@@ -540,6 +547,21 @@ define(<span class="string">'bar/bar'</span>,[
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
+              <p>Tooltips.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        svg.call(tip);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
               <p>Otherwise, create the skeletal chart.</p>
 
             </div>
@@ -552,11 +574,11 @@ define(<span class="string">'bar/bar'</span>,[
         </li>
         
         
-        <li id="section-21">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>Update the outer dimensions.</p>
 
@@ -568,11 +590,11 @@ define(<span class="string">'bar/bar'</span>,[
         </li>
         
         
-        <li id="section-22">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>Update the inner dimensions.</p>
 
@@ -585,11 +607,11 @@ define(<span class="string">'bar/bar'</span>,[
         </li>
         
         
-        <li id="section-23">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>Transitions root.</p>
 
@@ -600,11 +622,11 @@ define(<span class="string">'bar/bar'</span>,[
         </li>
         
         
-        <li id="section-24">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>Update the y axis.</p>
 
@@ -617,11 +639,11 @@ define(<span class="string">'bar/bar'</span>,[
         </li>
         
         
-        <li id="section-25">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>Update the x axis.</p>
 
@@ -634,11 +656,11 @@ define(<span class="string">'bar/bar'</span>,[
         </li>
         
         
-        <li id="section-26">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>Select the bar elements, if they exists.</p>
 
@@ -650,11 +672,11 @@ define(<span class="string">'bar/bar'</span>,[
         </li>
         
         
-        <li id="section-27">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>Exit phase (let us push out old bars before the new ones come in).</p>
 
@@ -666,27 +688,29 @@ define(<span class="string">'bar/bar'</span>,[
         </li>
         
         
-        <li id="section-28">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Otherwise, create them.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>        orientation[__.orient].createBars.call(bars.enter(), params)
-          .on(<span class="string">'click'</span>, __.handleClick);</pre></div></div>
+          .on(<span class="string">'click'</span>, __.handleClick)
+          .on(<span class="string">'mouseover'</span>, tip.show)
+          .on(<span class="string">'mouseout'</span>, tip.hide);</pre></div></div>
             
         </li>
         
         
-        <li id="section-29">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>And transition them.</p>
 
@@ -714,11 +738,11 @@ define(<span class="string">'frame/states'</span>,[<span class="string">'require
         </li>
         
         
-        <li id="section-30">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p><strong>frame.states module</strong></p>
 <p>Used by the <em>frame.state_machine</em> module.
@@ -777,11 +801,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>From <a href="http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/">http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/</a></p>
 
@@ -792,11 +816,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p><strong>frame.state_machine module</strong></p>
 
@@ -826,11 +850,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>getLastEvent();</p>
 
@@ -851,11 +875,11 @@ define(<span class="string">'frame/frame'</span>,[
         </li>
         
         
-        <li id="section-34">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p><strong>frame.frame module</strong></p>
 
@@ -887,11 +911,11 @@ define(<span class="string">'frame/frame'</span>,[
         </li>
         
         
-        <li id="section-35">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>Initial frame. The chart is rendered for the first time.</p>
 
@@ -902,11 +926,11 @@ define(<span class="string">'frame/frame'</span>,[
         </li>
         
         
-        <li id="section-36">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>Fired when all the chart related transitions within a frame are 
 terminated.
@@ -947,11 +971,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-37">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>Re-render the chart</p>
 
@@ -964,11 +988,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-38">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>When no data is left to consume, let us stop the running frames!</p>
 
@@ -993,11 +1017,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-39">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>TODO: there is a lot of repetition here!</p>
 
@@ -1016,11 +1040,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-40">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>TODO:
 for next and prev we are allowing multiple prev-next events to be 
