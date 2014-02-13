@@ -46,7 +46,7 @@ define(<span class="string">'draw'</span>,[<span class="string">'require'</span>
 });
 
 
-define(<span class="string">'utils/utils'</span>,[<span class="string">"d3"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3)</span> {</span></pre></div></div>
+define(<span class="string">'utils/utils'</span>,[<span class="string">"d3"</span>, <span class="string">"d3_tip"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3, d3_tip)</span> {</span></pre></div></div>
             
         </li>
         
@@ -122,7 +122,7 @@ instead also accounts for exits during the transition.</p>
 
   <span class="function"><span class="keyword">function</span> <span class="title">tip</span> <span class="params">(cb)</span> {</span>
     <span class="keyword">var</span> cb = <span class="keyword">typeof</span>(cb) == <span class="string">"function"</span> ? htmlCallback : <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d; };
-    <span class="keyword">return</span> d3.tip()
+    <span class="keyword">return</span> d3_tip()
       .attr(<span class="string">'class'</span>, <span class="string">'d3-tip'</span>)
       .html(cb);
   }

@@ -1,4 +1,4 @@
-define(["d3"], function(d3) {
+define(["d3", "d3_tip"], function(d3, d3_tip) {
 
   // **Useful functions that can be shared across modules**
   
@@ -38,7 +38,7 @@ define(["d3"], function(d3) {
 
   function tip (cb) {
     var cb = typeof(cb) == "function" ? htmlCallback : function(d) { return d; };
-    return d3.tip()
+    return d3_tip()
       .attr('class', 'd3-tip')
       .html(cb);
   }
