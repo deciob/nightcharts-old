@@ -4,6 +4,7 @@
 		// baseUrl: '',
 		paths: {
       d3: 'bower_components/d3/d3.js',
+      d3_tip: 'lib/d3-tip/index.js',
       underscore: 'bower_components/lodash/dist/lodash.js',
       chart: 'dist/nightcharts.js',
 		},
