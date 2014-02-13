@@ -121,7 +121,7 @@ instead also accounts for exits during the transition.</p>
   }
 
   <span class="function"><span class="keyword">function</span> <span class="title">tip</span> <span class="params">(cb)</span> {</span>
-    <span class="keyword">var</span> cb = <span class="keyword">typeof</span>(cb) == <span class="string">"function"</span> ? htmlCallback : <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d; };
+    <span class="keyword">var</span> cb = <span class="keyword">typeof</span>(cb) == <span class="string">"function"</span> ? cb : <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d; };
     <span class="keyword">return</span> d3_tip()
       .attr(<span class="string">'class'</span>, <span class="string">'d3-tip'</span>)
       .html(cb);

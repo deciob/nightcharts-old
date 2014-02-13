@@ -37,7 +37,7 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
   }
 
   function tip (cb) {
-    var cb = typeof(cb) == "function" ? htmlCallback : function(d) { return d; };
+    var cb = typeof(cb) == "function" ? cb : function(d) { return d; };
     return d3_tip()
       .attr('class', 'd3-tip')
       .html(cb);
