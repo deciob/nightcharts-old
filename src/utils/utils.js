@@ -36,10 +36,11 @@ define(["d3"], function(d3) {
       });
   }
 
-  function tip () {
+  function tip (cb) {
+    var cb = typeof(cb) == "function" ? htmlCallback : function(d) { return d; };
     return d3.tip()
       .attr('class', 'd3-tip')
-      .html(function(d) { return d; });
+      .html(cb);
   }
 
   return {

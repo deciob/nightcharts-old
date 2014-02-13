@@ -24,6 +24,8 @@ define(function(require) {
       // events
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
+      // tooltips
+      tooltip: false,
     };
   
 });

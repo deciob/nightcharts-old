@@ -52,10 +52,11 @@ define('utils/utils',["d3"], function(d3) {
       });
   }
 
-  function tip () {
+  function tip (cb) {
+    var cb = typeof(cb) == "function" ? htmlCallback : function(d) { return d; };
     return d3.tip()
       .attr('class', 'd3-tip')
-      .html(function(d) { return d; });
+      .html(cb);
   }
 
   return {
@@ -94,6 +95,8 @@ define('bar/config',['require'],function(require) {
       // events
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
+      // tooltips
+      tooltip: false,
     };
   
 });
@@ -247,7 +250,9 @@ define('bar/bar',[
 
       selection.each(function(dat) {
 
-        var data, svg, gEnter, g, bars, transition, bars_t, bars_ex, params;
+        var data, 
+          tooltip = __.tooltip, 
+          tip, svg, gEnter, g, bars, transition, bars_t, bars_ex, params;
 
         // data structure:
         // 0: name
@@ -285,11 +290,12 @@ define('bar/bar',[
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
 
-        // Tooltips.
-        svg.call(tip);
-
         // Otherwise, create the skeletal chart.
         gEnter = svg.enter().append("svg").append("g");
+        if (tooltip) {
+          tip = utils.tip(tooltip);
+          gEnter.call(tip);
+        }
         gEnter.append("g").attr("class", "bars");
         gEnter.append("g").attr("class", "x axis");
         gEnter.append("g").attr("class", "y axis");
@@ -325,10 +331,14 @@ define('bar/bar',[
           .transition().duration(__.duration).style('opacity', 0).remove();
 
         // Otherwise, create them.
-        orientation[__.orient].createBars.call(bars.enter(), params)
-          .on('click', __.handleClick)
-          .on('mouseover', tip.show)
-          .on('mouseout', tip.hide);
+        bars = orientation[__.orient].createBars.call(bars.enter(), params)
+          .on('click', __.handleClick);
+
+        if (tooltip) {
+          bars
+           .on('mouseover', tip.show)
+           .on('mouseout', tip.hide);
+        }
           
         // And transition them.
         orientation[__.orient].transitionBars
