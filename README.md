@@ -8,16 +8,18 @@ Example:  [data-story.org/wup/](http://data-story.org/wup/) ([source code](https
 
 #### Data
 
-The `bar` module expects an array of objects:
+The `bar` module expects an array of arrays or objects:
 ```js
- data = [{value: 10, name: 'a'}, {value: 20, name: 'b'}]
+ data = [ ['a',10], ['b',20] ];
+ // or
+ data = [ {value: 10, name: 'a'}, {value: 20, name: 'b'} ];
 ```
 
-The `frame` module expects an object with arrays of objects:
+The `frame` module expects an object with arrays of arrays or objects:
 ```js
  data = { 
-  1950: [{value: 10, name: 'a'}, {value: 20, name: 'b'}],
-  1960: [{value: 11, name: 'a'}, {value: 23, name: 'b'}]
+  1950: [ {value: 10, name: 'a'}, {value: 20, name: 'b'} ],
+  1960: [ {value: 11, name: 'a'}, {value: 23, name: 'b'} ]
  }
 ```
 
@@ -25,9 +27,6 @@ The `frame` module expects an object with arrays of objects:
 
 ```js
 selection = d3.select('#viz');
-barchart = chart.bar()
-  .xValue( function(d) { return d['name']; } )
-  .yValue( function(d) { return d['value']; } );
-draw = chart.draw(barchart, selection);
-draw(data);
+barchart = chart.bar();
+chart.draw(barchart, selection, data);
 ```
