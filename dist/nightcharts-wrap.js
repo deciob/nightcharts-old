@@ -10075,8 +10075,9 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
 
   // Initializes a [d3-tip](https://github.com/Caged/d3-tip) tooltip.
   function tip (obj) {
-    var tip = d3_tip().attr('class', 'd3-tip');
-    typeof true === 'boolean';
+    var tip = d3_tip()
+      .attr('class', 'd3-tip')
+      .html(function(d) { return d; });
     //if (Object.prototype.toString.call(obj) === "[object Object]") {
     if (typeof obj !== 'boolean') {
       Object.keys(obj).forEach(function(key) {
@@ -10088,12 +10089,7 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
         }  
       });
     }
-
-
-    //var cb = typeof(cb) == "function" ? cb : function(d) { return d; };
-    //return d3_tip()
-    //  .attr('class', 'd3-tip')
-    //  .html(cb);
+    return tip;
   }
 
   return {
