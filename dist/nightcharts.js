@@ -118,7 +118,7 @@ define('bar/config',['require'],function(require) {
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
-      // can pass boolean or html callback function.
+      // can pass boolean or object with d3-tip configuration.
       tooltip: false,
     };
   
