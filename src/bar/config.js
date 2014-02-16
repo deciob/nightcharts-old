@@ -24,7 +24,8 @@ define(function(require) {
       // events
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
-      // tooltips
+      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
+      // can pass boolean or html callback function.
       tooltip: false,
     };
   

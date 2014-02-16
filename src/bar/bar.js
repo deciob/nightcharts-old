@@ -77,6 +77,7 @@ define([
 
         // Otherwise, create the skeletal chart.
         gEnter = svg.enter().append("svg").append("g");
+        // Initializing the tooltip.
         if (tooltip) {
           tip = utils.tip(tooltip);
           gEnter.call(tip);

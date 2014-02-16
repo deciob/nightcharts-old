@@ -36,11 +36,27 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
       });
   }
 
-  function tip (cb) {
-    var cb = typeof(cb) == "function" ? cb : function(d) { return d; };
-    return d3_tip()
-      .attr('class', 'd3-tip')
-      .html(cb);
+  // Initializes a [d3-tip](https://github.com/Caged/d3-tip) tooltip.
+  function tip (obj) {
+    var tip = d3_tip().attr('class', 'd3-tip');
+    typeof true === 'boolean';
+    //if (Object.prototype.toString.call(obj) === "[object Object]") {
+    if (typeof obj !== 'boolean') {
+      Object.keys(obj).forEach(function(key) {
+        var value = obj[key];
+        if (key === 'attr') {
+          tip.attr(value[0], value[1]);
+        } else {
+          tip[key](value);
+        }  
+      });
+    }
+
+
+    //var cb = typeof(cb) == "function" ? cb : function(d) { return d; };
+    //return d3_tip()
+    //  .attr('class', 'd3-tip')
+    //  .html(cb);
   }
 
   return {
