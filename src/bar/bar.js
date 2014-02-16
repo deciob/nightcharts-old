@@ -3,16 +3,16 @@ define([
     "utils/utils",
     "bar/config", 
     "bar/orientation",
-  ], function(d3, utils, __, orientation) {
+  ], function(d3, utils, default_config, orientation) {
 
   // **The bar.bar module**
   
   return function (user_config) {
 
     var config = user_config || {},
-      w, h, xScale, yScale, xAxis, yAxis;
+       __, w, h, xScale, yScale, xAxis, yAxis;
 
-    utils.extend(__, config);
+    __ = utils.extend(default_config, config);
 
     function dataIdentifier (d) {
       return d[0];

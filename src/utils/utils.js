@@ -2,11 +2,21 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
 
   // **Useful functions that can be shared across modules**
   
-  function extend (target, source) {
-    for(prop in source) {
-      target[prop] = source[prop];
+  function clone (obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+      if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
     }
-    return target;
+    return copy;
+  }
+
+  function extend (target, source) {
+    var target_clone = clone(target);
+    for(prop in source) {
+      target_clone[prop] = source[prop];
+    }
+    return target_clone;
   }
 
   // Todo: some docs on this function.

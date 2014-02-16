@@ -62,11 +62,21 @@ define(<span class="string">'utils/utils'</span>,[<span class="string">"d3"</spa
             </div>
             
             <div class="content"><div class='highlight'><pre>  
-  <span class="function"><span class="keyword">function</span> <span class="title">extend</span> <span class="params">(target, source)</span> {</span>
-    <span class="keyword">for</span>(prop <span class="keyword">in</span> source) {
-      target[prop] = source[prop];
+  <span class="function"><span class="keyword">function</span> <span class="title">clone</span> <span class="params">(obj)</span> {</span>
+    <span class="keyword">if</span> (<span class="literal">null</span> == obj || <span class="string">"object"</span> != <span class="keyword">typeof</span> obj) <span class="keyword">return</span> obj;
+    <span class="keyword">var</span> copy = obj.constructor();
+    <span class="keyword">for</span> (<span class="keyword">var</span> attr <span class="keyword">in</span> obj) {
+      <span class="keyword">if</span> (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
     }
-    <span class="keyword">return</span> target;
+    <span class="keyword">return</span> copy;
+  }
+
+  <span class="function"><span class="keyword">function</span> <span class="title">extend</span> <span class="params">(target, source)</span> {</span>
+    <span class="keyword">var</span> target_clone = clone(target);
+    <span class="keyword">for</span>(prop <span class="keyword">in</span> source) {
+      target_clone[prop] = source[prop];
+    }
+    <span class="keyword">return</span> target_clone;
   }</pre></div></div>
             
         </li>
@@ -464,7 +474,7 @@ define(<span class="string">'bar/bar'</span>,[
     <span class="string">"utils/utils"</span>,
     <span class="string">"bar/config"</span>, 
     <span class="string">"bar/orientation"</span>,
-  ], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils, __, orientation)</span> {</span></pre></div></div>
+  ], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils, default_config, orientation)</span> {</span></pre></div></div>
             
         </li>
         
@@ -483,9 +493,9 @@ define(<span class="string">'bar/bar'</span>,[
   <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(user_config)</span> {</span>
 
     <span class="keyword">var</span> config = user_config || {},
-      w, h, xScale, yScale, xAxis, yAxis;
+       __, w, h, xScale, yScale, xAxis, yAxis;
 
-    utils.extend(__, config);
+    __ = utils.extend(default_config, config);
 
     <span class="function"><span class="keyword">function</span> <span class="title">dataIdentifier</span> <span class="params">(d)</span> {</span>
       <span class="keyword">return</span> d[<span class="number">0</span>];
