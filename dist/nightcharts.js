@@ -18,11 +18,21 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
 
   // **Useful functions that can be shared across modules**
   
-  function extend (target, source) {
-    for(prop in source) {
-      target[prop] = source[prop];
+  function clone (obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+      if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
     }
-    return target;
+    return copy;
+  }
+
+  function extend (target, source) {
+    var target_clone = clone(target);
+    for(prop in source) {
+      target_clone[prop] = source[prop];
+    }
+    return target_clone;
   }
 
   // Todo: some docs on this function.
@@ -52,11 +62,23 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
       });
   }
 
-  function tip (cb) {
-    var cb = typeof(cb) == "function" ? cb : function(d) { return d; };
-    return d3_tip()
+  // Initializes a [d3-tip](https://github.com/Caged/d3-tip) tooltip.
+  function tip (obj) {
+    var tip = d3_tip()
       .attr('class', 'd3-tip')
-      .html(cb);
+      .html(function(d) { return d; });
+    //if (Object.prototype.toString.call(obj) === "[object Object]") {
+    if (typeof obj !== 'boolean') {
+      Object.keys(obj).forEach(function(key) {
+        var value = obj[key];
+        if (key === 'attr') {
+          tip.attr(value[0], value[1]);
+        } else {
+          tip[key](value);
+        }  
+      });
+    }
+    return tip;
   }
 
   return {
@@ -95,7 +117,8 @@ define('bar/config',['require'],function(require) {
       // events
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
-      // tooltips
+      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
+      // can pass boolean or html callback function.
       tooltip: false,
     };
   
@@ -218,16 +241,16 @@ define('bar/bar',[
     "utils/utils",
     "bar/config", 
     "bar/orientation",
-  ], function(d3, utils, __, orientation) {
+  ], function(d3, utils, default_config, orientation) {
 
   // **The bar.bar module**
   
   return function (user_config) {
 
     var config = user_config || {},
-      w, h, xScale, yScale, xAxis, yAxis;
+       __, w, h, xScale, yScale, xAxis, yAxis;
 
-    utils.extend(__, config);
+    __ = utils.extend(default_config, config);
 
     function dataIdentifier (d) {
       return d[0];
@@ -292,6 +315,7 @@ define('bar/bar',[
 
         // Otherwise, create the skeletal chart.
         gEnter = svg.enter().append("svg").append("g");
+        // Initializing the tooltip.
         if (tooltip) {
           tip = utils.tip(tooltip);
           gEnter.call(tip);

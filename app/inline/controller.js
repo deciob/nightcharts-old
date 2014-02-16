@@ -1,13 +1,13 @@
 define([
   'when',
   'd3',
-  'underscore'
-], function(when, d3, _) {
+  'underscore',
+  'chart',
+], function(when, d3, _, chart) {
   'use strict';
 
   var inlineController = function (args) {
-    var chart = args.chart,
-      selection = d3.select(args.selector),
+    var selection = d3.select(args.selector),
       barchart,
       draw;
 

@@ -25,10 +25,33 @@ define({
   	create: {
       module: 'inline/controller',
       args: {
-        chart: {$ref: "chart_constructor"},
+        //chart: {$ref: "chart_constructor"},
         data_url: 'app/inline/data.json',
         el: {$ref: "inline_example"},
         selector: '#inline-viz'
+      }
+    }
+  },
+
+  // Create a simple view by rendering html, replacing some i18n strings
+	// and loading CSS.  Then, insert into the DOM
+	tooltip_example: {
+		render: {
+			template: { module: 'text!tooltip/template.html' },
+			replace: { module: 'i18n!tooltip/strings' },
+			css: { module: 'css!tooltip/structure.css' }
+		},
+		insert: { at: 'dom.first!.tooltip' }
+	},
+
+  tooltip_controller: {
+  	create: {
+      module: 'tooltip/controller',
+      args: {
+        //chart: {$ref: "chart_constructor"},
+        data_url: 'app/tooltip/data.json',
+        el: {$ref: "tooltip_example"},
+        selector: '#tooltip-viz'
       }
     }
   },

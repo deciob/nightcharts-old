@@ -1,0 +1,15 @@
+
+#tooltip-viz rect {
+  fill: #7EBDA2;
+  shape-rendering: crispEdges;
+}
+
+#tooltip-viz rect:hover {
+  fill: #abe0c9;
+  stroke: #7EBDA2;
+}
+
+.d3-tip {
+  padding: 5px;
+  background-color: rgba(230, 230, 230, 0.8);
+}
