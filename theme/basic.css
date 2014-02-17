@@ -39,6 +39,14 @@ section, footer {
   margin-bottom: 50px;
 }
 
+section.title h1 {
+  margin: 0;
+}
+
+section.title p {
+  margin: 0;
+}
+
 p {
   color: #3a3a3a;
 }
