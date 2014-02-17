@@ -27,7 +27,7 @@ define([
       });
 
       barchart = chart.bar()
-        .margin({top: 20, right: 20, bottom: 5, left: 40})
+        .margin({top: 20, right: 20, bottom: 5, left: 30})
         .width(600)
         .height(200)
         .duration(0)

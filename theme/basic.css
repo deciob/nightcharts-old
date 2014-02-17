@@ -35,9 +35,21 @@ section, footer {
   display: block;
   margin-left: auto;
   margin-right: auto;
+  margin-top: 50px;
+  margin-bottom: 50px;
 }
 
 p {
   color: #3a3a3a;
 }
+
+footer {
+  margin-top: 60px;
+}
+
+footer > p {
+  margin: 8px 0;
+}
+
+
 
