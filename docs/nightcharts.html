@@ -43,10 +43,7 @@ define(<span class="string">'draw'</span>,[<span class="string">'require'</span>
     }
   }
 
-});
-
-
-define(<span class="string">'utils/utils'</span>,[<span class="string">"d3"</span>, <span class="string">"d3_tip"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3, d3_tip)</span> {</span></pre></div></div>
+});</pre></div></div>
             
         </li>
         
@@ -61,7 +58,8 @@ define(<span class="string">'utils/utils'</span>,[<span class="string">"d3"</spa
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'utils/utils'</span>,[<span class="string">"d3"</span>, <span class="string">"d3_tip"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3, d3_tip)</span> {</span>
+  
   <span class="function"><span class="keyword">function</span> <span class="title">clone</span> <span class="params">(obj)</span> {</span>
     <span class="keyword">if</span> (<span class="literal">null</span> == obj || <span class="string">"object"</span> != <span class="keyword">typeof</span> obj) <span class="keyword">return</span> obj;
     <span class="keyword">var</span> copy = obj.constructor();
@@ -77,6 +75,10 @@ define(<span class="string">'utils/utils'</span>,[<span class="string">"d3"</spa
       target_clone[prop] = source[prop];
     }
     <span class="keyword">return</span> target_clone;
+  }
+
+  <span class="function"><span class="keyword">function</span> <span class="title">isObject</span> <span class="params">(o)</span> {</span>
+    <span class="keyword">return</span> Object.prototype.toString.call(o) === <span class="string">"[object Object]"</span>;
   }</pre></div></div>
             
         </li>
@@ -88,7 +90,10 @@ define(<span class="string">'utils/utils'</span>,[<span class="string">"d3"</spa
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>Todo: some docs on this function.</p>
+              <p>For each configuration in <code>state</code> it sets on the charting function <code>obj</code> 
+a function. When later called, with no arguments it gets the configuration,
+with argument it sets it. It handles nested configuration objects.</p>
+<p>obj - the charting function<br>state - configuration object  </p>
 
             </div>
             
@@ -99,6 +104,9 @@ define(<span class="string">'utils/utils'</span>,[<span class="string">"d3"</spa
         <span class="keyword">var</span> old = state[key];
         state[key] = x;
         <span class="keyword">return</span> obj;
+      }
+      <span class="keyword">if</span> ( isObject(state[key]) ) {
+        getset(obj[key], state[key]);
       }
     });
   }</pre></div></div>
@@ -116,7 +124,7 @@ define(<span class="string">'utils/utils'</span>,[<span class="string">"d3"</spa
 The solution is inspired from a reply in 
 <a href="https://groups.google.com/forum/#!msg/d3-js/WC_7Xi6VV50/j1HK0vIWI-EJ">Single event at end of transition?</a>. 
 The original suggestion assumes the data length never changes, this 
-instead also accounts for exits during the transition.</p>
+instead also accounts for <code>exits</code> during the transition.</p>
 
             </div>
             
@@ -146,22 +154,8 @@ instead also accounts for exits during the transition.</p>
             <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">tip</span> <span class="params">(obj)</span> {</span>
     <span class="keyword">var</span> tip = d3_tip()
       .attr(<span class="string">'class'</span>, <span class="string">'d3-tip'</span>)
-      .html(<span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d; });</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-6">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
-              <p>if (Object.prototype.toString.call(obj) === &quot;[object Object]&quot;) {</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span> (<span class="keyword">typeof</span> obj !== <span class="string">'boolean'</span>) {
+      .html(<span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d; });
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> obj !== <span class="string">'boolean'</span>) {
       Object.keys(obj).forEach(<span class="function"><span class="keyword">function</span><span class="params">(key)</span> {</span>
         <span class="keyword">var</span> value = obj[key];
         <span class="keyword">if</span> (key === <span class="string">'attr'</span>) {
@@ -181,10 +175,26 @@ instead also accounts for exits during the transition.</p>
     tip: tip
   };
 
-});
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p><strong>The default configuration module for the bar.bar module</strong></p>
 
-
-define(<span class="string">'bar/config'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span></pre></div></div>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'bar/config'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span>
+    
+    <span class="keyword">return</span> {
+      duration: <span class="number">900</span>,  <span class="comment">// transition duration</span>
+      colour: <span class="string">'LightSteelBlue'</span>,</pre></div></div>
             
         </li>
         
@@ -195,14 +205,16 @@ define(<span class="string">'bar/config'</span>,[<span class="string">'require'<
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p><strong>The default configuration module for the bar.bar module</strong></p>
+              <p>layout</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    
-    <span class="keyword">return</span> {
-      duration: <span class="number">900</span>,  <span class="comment">// transition duration</span>
-      colour: <span class="string">'LightSteelBlue'</span>,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      margin: {top: <span class="number">20</span>, right: <span class="number">20</span>, bottom: <span class="number">40</span>, left: <span class="number">40</span>},
+      width: <span class="number">500</span>,
+      height: <span class="number">400</span>,
+      padding: <span class="number">.1</span>,
+      barOffSet: <span class="number">4</span>,
+      orientation: <span class="string">'vertical'</span>,</pre></div></div>
             
         </li>
         
@@ -213,16 +225,15 @@ define(<span class="string">'bar/config'</span>,[<span class="string">'require'<
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>layout</p>
+              <p>axes</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      margin: {top: <span class="number">20</span>, right: <span class="number">20</span>, bottom: <span class="number">40</span>, left: <span class="number">40</span>},
-      width: <span class="number">500</span>,
-      height: <span class="number">400</span>,
-      padding: <span class="number">.1</span>,
-      barOffSet: <span class="number">4</span>,
-      orient: <span class="string">'vertical'</span>,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      axes: {
+        outerTickSize: <span class="number">0</span>,
+        x_orient: <span class="string">'bottom'</span>,
+        y_orient: <span class="string">'left'</span>,
+      },</pre></div></div>
             
         </li>
         
@@ -232,23 +243,6 @@ define(<span class="string">'bar/config'</span>,[<span class="string">'require'<
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
-              </div>
-              <p>axis</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      outerTickSize: <span class="number">0</span>,
-      x_orient: <span class="string">'bottom'</span>,
-      y_orient: <span class="string">'left'</span>,</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-10">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>data</p>
 
@@ -262,11 +256,11 @@ define(<span class="string">'bar/config'</span>,[<span class="string">'require'<
         </li>
         
         
-        <li id="section-11">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>events</p>
 
@@ -278,11 +272,11 @@ define(<span class="string">'bar/config'</span>,[<span class="string">'require'<
         </li>
         
         
-        <li id="section-12">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p><a href="https://github.com/Caged/d3-tip">d3-tip</a> tooltips,
 can pass boolean or object with d3-tip configuration.</p>
@@ -292,10 +286,26 @@ can pass boolean or object with d3-tip configuration.</p>
             <div class="content"><div class='highlight'><pre>      tooltip: <span class="literal">false</span>,
     };
   
-});
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p><strong>The bar.orientation module</strong></p>
+<p>It handles the barchart orientation: vertical or horizontal.
+An horizontal barchart has an ordinal scale on the y axis.
+A vertical barchart has a linear scale on the y axis.
+TODO: add time axis option.</p>
 
-
-define(<span class="string">'bar/orientation'</span>,[<span class="string">"d3"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3)</span> {</span></pre></div></div>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'bar/orientation'</span>,[<span class="string">"d3"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3)</span> {</span></pre></div></div>
             
         </li>
         
@@ -306,9 +316,7 @@ define(<span class="string">'bar/orientation'</span>,[<span class="string">"d3"<
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p><strong>The bar.orientation module</strong></p>
-<p>It handles the barchart orientation: vertical or horizontal.</p>
-<p>Sets the range and domain for the linear scale.</p>
+              <p>Sets the range and domain for the linear scale.</p>
 
             </div>
             
@@ -451,15 +459,7 @@ define(<span class="string">'bar/orientation'</span>,[<span class="string">"d3"<
     horizontal: horizontal
   };
 
-});
-
-
-define(<span class="string">'bar/bar'</span>,[
-    <span class="string">"d3"</span>, 
-    <span class="string">"utils/utils"</span>,
-    <span class="string">"bar/config"</span>, 
-    <span class="string">"bar/orientation"</span>,
-  ], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils, default_config, orientation)</span> {</span></pre></div></div>
+});</pre></div></div>
             
         </li>
         
@@ -474,7 +474,13 @@ define(<span class="string">'bar/bar'</span>,[
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'bar/bar'</span>,[
+    <span class="string">"d3"</span>, 
+    <span class="string">"utils/utils"</span>,
+    <span class="string">"bar/config"</span>, 
+    <span class="string">"bar/orientation"</span>,
+  ], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils, default_config, orientation)</span> {</span>
+  
   <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(user_config)</span> {</span>
 
     <span class="keyword">var</span> config = user_config || {},
@@ -504,8 +510,8 @@ define(<span class="string">'bar/bar'</span>,[
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      xScale = orientation[__.orient].xScale();
-      yScale = orientation[__.orient].yScale();</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      xScale = orientation[__.orientation].xScale();
+      yScale = orientation[__.orientation].yScale();</pre></div></div>
             
         </li>
         
@@ -516,14 +522,16 @@ define(<span class="string">'bar/bar'</span>,[
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
-              <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">https://github.com/mbostock/d3/wiki/SVG-Axes</a></p>
+              <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">SVG-Axes</a></p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>      xAxis = d3.svg.axis()
-        .outerTickSize(__.outerTickSize).scale(xScale).orient(__.x_orient);
+        .outerTickSize(__.axes.outerTickSize)
+        .scale(xScale).orient(__.axes.x_orient);
       yAxis = d3.svg.axis()
-        .outerTickSize(__.outerTickSize).scale(yScale).orient(__.y_orient);
+        .outerTickSize(__.axes.outerTickSize)
+        .scale(yScale).orient(__.axes.y_orient);
 
       selection.each(<span class="function"><span class="keyword">function</span><span class="params">(dat)</span> {</span>
 
@@ -586,8 +594,8 @@ define(<span class="string">'bar/bar'</span>,[
           delay: delay,
         }
 
-        orientation[__.orient].inflateYScale.call(yScale, params);
-        orientation[__.orient].inflateXScale.call(xScale, params);</pre></div></div>
+        orientation[__.orientation].inflateYScale.call(yScale, params);
+        orientation[__.orientation].inflateXScale.call(xScale, params);</pre></div></div>
             
         </li>
         
@@ -701,7 +709,7 @@ define(<span class="string">'bar/bar'</span>,[
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        orientation[__.orient]
+            <div class="content"><div class='highlight'><pre>        orientation[__.orientation]
           .transitionYAxis
           .call(transition.selectAll(<span class="string">'.y.axis'</span>), params);</pre></div></div>
             
@@ -718,7 +726,7 @@ define(<span class="string">'bar/bar'</span>,[
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        orientation[__.orient]
+            <div class="content"><div class='highlight'><pre>        orientation[__.orientation]
           .transitionXAxis
           .call(transition.select(<span class="string">".x.axis"</span>), params);</pre></div></div>
             
@@ -767,7 +775,7 @@ define(<span class="string">'bar/bar'</span>,[
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        bars = orientation[__.orient].createBars.call(bars.enter(), params)
+            <div class="content"><div class='highlight'><pre>        bars = orientation[__.orientation].createBars.call(bars.enter(), params)
           .on(<span class="string">'click'</span>, __.handleClick);
 
         <span class="keyword">if</span> (tooltip) {
@@ -789,7 +797,7 @@ define(<span class="string">'bar/bar'</span>,[
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        orientation[__.orient].transitionBars
+            <div class="content"><div class='highlight'><pre>        orientation[__.orientation].transitionBars
           .call(transition.selectAll(<span class="string">'.bar'</span>), params)
           .call(utils.endall, data, __.handleTransitionEnd);
 
@@ -803,10 +811,7 @@ define(<span class="string">'bar/bar'</span>,[
 
   }
 
-});
-
-
-define(<span class="string">'frame/states'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span></pre></div></div>
+});</pre></div></div>
             
         </li>
         
@@ -823,7 +828,9 @@ Name-spaced, might add other states if needed.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> transition_states = [
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'frame/states'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span>
+
+  <span class="keyword">var</span> transition_states = [
     {
       <span class="string">'name'</span>: <span class="string">'in_pause'</span>,
       <span class="string">'initial'</span>: <span class="literal">true</span>,
@@ -880,26 +887,14 @@ Name-spaced, might add other states if needed.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
-              <p>From <a href="http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/">http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/</a></p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>define(<span class="string">'frame/state_machine'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-36">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
-              </div>
               <p><strong>frame.state_machine module</strong></p>
+<p>From <a href="http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/">http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/</a></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">StateMachine</span> <span class="params">(states)</span> {</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'frame/state_machine'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span>
+
+  <span class="function"><span class="keyword">function</span> <span class="title">StateMachine</span> <span class="params">(states)</span> {</span>
     <span class="keyword">this</span>.states = states;
     <span class="keyword">this</span>.indexes = {};
     <span class="keyword">for</span>( <span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>.states.length; i++) {
@@ -923,11 +918,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>getLastEvent();</p>
 
@@ -935,30 +930,29 @@ Name-spaced, might add other states if needed.</p>
             
             <div class="content"><div class='highlight'><pre>  <span class="keyword">return</span> StateMachine;
 
-});
-
-
-define(<span class="string">'frame/frame'</span>,[
-  <span class="string">'d3'</span>,
-  <span class="string">'utils/utils'</span>,
-  <span class="string">'frame/states'</span>,
-  <span class="string">'frame/state_machine'</span>
-], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils, states, StateMachine)</span> {</span></pre></div></div>
+});</pre></div></div>
             
         </li>
         
         
-        <li id="section-38">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p><strong>frame.frame module</strong></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> Frame = <span class="function"><span class="keyword">function</span> <span class="params">(conf)</span> {</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'frame/frame'</span>,[
+  <span class="string">'d3'</span>,
+  <span class="string">'utils/utils'</span>,
+  <span class="string">'frame/states'</span>,
+  <span class="string">'frame/state_machine'</span>
+], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils, states, StateMachine)</span> {</span>
+
+  <span class="keyword">var</span> Frame = <span class="function"><span class="keyword">function</span> <span class="params">(conf)</span> {</span>
     <span class="keyword">var</span> self = <span class="keyword">this</span>;
     
     <span class="keyword">this</span>.initial_frame = <span class="keyword">this</span>.frame = conf.frame;
@@ -984,11 +978,11 @@ define(<span class="string">'frame/frame'</span>,[
         </li>
         
         
-        <li id="section-39">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>Initial frame. The chart is rendered for the first time.</p>
 
@@ -999,11 +993,11 @@ define(<span class="string">'frame/frame'</span>,[
         </li>
         
         
-        <li id="section-40">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>Fired when all the chart related transitions within a frame are 
 terminated.
@@ -1044,11 +1038,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-41">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>Re-render the chart</p>
 
@@ -1061,11 +1055,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-42">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>When no data is left to consume, let us stop the running frames!</p>
 
@@ -1090,11 +1084,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-43">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p>TODO: there is a lot of repetition here!</p>
 
@@ -1113,11 +1107,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-44">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <p>TODO:
 for next and prev we are allowing multiple prev-next events to be 
