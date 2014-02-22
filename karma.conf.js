@@ -16,6 +16,7 @@ module.exports = function(config) {
       {pattern: 'src/**/*.js', included: false},
       {pattern: 'test/**/*_spec.js', included: false},
       {pattern: 'lib/d3/d3.js', included: false},
+      {pattern: 'lib/d3-tip/index.js', included: false},
       {pattern: 'lib/chai/chai.js', included: false},
       {pattern: 'test/data.js', included: false},
       'test/test-main.js'
