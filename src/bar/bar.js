@@ -1,11 +1,11 @@
+// **The bar.bar module**
+
 define([
     "d3", 
     "utils/utils",
     "bar/config", 
     "bar/orientation",
   ], function(d3, utils, default_config, orientation) {
-
-  // **The bar.bar module**
   
   return function (user_config) {
 
@@ -24,14 +24,16 @@ define([
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
       // Scales are functions that map from an input domain to an output range.
-      xScale = orientation[__.orient].xScale();
-      yScale = orientation[__.orient].yScale();
+      xScale = orientation[__.orientation].xScale();
+      yScale = orientation[__.orientation].yScale();
   
-      // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
+      // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       xAxis = d3.svg.axis()
-        .outerTickSize(__.outerTickSize).scale(xScale).orient(__.x_orient);
+        .outerTickSize(__.axes.outerTickSize)
+        .scale(xScale).orient(__.axes.x_orient);
       yAxis = d3.svg.axis()
-        .outerTickSize(__.outerTickSize).scale(yScale).orient(__.y_orient);
+        .outerTickSize(__.axes.outerTickSize)
+        .scale(yScale).orient(__.axes.y_orient);
 
       selection.each(function(dat) {
 
@@ -69,8 +71,8 @@ define([
           delay: delay,
         }
 
-        orientation[__.orient].inflateYScale.call(yScale, params);
-        orientation[__.orient].inflateXScale.call(xScale, params);
+        orientation[__.orientation].inflateYScale.call(yScale, params);
+        orientation[__.orientation].inflateXScale.call(xScale, params);
 
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
@@ -99,12 +101,12 @@ define([
         transition = g.transition().duration(__.duration)
         
         // Update the y axis.
-        orientation[__.orient]
+        orientation[__.orientation]
           .transitionYAxis
           .call(transition.selectAll('.y.axis'), params);
 
         // Update the x axis.
-        orientation[__.orient]
+        orientation[__.orientation]
           .transitionXAxis
           .call(transition.select(".x.axis"), params);
 
@@ -117,7 +119,7 @@ define([
           .transition().duration(__.duration).style('opacity', 0).remove();
 
         // Otherwise, create them.
-        bars = orientation[__.orient].createBars.call(bars.enter(), params)
+        bars = orientation[__.orientation].createBars.call(bars.enter(), params)
           .on('click', __.handleClick);
 
         if (tooltip) {
@@ -127,7 +129,7 @@ define([
         }
           
         // And transition them.
-        orientation[__.orient].transitionBars
+        orientation[__.orientation].transitionBars
           .call(transition.selectAll('.bar'), params)
           .call(utils.endall, data, __.handleTransitionEnd);
 

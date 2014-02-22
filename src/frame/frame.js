@@ -1,11 +1,11 @@
+// **frame.frame module**
+
 define([
   'd3',
   'utils/utils',
   'frame/states',
   'frame/state_machine'
 ], function(d3, utils, states, StateMachine) {
-
-  // **frame.frame module**
 
   var Frame = function (conf) {
     var self = this;

@@ -1,8 +1,8 @@
+// **frame.state_machine module**
+// 
 // From http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/
 
 define(function(require) {
-
-  // **frame.state_machine module**
 
   function StateMachine (states) {
     this.states = states;

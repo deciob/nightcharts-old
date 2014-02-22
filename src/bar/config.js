@@ -1,6 +1,6 @@
+// **The default configuration module for the bar.bar module**
+
 define(function(require) {
-  
-    // **The default configuration module for the bar.bar module**
     
     return {
       duration: 900,  // transition duration
@@ -11,11 +11,13 @@ define(function(require) {
       height: 400,
       padding: .1,
       barOffSet: 4,
-      orient: 'vertical',
-      // axis
-      outerTickSize: 0,
-      x_orient: 'bottom',
-      y_orient: 'left',
+      orientation: 'vertical',
+      // axes
+      axes: {
+        outerTickSize: 0,
+        x_orient: 'bottom',
+        y_orient: 'left',
+      },
       // data
       max: void 0,         // Max value for the linear scale
       invert_data: false,  // Data sorting

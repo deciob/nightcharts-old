@@ -1,6 +1,6 @@
-define(["d3", "d3_tip"], function(d3, d3_tip) {
+// **Useful functions that can be shared across modules**
 
-  // **Useful functions that can be shared across modules**
+define(["d3", "d3_tip"], function(d3, d3_tip) {
   
   function clone (obj) {
     if (null == obj || "object" != typeof obj) return obj;
@@ -19,7 +19,17 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return target_clone;
   }
 
-  // Todo: some docs on this function.
+  function isObject (o) {
+    return Object.prototype.toString.call(o) === "[object Object]";
+  }
+
+  // For each configuration in `state` it sets on the charting function `obj` 
+  // a function. When later called, with no arguments it gets the configuration,
+  // with argument it sets it. It handles nested configuration objects.
+  //
+  // obj - the charting function  
+  // state - configuration object  
+  //
   function getset (obj, state) {
     d3.keys(state).forEach( function(key) {
       obj[key] = function (x) {
@@ -28,6 +38,9 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
         state[key] = x;
         return obj;
       }
+      if ( isObject(state[key]) ) {
+        getset(obj[key], state[key]);
+      }
     });
   }
 
@@ -35,7 +48,7 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
   // The solution is inspired from a reply in 
   // [Single event at end of transition?](https://groups.google.com/forum/#!msg/d3-js/WC_7Xi6VV50/j1HK0vIWI-EJ). 
   // The original suggestion assumes the data length never changes, this 
-  // instead also accounts for exits during the transition.
+  // instead also accounts for `exits` during the transition.
   function endall (elements_in_transition, data, callback) {
     var n = data.length;
     elements_in_transition 
@@ -51,7 +64,6 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     var tip = d3_tip()
       .attr('class', 'd3-tip')
       .html(function(d) { return d; });
-    //if (Object.prototype.toString.call(obj) === "[object Object]") {
     if (typeof obj !== 'boolean') {
       Object.keys(obj).forEach(function(key) {
         var value = obj[key];

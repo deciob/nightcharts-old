@@ -1,9 +1,9 @@
+// **frame.states module**
+
+// Used by the *frame.state_machine* module.
+// Name-spaced, might add other states if needed.
+
 define(function(require) {
-
-  // **frame.states module**
-
-  // Used by the *frame.state_machine* module.
-  // Name-spaced, might add other states if needed.
 
   var transition_states = [
     {

@@ -1,8 +1,11 @@
+// **The bar.orientation module**
+
+// It handles the barchart orientation: vertical or horizontal.
+// An horizontal barchart has an ordinal scale on the y axis.
+// A vertical barchart has a linear scale on the y axis.
+// TODO: add time axis option.
+
 define(["d3"], function(d3) {
-
-  // **The bar.orientation module**
-
-  // It handles the barchart orientation: vertical or horizontal.
 
   // Sets the range and domain for the linear scale.
   function inflateLinearScale (params, range) {
