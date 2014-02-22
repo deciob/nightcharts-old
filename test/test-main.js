@@ -14,13 +14,8 @@ requirejs.config({
     paths: {
         'chai': '../lib/chai/chai',
         'd3': '../lib/d3/d3',
+        'd3_tip': '../lib/d3-tip/index',
         'data': '../test/data'
-    },
-
-    shim: {
-        'd3': {
-            exports: 'd3'
-        }
     },
 
     // ask Require.js to load these files (all our tests)
