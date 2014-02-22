@@ -230,9 +230,16 @@ instead also accounts for <code>exits</code> during the transition.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>      axes: {
-        outerTickSize: <span class="number">0</span>,
-        x_orient: <span class="string">'bottom'</span>,
-        y_orient: <span class="string">'left'</span>,
+        x: {
+          outerTickSize: <span class="number">0</span>,
+          orient: <span class="string">'bottom'</span>,
+          tickValues: <span class="keyword">void</span> <span class="number">0</span>,
+        },
+        y: {
+          outerTickSize: <span class="number">0</span>,
+          orient: <span class="string">'left'</span>,
+          tickValues: <span class="keyword">void</span> <span class="number">0</span>,
+        }
       },</pre></div></div>
             
         </li>
@@ -506,7 +513,8 @@ TODO: add time axis option.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
-              <p>Scales are functions that map from an input domain to an output range.</p>
+              <p>Scales are functions that map from an input domain to an output range.
+Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
@@ -522,16 +530,23 @@ TODO: add time axis option.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
-              <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">SVG-Axes</a></p>
+              <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">SVG-Axes</a>
+Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      xAxis = d3.svg.axis()
-        .outerTickSize(__.axes.outerTickSize)
-        .scale(xScale).orient(__.axes.x_orient);
-      yAxis = d3.svg.axis()
-        .outerTickSize(__.axes.outerTickSize)
-        .scale(yScale).orient(__.axes.y_orient);
+            <div class="content"><div class='highlight'><pre>      xAxis = d3.svg.axis();
+      d3.entries(__.axes.x).forEach(<span class="function"><span class="keyword">function</span><span class="params">(key, value)</span> {</span>
+        <span class="keyword">if</span> (value) {
+          xAxis[key](value);
+        }
+      });
+      yAxis = d3.svg.axis();
+      d3.entries(__.axes.y).forEach(<span class="function"><span class="keyword">function</span><span class="params">(key, value)</span> {</span>
+        <span class="keyword">if</span> (value) {
+          yAxis[key](value);
+        }
+      });
 
       selection.each(<span class="function"><span class="keyword">function</span><span class="params">(dat)</span> {</span>
 

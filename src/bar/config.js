@@ -14,9 +14,16 @@ define(function(require) {
       orientation: 'vertical',
       // axes
       axes: {
-        outerTickSize: 0,
-        x_orient: 'bottom',
-        y_orient: 'left',
+        x: {
+          outerTickSize: 0,
+          orient: 'bottom',
+          tickValues: void 0,
+        },
+        y: {
+          outerTickSize: 0,
+          orient: 'left',
+          tickValues: void 0,
+        }
       },
       // data
       max: void 0,         // Max value for the linear scale

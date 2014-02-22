@@ -10122,9 +10122,16 @@ define('bar/config',['require'],function(require) {
       orientation: 'vertical',
       // axes
       axes: {
-        outerTickSize: 0,
-        x_orient: 'bottom',
-        y_orient: 'left',
+        x: {
+          outerTickSize: 0,
+          orient: 'bottom',
+          tickValues: void 0,
+        },
+        y: {
+          outerTickSize: 0,
+          orient: 'left',
+          tickValues: void 0,
+        }
       },
       // data
       max: void 0,         // Max value for the linear scale
@@ -10282,16 +10289,24 @@ define('bar/bar',[
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
       // Scales are functions that map from an input domain to an output range.
+      // Presently no assumption is made about the chart orientation.
       xScale = orientation[__.orientation].xScale();
       yScale = orientation[__.orientation].yScale();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
-      xAxis = d3.svg.axis()
-        .outerTickSize(__.axes.outerTickSize)
-        .scale(xScale).orient(__.axes.x_orient);
-      yAxis = d3.svg.axis()
-        .outerTickSize(__.axes.outerTickSize)
-        .scale(yScale).orient(__.axes.y_orient);
+      // Presently no assumption is made about the chart orientation.
+      xAxis = d3.svg.axis();
+      d3.entries(__.axes.x).forEach(function(key, value) {
+        if (value) {
+          xAxis[key](value);
+        }
+      });
+      yAxis = d3.svg.axis();
+      d3.entries(__.axes.y).forEach(function(key, value) {
+        if (value) {
+          yAxis[key](value);
+        }
+      });
 
       selection.each(function(dat) {
 
