@@ -90,10 +90,10 @@ define(<span class="string">'draw'</span>,[<span class="string">'require'</span>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>For each configuration in <code>state</code> it sets on the charting function <code>obj</code> 
-a function. When later called, with no arguments it gets the configuration,
-with argument it sets it. It handles nested configuration objects.</p>
-<p>obj - the charting function<br>state - configuration object  </p>
+              <p>For each nested attributes in <code>state</code> it sets a getter-setter function 
+on <code>obj</code>.</p>
+<p>obj - object or function
+state - object</p>
 
             </div>
             

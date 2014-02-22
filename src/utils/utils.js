@@ -23,13 +23,11 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return Object.prototype.toString.call(o) === "[object Object]";
   }
 
-  // For each configuration in `state` it sets on the charting function `obj` 
-  // a function. When later called, with no arguments it gets the configuration,
-  // with argument it sets it. It handles nested configuration objects.
+  // For each nested attributes in `state` it sets a getter-setter function 
+  // on `obj`.
   //
-  // obj - the charting function  
-  // state - configuration object  
-  //
+  // obj - object or function
+  // state - object
   function getset (obj, state) {
     d3.keys(state).forEach( function(key) {
       obj[key] = function (x) {
