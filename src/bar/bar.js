@@ -31,15 +31,15 @@ define([
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       // Presently no assumption is made about the chart orientation.
       xAxis = d3.svg.axis();
-      d3.entries(__.axes.x).forEach(function(key, value) {
-        if (value) {
-          xAxis[key](value);
+      d3.entries(__.axes.x).forEach(function(o) {
+        if (o.value) {
+          xAxis[o.key](o.value);
         }
       });
       yAxis = d3.svg.axis();
-      d3.entries(__.axes.y).forEach(function(key, value) {
-        if (value) {
-          yAxis[key](value);
+      d3.entries(__.axes.y).forEach(function(o) {
+        if (o.value) {
+          yAxis[o.key](o.value);
         }
       });
 

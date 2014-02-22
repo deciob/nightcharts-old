@@ -536,15 +536,15 @@ Presently no assumption is made about the chart orientation.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>      xAxis = d3.svg.axis();
-      d3.entries(__.axes.x).forEach(<span class="function"><span class="keyword">function</span><span class="params">(key, value)</span> {</span>
-        <span class="keyword">if</span> (value) {
-          xAxis[key](value);
+      d3.entries(__.axes.x).forEach(<span class="function"><span class="keyword">function</span><span class="params">(o)</span> {</span>
+        <span class="keyword">if</span> (o.value) {
+          xAxis[o.key](o.value);
         }
       });
       yAxis = d3.svg.axis();
-      d3.entries(__.axes.y).forEach(<span class="function"><span class="keyword">function</span><span class="params">(key, value)</span> {</span>
-        <span class="keyword">if</span> (value) {
-          yAxis[key](value);
+      d3.entries(__.axes.y).forEach(<span class="function"><span class="keyword">function</span><span class="params">(o)</span> {</span>
+        <span class="keyword">if</span> (o.value) {
+          yAxis[o.key](o.value);
         }
       });
 
