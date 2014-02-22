@@ -535,15 +535,15 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      xAxis = d3.svg.axis();
+            <div class="content"><div class='highlight'><pre>      xAxis = d3.svg.axis().scale(xScale);
       d3.entries(__.axes.x).forEach(<span class="function"><span class="keyword">function</span><span class="params">(o)</span> {</span>
-        <span class="keyword">if</span> (o.value) {
+        <span class="keyword">if</span> (o.value !== <span class="literal">undefined</span>) {
           xAxis[o.key](o.value);
         }
       });
-      yAxis = d3.svg.axis();
+      yAxis = d3.svg.axis().scale(yScale);
       d3.entries(__.axes.y).forEach(<span class="function"><span class="keyword">function</span><span class="params">(o)</span> {</span>
-        <span class="keyword">if</span> (o.value) {
+        <span class="keyword">if</span> (o.value !== <span class="literal">undefined</span>) {
           yAxis[o.key](o.value);
         }
       });
