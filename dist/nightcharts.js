@@ -294,13 +294,13 @@ define('bar/bar',[
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       // Presently no assumption is made about the chart orientation.
       xAxis = d3.svg.axis().scale(xScale);
-      d3.entries(__.axes.x).forEach(function(o) {
+      d3.entries(__.x_axis).forEach(function(o) {
         if (o.value !== undefined) {
           xAxis[o.key](o.value);
         }
       });
       yAxis = d3.svg.axis().scale(yScale);
-      d3.entries(__.axes.y).forEach(function(o) {
+      d3.entries(__.y_axis).forEach(function(o) {
         if (o.value !== undefined) {
           yAxis[o.key](o.value);
         }

@@ -27,9 +27,12 @@ define([
       });
 
       barchart = chart.bar()
-        .margin({bottom: 5})
+        .margin({bottom: 35})
         .width(600)
         .height(200)
+        .x_axis({
+          tickValues: ['1950-1955', '2045-2050']
+        })
         .duration(0)
         .tooltip(tooltip_conf);
       chart.draw(barchart, selection, data);
