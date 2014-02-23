@@ -90,23 +90,27 @@ define(<span class="string">'draw'</span>,[<span class="string">'require'</span>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>For each nested attributes in <code>state</code> it sets a getter-setter function 
-on <code>obj</code>.</p>
+              <p>For each attribute in <code>state</code> it sets a getter-setter function 
+on <code>obj</code>.
+Accepts one level nested <code>state</code> objects.
+TODO: make this function less convoluted.</p>
 <p>obj - object or function
 state - object</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">getset</span> <span class="params">(obj, state)</span> {</span>
-    d3.keys(state).forEach( <span class="function"><span class="keyword">function</span><span class="params">(key)</span> {</span>
-      obj[key] = <span class="function"><span class="keyword">function</span> <span class="params">(x)</span> {</span>
-        <span class="keyword">if</span> (!arguments.length) <span class="keyword">return</span> state[key];
-        <span class="keyword">var</span> old = state[key];
-        state[key] = x;
+    d3.entries(state).forEach(<span class="function"><span class="keyword">function</span><span class="params">(o)</span> {</span>
+      obj[o.key] = <span class="function"><span class="keyword">function</span> <span class="params">(x)</span> {</span>
+        <span class="keyword">if</span> (!arguments.length) <span class="keyword">return</span> state[o.key];
+        <span class="keyword">var</span> old = state[o.key];
+        state[o.key] = x;
+        <span class="keyword">if</span> ( isObject(o.value) ) {
+          d3.keys(o.value).forEach(<span class="function"><span class="keyword">function</span><span class="params">(key)</span> {</span>
+            state[o.key][key] = <span class="keyword">typeof</span> x[key] !== <span class="string">'undefined'</span> ? x[key] : o.value[key];
+          });
+        }
         <span class="keyword">return</span> obj;
-      }
-      <span class="keyword">if</span> ( isObject(state[key]) ) {
-        getset(obj[key], state[key]);
       }
     });
   }</pre></div></div>

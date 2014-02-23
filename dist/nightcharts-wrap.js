@@ -10044,21 +10044,26 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     return Object.prototype.toString.call(o) === "[object Object]";
   }
 
-  // For each nested attributes in `state` it sets a getter-setter function 
+
+  // For each attribute in `state` it sets a getter-setter function 
   // on `obj`.
+  // Accepts one level nested `state` objects.
+  // TODO: make this function less convoluted.
   //
   // obj - object or function
   // state - object
   function getset (obj, state) {
-    d3.keys(state).forEach( function(key) {
-      obj[key] = function (x) {
-        if (!arguments.length) return state[key];
-        var old = state[key];
-        state[key] = x;
+    d3.entries(state).forEach(function(o) {
+      obj[o.key] = function (x) {
+        if (!arguments.length) return state[o.key];
+        var old = state[o.key];
+        state[o.key] = x;
+        if ( isObject(o.value) ) {
+          d3.keys(o.value).forEach(function(key) {
+            state[o.key][key] = typeof x[key] !== 'undefined' ? x[key] : o.value[key];
+          });
+        }
         return obj;
-      }
-      if ( isObject(state[key]) ) {
-        getset(obj[key], state[key]);
       }
     });
   }

@@ -29,9 +29,9 @@ define(['chai', 'utils/utils'], function(chai, utils) {
 
     it('getset nested - calling with arguments is setter, without is getter', function(){
       utils.getset(myFunction, __);
-      myFunction.margin.top(30);
-      assert.equal(myFunction.margin.top(), 30);
-      assert.equal(myFunction.margin.right(), 20);
+      myFunction.margin({top: 30});
+      assert.equal(myFunction.margin().top, 30);
+      assert.equal(myFunction.margin().right, 20);
     });
 
   });
