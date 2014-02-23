@@ -14,9 +14,9 @@ define('draw',['require'],function(require) {
 });
 
 
-define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
+// **Useful functions that can be shared across modules**
 
-  // **Useful functions that can be shared across modules**
+define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
   
   function clone (obj) {
     if (null == obj || "object" != typeof obj) return obj;
@@ -35,13 +35,29 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     return target_clone;
   }
 
-  // Todo: some docs on this function.
+  function isObject (o) {
+    return Object.prototype.toString.call(o) === "[object Object]";
+  }
+
+
+  // For each attribute in `state` it sets a getter-setter function 
+  // on `obj`.
+  // Accepts one level nested `state` objects.
+  // TODO: make this function less convoluted.
+  //
+  // obj - object or function
+  // state - object
   function getset (obj, state) {
-    d3.keys(state).forEach( function(key) {
-      obj[key] = function (x) {
-        if (!arguments.length) return state[key];
-        var old = state[key];
-        state[key] = x;
+    d3.entries(state).forEach(function(o) {
+      obj[o.key] = function (x) {
+        if (!arguments.length) return state[o.key];
+        var old = state[o.key];
+        state[o.key] = x;
+        if ( isObject(o.value) ) {
+          d3.keys(o.value).forEach(function(key) {
+            state[o.key][key] = typeof x[key] !== 'undefined' ? x[key] : o.value[key];
+          });
+        }
         return obj;
       }
     });
@@ -51,7 +67,7 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
   // The solution is inspired from a reply in 
   // [Single event at end of transition?](https://groups.google.com/forum/#!msg/d3-js/WC_7Xi6VV50/j1HK0vIWI-EJ). 
   // The original suggestion assumes the data length never changes, this 
-  // instead also accounts for exits during the transition.
+  // instead also accounts for `exits` during the transition.
   function endall (elements_in_transition, data, callback) {
     var n = data.length;
     elements_in_transition 
@@ -67,7 +83,6 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     var tip = d3_tip()
       .attr('class', 'd3-tip')
       .html(function(d) { return d; });
-    //if (Object.prototype.toString.call(obj) === "[object Object]") {
     if (typeof obj !== 'boolean') {
       Object.keys(obj).forEach(function(key) {
         var value = obj[key];
@@ -91,9 +106,9 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
 });
 
 
+// **The default configuration module for the bar.bar module**
+
 define('bar/config',['require'],function(require) {
-  
-    // **The default configuration module for the bar.bar module**
     
     return {
       duration: 900,  // transition duration
@@ -104,11 +119,18 @@ define('bar/config',['require'],function(require) {
       height: 400,
       padding: .1,
       barOffSet: 4,
-      orient: 'vertical',
-      // axis
-      outerTickSize: 0,
-      x_orient: 'bottom',
-      y_orient: 'left',
+      orientation: 'vertical',
+      // axes
+      x_axis: {
+        outerTickSize: 0,
+        orient: 'bottom',
+        tickValues: void 0,
+      },
+      y_axis: {
+        outerTickSize: 0,
+        orient: 'left',
+        tickValues: void 0,
+      },
       // data
       max: void 0,         // Max value for the linear scale
       invert_data: false,  // Data sorting
@@ -118,18 +140,21 @@ define('bar/config',['require'],function(require) {
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
-      // can pass boolean or html callback function.
+      // can pass boolean or object with d3-tip configuration.
       tooltip: false,
     };
   
 });
 
 
+// **The bar.orientation module**
+
+// It handles the barchart orientation: vertical or horizontal.
+// An horizontal barchart has an ordinal scale on the y axis.
+// A vertical barchart has a linear scale on the y axis.
+// TODO: add time axis option.
+
 define('bar/orientation',["d3"], function(d3) {
-
-  // **The bar.orientation module**
-
-  // It handles the barchart orientation: vertical or horizontal.
 
   // Sets the range and domain for the linear scale.
   function inflateLinearScale (params, range) {
@@ -236,14 +261,14 @@ define('bar/orientation',["d3"], function(d3) {
 });
 
 
+// **The bar.bar module**
+
 define('bar/bar',[
     "d3", 
     "utils/utils",
     "bar/config", 
     "bar/orientation",
   ], function(d3, utils, default_config, orientation) {
-
-  // **The bar.bar module**
   
   return function (user_config) {
 
@@ -262,14 +287,24 @@ define('bar/bar',[
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
       // Scales are functions that map from an input domain to an output range.
-      xScale = orientation[__.orient].xScale();
-      yScale = orientation[__.orient].yScale();
+      // Presently no assumption is made about the chart orientation.
+      xScale = orientation[__.orientation].xScale();
+      yScale = orientation[__.orientation].yScale();
   
-      // Axes, see: https://github.com/mbostock/d3/wiki/SVG-Axes
-      xAxis = d3.svg.axis()
-        .outerTickSize(__.outerTickSize).scale(xScale).orient(__.x_orient);
-      yAxis = d3.svg.axis()
-        .outerTickSize(__.outerTickSize).scale(yScale).orient(__.y_orient);
+      // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
+      // Presently no assumption is made about the chart orientation.
+      xAxis = d3.svg.axis().scale(xScale);
+      d3.entries(__.axes.x).forEach(function(o) {
+        if (o.value !== undefined) {
+          xAxis[o.key](o.value);
+        }
+      });
+      yAxis = d3.svg.axis().scale(yScale);
+      d3.entries(__.axes.y).forEach(function(o) {
+        if (o.value !== undefined) {
+          yAxis[o.key](o.value);
+        }
+      });
 
       selection.each(function(dat) {
 
@@ -307,8 +342,8 @@ define('bar/bar',[
           delay: delay,
         }
 
-        orientation[__.orient].inflateYScale.call(yScale, params);
-        orientation[__.orient].inflateXScale.call(xScale, params);
+        orientation[__.orientation].inflateYScale.call(yScale, params);
+        orientation[__.orientation].inflateXScale.call(xScale, params);
 
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
@@ -337,12 +372,12 @@ define('bar/bar',[
         transition = g.transition().duration(__.duration)
         
         // Update the y axis.
-        orientation[__.orient]
+        orientation[__.orientation]
           .transitionYAxis
           .call(transition.selectAll('.y.axis'), params);
 
         // Update the x axis.
-        orientation[__.orient]
+        orientation[__.orientation]
           .transitionXAxis
           .call(transition.select(".x.axis"), params);
 
@@ -355,7 +390,7 @@ define('bar/bar',[
           .transition().duration(__.duration).style('opacity', 0).remove();
 
         // Otherwise, create them.
-        bars = orientation[__.orient].createBars.call(bars.enter(), params)
+        bars = orientation[__.orientation].createBars.call(bars.enter(), params)
           .on('click', __.handleClick);
 
         if (tooltip) {
@@ -365,7 +400,7 @@ define('bar/bar',[
         }
           
         // And transition them.
-        orientation[__.orient].transitionBars
+        orientation[__.orientation].transitionBars
           .call(transition.selectAll('.bar'), params)
           .call(utils.endall, data, __.handleTransitionEnd);
 
@@ -382,12 +417,12 @@ define('bar/bar',[
 });
 
 
+// **frame.states module**
+
+// Used by the *frame.state_machine* module.
+// Name-spaced, might add other states if needed.
+
 define('frame/states',['require'],function(require) {
-
-  // **frame.states module**
-
-  // Used by the *frame.state_machine* module.
-  // Name-spaced, might add other states if needed.
 
   var transition_states = [
     {
@@ -438,11 +473,11 @@ define('frame/states',['require'],function(require) {
 });
 
 
+// **frame.state_machine module**
+// 
 // From http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/
 
 define('frame/state_machine',['require'],function(require) {
-
-  // **frame.state_machine module**
 
   function StateMachine (states) {
     this.states = states;
@@ -472,14 +507,14 @@ define('frame/state_machine',['require'],function(require) {
 });
 
 
+// **frame.frame module**
+
 define('frame/frame',[
   'd3',
   'utils/utils',
   'frame/states',
   'frame/state_machine'
 ], function(d3, utils, states, StateMachine) {
-
-  // **frame.frame module**
 
   var Frame = function (conf) {
     var self = this;
