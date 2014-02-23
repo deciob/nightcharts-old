@@ -121,17 +121,15 @@ define('bar/config',['require'],function(require) {
       barOffSet: 4,
       orientation: 'vertical',
       // axes
-      axes: {
-        x: {
-          outerTickSize: 0,
-          orient: 'bottom',
-          tickValues: void 0,
-        },
-        y: {
-          outerTickSize: 0,
-          orient: 'left',
-          tickValues: void 0,
-        }
+      x_axis: {
+        outerTickSize: 0,
+        orient: 'bottom',
+        tickValues: void 0,
+      },
+      y_axis: {
+        outerTickSize: 0,
+        orient: 'left',
+        tickValues: void 0,
       },
       // data
       max: void 0,         // Max value for the linear scale
