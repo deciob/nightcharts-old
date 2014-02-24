@@ -97,11 +97,29 @@ define(["d3", "utils/utils"], function(d3, utils) {
       }  
     } 
 
+    function setYScale (orientation) {
+      if (orientation == 'vertical') {
+        return d3.scale.linear;
+      } else {
+        return d3.scale.ordinal;
+      }  
+    }
+
+    function setXScale (orientation) {
+      if (orientation == 'vertical') {
+        return d3.scale.ordinal;
+      } else {
+        return d3.scale.linear;
+      }  
+    }
+
     return function(orientation, params) {
       this.applyXScale = utils.schonfinkelize(applyXScale, orientation, params);
       this.applyYScale = utils.schonfinkelize(applyYScale, orientation, params);
       this.transitionXAxis = utils.schonfinkelize(transitionXAxis, orientation, params);
       this.transitionYAxis = utils.schonfinkelize(transitionYAxis, orientation, params);
+      this.setYScale = utils.schonfinkelize(setYScale, orientation);
+      this.setXScale = utils.schonfinkelize(setXScale, orientation);
       return this;
     };
 

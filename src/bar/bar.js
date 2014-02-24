@@ -26,8 +26,10 @@ define([
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      xScale = orientation[__.orientation].xScale();
-      yScale = orientation[__.orientation].yScale();
+      //xScale = orientation[__.orientation].xScale();
+      this.setXScale(__.orientation);
+      //yScale = orientation[__.orientation].yScale();
+      this.setYScale(__.orientation);
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       // Presently no assumption is made about the chart orientation.
