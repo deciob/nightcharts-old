@@ -218,11 +218,29 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }  
     } 
 
+    function setYScale (orientation) {
+      if (orientation == 'vertical') {
+        return d3.scale.linear;
+      } else {
+        return d3.scale.ordinal;
+      }  
+    }
+
+    function setXScale (orientation) {
+      if (orientation == 'vertical') {
+        return d3.scale.ordinal;
+      } else {
+        return d3.scale.linear;
+      }  
+    }
+
     return function(orientation, params) {
       this.applyXScale = utils.schonfinkelize(applyXScale, orientation, params);
       this.applyYScale = utils.schonfinkelize(applyYScale, orientation, params);
       this.transitionXAxis = utils.schonfinkelize(transitionXAxis, orientation, params);
       this.transitionYAxis = utils.schonfinkelize(transitionYAxis, orientation, params);
+      this.setYScale = utils.schonfinkelize(setYScale, orientation);
+      this.setXScale = utils.schonfinkelize(setXScale, orientation);
       return this;
     };
 
@@ -365,8 +383,10 @@ define('bar/bar',[
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      xScale = orientation[__.orientation].xScale();
-      yScale = orientation[__.orientation].yScale();
+      //xScale = orientation[__.orientation].xScale();
+      this.setXScale(__.orientation);
+      //yScale = orientation[__.orientation].yScale();
+      this.setYScale(__.orientation);
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       // Presently no assumption is made about the chart orientation.
