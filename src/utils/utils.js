@@ -23,6 +23,14 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return Object.prototype.toString.call(o) === "[object Object]";
   }
 
+  function curry (fn, scope) {
+    var scope = scope || window,
+      args = [].slice.call(arguments, 0);
+    return function() {
+      return fn.apply(scope, args.concat([].slice.call(arguments, 0)));
+    };
+  }
+
 
   // For each attribute in `state` it sets a getter-setter function 
   // on `obj`.

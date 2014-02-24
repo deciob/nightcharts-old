@@ -82,6 +82,8 @@ define([
         orientation[__.orientation].inflateYScale.call(yScale, params);
         orientation[__.orientation].inflateXScale.call(xScale, params);
 
+        this.inflateYScale.call(yScale, params);
+
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
 
