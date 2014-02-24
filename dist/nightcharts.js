@@ -39,6 +39,17 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     return Object.prototype.toString.call(o) === "[object Object]";
   }
 
+  /* Adapted from Stoyan Stafanov */
+  function schonfinkelize(fn) {
+      var slice = Array.prototype.slice,
+          stored_args = slice.call(arguments, 1);
+      return function () {
+          var new_args = slice.call(arguments),
+              args = stored_args.concat(new_args);
+          return fn.apply(null, args);
+      };
+  }
+
 
   // For each attribute in `state` it sets a getter-setter function 
   // on `obj`.
@@ -99,13 +110,192 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
   return {
     extend: extend,
     getset: getset,
+    isObject: isObject,
+    schonfinkelize: schonfinkelize,
     endall: endall,
-    tip: tip
+    tip: tip,
   };
 
 });
 
 
+define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
+
+  return (function() {
+
+    // Sets the range and domain for the linear scale.
+    function applyLinearScale (params, range) {
+      var max;
+      if (params.__.max) {
+        max = params.__.max;
+      } else {
+        max = d3.max( params.data, function(d) {return parseFloat(d[1]); } );
+      }
+      return this.range(range).domain([0, max]);
+    }
+  
+    // Sets the range and domain for the ordinal scale.
+    function applyOrdinalScale (params, range) {
+      return this
+        .rangeRoundBands(range, params.__.padding)
+        .domain(params.data.map(function(d) { return d[0]; }));
+    }
+  
+    function applyXScaleV (params) {
+      var range = [0, params.w()];
+      return applyOrdinalScale.call(this, params, range);
+    }
+  
+    function applyXScaleH (params) {
+      var range = [0, params.w()];
+      return applyLinearScale.call(this, params, range);
+    }
+  
+    function applyXScale (orientation, params) {
+      if (orientation == 'vertical') {
+        applyXScaleV.call(this, params);
+      } else {
+        applyXScaleH.call(this, params);
+      }
+    }
+  
+    function applyYScaleV (params) {
+      // Note the inverted range for the y-scale: bigger is up!
+      var range = [params.h(), 0];
+      return applyLinearScale.call(this, params, range);
+    }
+  
+    function applyYScaleH (params) {
+      // Note the inverted range for the y-scale: bigger is up!
+      var range = [params.h(), 0];
+      return applyOrdinalScale.call(this, params, range);
+    }
+  
+    function applyYScale (orientation, params) {
+      if (orientation == 'vertical') {
+        applyYScaleV.call(this, params);
+      } else {
+        applyYScaleH.call(this, params);
+      }  
+    }
+  
+    function transitionXAxisV (params) {
+      return this
+        .attr("transform", "translate(0," + params.yScale.range()[0] + ")")
+        .call(params.xAxis);
+    }
+  
+    function transitionXAxisH (params) {
+      return this.attr("transform", "translate(" + params.__.barOffSet
+        + "," + params.h() + ")").call(params.xAxis);
+    }
+  
+    function transitionXAxis (orientation, params) {
+      if (orientation == 'vertical') {
+        transitionXAxisV.call(this, params);
+      } else {
+        transitionXAxisH.call(this, params);
+      }  
+    }
+  
+    function transitionYAxisV (params) {
+      return this.call(params.yAxis)
+        .selectAll("g")
+        .delay(params.delay);
+    }
+  
+    function transitionYAxisH (params) {
+      return this.call(params.yAxis)
+        .selectAll("g")
+        .delay(params.delay);
+    }
+  
+    function transitionYAxis (orientation, params) {
+      if (orientation == 'vertical') {
+        transitionYAxisV.call(this, params);
+      } else {
+        transitionYAxisH.call(this, params);
+      }  
+    } 
+
+    return function(orientation, params) {
+      this.applyXScale = utils.schonfinkelize(applyXScale, orientation, params);
+      this.applyYScale = utils.schonfinkelize(applyYScale, orientation, params);
+      this.transitionXAxis = utils.schonfinkelize(transitionXAxis, orientation, params);
+      this.transitionYAxis = utils.schonfinkelize(transitionYAxis, orientation, params);
+      return this;
+    };
+
+  })();
+
+});
+define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
+
+  return (function() {
+
+
+
+    function createBarsV (params) {
+      return this
+        .append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return params.xScale(d[1]); })
+        .attr("width", params.xScale.rangeBand())
+        .attr("y", params.h() + params.__.barOffSet)
+        .attr("height", 0);
+    }
+
+    function createBarsH (params) {
+      return this
+        .append("rect")
+        .attr("class", "bar")
+        .attr("x", params.__.barOffSet)
+        .attr("width", 0)
+        .attr("y", function(d) { return params.yScale(d[0]); })
+        .attr("height", params.yScale.rangeBand());
+    }
+
+    function createBars (orientation, params) {
+      if (orientation == 'vertical') {
+        createBarsV.call(this, params);
+      } else {
+        createBarsH.call(this, params);
+      }
+    }
+
+    function transitionBarsV (params) {
+      return this.delay(params.delay)
+        .attr("x", function(d) { return params.xScale(d[0]); })
+        .attr("y", function(d) { return params.yScale(d[1]); })
+        .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
+    }
+
+    function transitionBarsH (params) {
+      return this.delay(params.delay)
+        .attr("y", function(d) { return params.yScale(d[0]); })
+        .attr("x", params.__.barOffSet)
+        .attr("width", function(d) { 
+          return params.xScale(d[1]) + params.__.barOffSet; 
+        });
+    }
+
+    function transitionBars (orientation, params) {
+      if (orientation == 'vertical') {
+        transitionBarsV.call(this, params);
+      } else {
+        transitionBarsH.call(this, params);
+      }
+    }
+
+    return function(orientation, params) {
+      this.createBars = utils.schonfinkelize(createBars, orientation, params);
+      this.transitionBars = utils.schonfinkelize(transitionBars, orientation, params);
+      return this;
+    };
+
+  })();
+
+});
 // **The default configuration module for the bar.bar module**
 
 define('bar/config',['require'],function(require) {
@@ -147,128 +337,15 @@ define('bar/config',['require'],function(require) {
 });
 
 
-// **The bar.orientation module**
-
-// It handles the barchart orientation: vertical or horizontal.
-// An horizontal barchart has an ordinal scale on the y axis.
-// A vertical barchart has a linear scale on the y axis.
-// TODO: add time axis option.
-
-define('bar/orientation',["d3"], function(d3) {
-
-  // Sets the range and domain for the linear scale.
-  function inflateLinearScale (params, range) {
-    var max;
-    if (params.__.max) {
-      max = params.__.max;
-    } else {
-      max = d3.max( params.data, function(d) {return parseFloat(d[1]); } );
-    }
-    return this.range(range).domain([0, max]);
-  }
-
-  // Sets the range and domain for the ordinal scale.
-  function inflateOrdinalScale (params, range) {
-    return this
-      .rangeRoundBands(range, params.__.padding)
-      .domain(params.data.map(function(d) { return d[0]; }));
-  }
-
-  var vertical = {
-    xScale: d3.scale.ordinal,
-    yScale: d3.scale.linear,
-    inflateXScale: function (params) {
-      var range = [0, params.w()];
-      return inflateOrdinalScale.call(this, params, range);
-    },
-    inflateYScale: function (params) {
-      // Note the inverted range for the y-scale: bigger is up!
-      var range = [params.h(), 0];
-      return inflateLinearScale.call(this, params, range);
-    },
-    createBars: function (params) {
-      return this
-        .append("rect")
-        .attr("class", "bar")
-        .attr("x", function(d) { return params.xScale(d[1]); })
-        .attr("width", params.xScale.rangeBand())
-        .attr("y", params.h() + params.__.barOffSet)
-        .attr("height", 0);
-    },
-    transitionXAxis: function (params) {
-      return this
-        .attr("transform", "translate(0," + params.yScale.range()[0] + ")")
-        .call(params.xAxis);
-    },
-    transitionYAxis: function (params) {
-      return this.call(params.yAxis)
-        .selectAll("g")
-        .delay(params.delay);
-    },
-    transitionBars: function (params) {
-      return this.delay(params.delay)
-        .attr("x", function(d) { return params.xScale(d[0]); })
-        .attr("y", function(d) { return params.yScale(d[1]); })
-        .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
-    }
-  }
-
-  var horizontal = {
-    xScale: d3.scale.linear,
-    yScale: d3.scale.ordinal,
-    inflateXScale: function (params) {
-      var range = [0, params.w()];
-      return inflateLinearScale.call(this, params, range);
-    },
-    inflateYScale: function (params) {
-      // Note the inverted range for the y-scale: bigger is up!
-      var range = [params.h(), 0];
-      return inflateOrdinalScale.call(this, params, range);
-    },
-    createBars: function (params) {
-      return this
-        .append("rect")
-        .attr("class", "bar")
-        .attr("x", params.__.barOffSet)
-        .attr("width", 0)
-        .attr("y", function(d) { return params.yScale(d[0]); })
-        .attr("height", params.yScale.rangeBand());
-    },
-    transitionXAxis: function (params) {
-      return this.attr("transform", "translate(" + params.__.barOffSet
-        + "," + params.h() + ")").call(params.xAxis);
-    },
-    transitionYAxis: function (params) {
-      return this.call(params.yAxis)
-        .selectAll("g")
-        .delay(params.delay);
-    },
-    transitionBars: function (params) {
-      return this.delay(params.delay)
-        .attr("y", function(d) { return params.yScale(d[0]); })
-        .attr("x", params.__.barOffSet)
-        .attr("width", function(d) { 
-          return params.xScale(d[1]) + params.__.barOffSet; 
-        });
-    }
-  }
-
-  return {
-    vertical: vertical,
-    horizontal: horizontal
-  };
-
-});
-
-
 // **The bar.bar module**
 
 define('bar/bar',[
     "d3", 
     "utils/utils",
     "bar/config", 
-    "bar/orientation",
-  ], function(d3, utils, default_config, orientation) {
+    "mixins/common_mixins",
+    "mixins/bar_mixins",
+  ], function(d3, utils, default_config, common_mixins, bar_mixins) {
   
   return function (user_config) {
 
@@ -342,8 +419,8 @@ define('bar/bar',[
           delay: delay,
         }
 
-        orientation[__.orientation].inflateYScale.call(yScale, params);
-        orientation[__.orientation].inflateXScale.call(xScale, params);
+        this.applyYScale.call(yScale, __.orientation, params); 
+        this.applyXScale.call(yScale, __.orientation, params);
 
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
@@ -372,14 +449,18 @@ define('bar/bar',[
         transition = g.transition().duration(__.duration)
         
         // Update the y axis.
-        orientation[__.orientation]
-          .transitionYAxis
-          .call(transition.selectAll('.y.axis'), params);
+        this.transitionYAxis.call(
+          transition.selectAll('.y.axis'), __.orientation, params);
+        //orientation[__.orientation]
+        //  .transitionYAxis
+        //  .call(transition.selectAll('.y.axis'), params);
 
         // Update the x axis.
-        orientation[__.orientation]
-          .transitionXAxis
-          .call(transition.select(".x.axis"), params);
+        this.transitionXAxis.call(
+          transition.selectAll('.x.axis'), __.orientation, params);
+        //orientation[__.orientation]
+        //  .transitionXAxis
+        //  .call(transition.select(".x.axis"), params);
 
         // Select the bar elements, if they exists.
         bars = g.select(".bars").selectAll(".bar")
@@ -390,8 +471,10 @@ define('bar/bar',[
           .transition().duration(__.duration).style('opacity', 0).remove();
 
         // Otherwise, create them.
-        bars = orientation[__.orientation].createBars.call(bars.enter(), params)
+        bars = this.createBars.call(bars.enter(), __.orientation, params)
           .on('click', __.handleClick);
+        //bars = orientation[__.orientation].createBars.call(bars.enter(), params)
+        //  .on('click', __.handleClick);
 
         if (tooltip) {
           bars
@@ -400,15 +483,19 @@ define('bar/bar',[
         }
           
         // And transition them.
-        orientation[__.orientation].transitionBars
-          .call(transition.selectAll('.bar'), params)
+        this.transitionBars.call(transition.selectAll('.bar'), __.orientation, params)
           .call(utils.endall, data, __.handleTransitionEnd);
+        //orientation[__.orientation].transitionBars
+        //  .call(transition.selectAll('.bar'), params)
+        //  .call(utils.endall, data, __.handleTransitionEnd);
 
       });
 
     }
 
     utils.getset(bar, __);
+    common_mixins.call(bar.prototype);
+    bar_mixins.call(bar.prototype);
 
     return bar;
 
@@ -693,19 +780,22 @@ define('frame/frame',[
 define('chart',[
   "draw",
   "utils/utils",
+  "mixins/common_mixins",
+  "mixins/bar_mixins",
   "bar/config", 
   "bar/bar",
-  "bar/orientation",
+  //"bar/orientation",
   "frame/states",
   "frame/state_machine",
   "frame/frame"
-], function(draw, utils, __, bar, orientation, states, StateMachine, Frame) {
+], function(draw, utils, common_mixins, bar_mixins, __, bar, states, StateMachine, Frame) {
 
   return {
-    utils: utils, 
+    utils: utils,
+    common_mixins: common_mixins,
+    bar_mixins: bar_mixins,
     bar:bar,
     __: __, 
-    orientation: orientation,
     Frame: Frame,
     states: states, 
     StateMachine: StateMachine,

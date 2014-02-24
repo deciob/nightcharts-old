@@ -23,12 +23,15 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return Object.prototype.toString.call(o) === "[object Object]";
   }
 
-  function curry (fn, scope) {
-    var scope = scope || window,
-      args = [].slice.call(arguments, 0);
-    return function() {
-      return fn.apply(scope, args.concat([].slice.call(arguments, 0)));
-    };
+  /* Adapted from Stoyan Stafanov */
+  function schonfinkelize(fn) {
+      var slice = Array.prototype.slice,
+          stored_args = slice.call(arguments, 1);
+      return function () {
+          var new_args = slice.call(arguments),
+              args = stored_args.concat(new_args);
+          return fn.apply(null, args);
+      };
   }
 
 
@@ -91,8 +94,10 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
   return {
     extend: extend,
     getset: getset,
+    isObject: isObject,
+    schonfinkelize: schonfinkelize,
     endall: endall,
-    tip: tip
+    tip: tip,
   };
 
 });

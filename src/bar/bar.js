@@ -4,8 +4,9 @@ define([
     "d3", 
     "utils/utils",
     "bar/config", 
-    "bar/orientation",
-  ], function(d3, utils, default_config, orientation) {
+    "mixins/common_mixins",
+    "mixins/bar_mixins",
+  ], function(d3, utils, default_config, common_mixins, bar_mixins) {
   
   return function (user_config) {
 
@@ -79,10 +80,8 @@ define([
           delay: delay,
         }
 
-        orientation[__.orientation].inflateYScale.call(yScale, params);
-        orientation[__.orientation].inflateXScale.call(xScale, params);
-
-        this.inflateYScale.call(yScale, params);
+        this.applyYScale.call(yScale, __.orientation, params); 
+        this.applyXScale.call(yScale, __.orientation, params);
 
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
@@ -111,14 +110,18 @@ define([
         transition = g.transition().duration(__.duration)
         
         // Update the y axis.
-        orientation[__.orientation]
-          .transitionYAxis
-          .call(transition.selectAll('.y.axis'), params);
+        this.transitionYAxis.call(
+          transition.selectAll('.y.axis'), __.orientation, params);
+        //orientation[__.orientation]
+        //  .transitionYAxis
+        //  .call(transition.selectAll('.y.axis'), params);
 
         // Update the x axis.
-        orientation[__.orientation]
-          .transitionXAxis
-          .call(transition.select(".x.axis"), params);
+        this.transitionXAxis.call(
+          transition.selectAll('.x.axis'), __.orientation, params);
+        //orientation[__.orientation]
+        //  .transitionXAxis
+        //  .call(transition.select(".x.axis"), params);
 
         // Select the bar elements, if they exists.
         bars = g.select(".bars").selectAll(".bar")
@@ -129,8 +132,10 @@ define([
           .transition().duration(__.duration).style('opacity', 0).remove();
 
         // Otherwise, create them.
-        bars = orientation[__.orientation].createBars.call(bars.enter(), params)
+        bars = this.createBars.call(bars.enter(), __.orientation, params)
           .on('click', __.handleClick);
+        //bars = orientation[__.orientation].createBars.call(bars.enter(), params)
+        //  .on('click', __.handleClick);
 
         if (tooltip) {
           bars
@@ -139,15 +144,19 @@ define([
         }
           
         // And transition them.
-        orientation[__.orientation].transitionBars
-          .call(transition.selectAll('.bar'), params)
+        this.transitionBars.call(transition.selectAll('.bar'), __.orientation, params)
           .call(utils.endall, data, __.handleTransitionEnd);
+        //orientation[__.orientation].transitionBars
+        //  .call(transition.selectAll('.bar'), params)
+        //  .call(utils.endall, data, __.handleTransitionEnd);
 
       });
 
     }
 
     utils.getset(bar, __);
+    common_mixins.call(bar.prototype);
+    bar_mixins.call(bar.prototype);
 
     return bar;
 
