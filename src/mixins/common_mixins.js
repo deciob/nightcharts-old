@@ -114,7 +114,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     function setXAxis (x_axis, xScale) {
       var xAxis = d3.svg.axis().scale(xScale);
-      d3.entries(__.x_axis).forEach(function(o) {
+      d3.entries(x_axis).forEach(function(o) {
         if (o.value !== undefined) {
           xAxis[o.key](o.value);
         }
@@ -124,7 +124,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     function setYAxis (y_axis, yScale) {
       var yAxis = d3.svg.axis().scale(yScale);
-      d3.entries(__.y_axis).forEach(function(o) {
+      d3.entries(y_axis).forEach(function(o) {
         if (o.value !== undefined) {
           yAxis[o.key](o.value);
         }
