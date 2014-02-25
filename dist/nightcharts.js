@@ -4,10 +4,12 @@ define('draw',['require'],function(require) {
 
   return function (chart, selection, data) {
     if (data) {
-      return selection.datum(data).call(chart);
+      //return selection.datum(data).call(chart);
+      return chart.call( null, selection.datum(data) );
     }
     return function (data) {
-      selection.datum(data).call(chart);
+      //selection.datum(data).call(chart);
+      return chart.call( null, selection.datum(data) );
     }
   }
 
@@ -355,11 +357,7 @@ define('bar/bar',[
     "mixins/bar_mixins",
   ], function(d3, utils, default_config, common_mixins, bar_mixins) {
   
-  function Chart (user_config) {
-
-    var self = this instanceof Chart
-             ? this
-             : new Chart();
+  return function (user_config) {
 
     var config = user_config || {},
        __, w, h, xScale, yScale, xAxis, yAxis;
@@ -502,20 +500,20 @@ define('bar/bar',[
         //orientation[__.orientation].transitionBars
         //  .call(transition.selectAll('.bar'), params)
         //  .call(utils.endall, data, __.handleTransitionEnd);
+        
+        return selection;
 
       });
 
     }
 
     utils.getset(bar, __);
-    common_mixins.call(Bar.prototype);
-    bar_mixins.call(Bar.prototype);
+    common_mixins.call(bar.prototype);
+    bar_mixins.call(bar.prototype);
 
     return bar;
 
   }
-
-  return Chart;
 
 });
 
