@@ -8,11 +8,7 @@ define([
     "mixins/bar_mixins",
   ], function(d3, utils, default_config, common_mixins, bar_mixins) {
   
-  function Chart (user_config) {
-
-    var self = this instanceof Chart
-             ? this
-             : new Chart();
+  return function (user_config) {
 
     var config = user_config || {},
        __, w, h, xScale, yScale, xAxis, yAxis;
@@ -155,20 +151,20 @@ define([
         //orientation[__.orientation].transitionBars
         //  .call(transition.selectAll('.bar'), params)
         //  .call(utils.endall, data, __.handleTransitionEnd);
+        
+        return selection;
 
       });
 
     }
 
     utils.getset(bar, __);
-    common_mixins.call(Bar.prototype);
-    bar_mixins.call(Bar.prototype);
+    common_mixins.call(bar.prototype);
+    bar_mixins.call(bar.prototype);
 
     return bar;
 
   }
-
-  return Chart;
 
 });
 
