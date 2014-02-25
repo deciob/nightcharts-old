@@ -1,8 +1,7 @@
-define(["d3", "utils/utils"], function(d3, utils) {
+define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     function createBarsV (params) {
-      return this
-        .append("rect")
+      return this.append("rect")
         .attr("class", "bar")
         .attr("x", function(d) { return params.xScale(d[1]); })
         .attr("width", params.xScale.rangeBand())
@@ -11,8 +10,7 @@ define(["d3", "utils/utils"], function(d3, utils) {
     }
 
     function createBarsH (params) {
-      return this
-        .append("rect")
+      return this.append("rect")
         .attr("class", "bar")
         .attr("x", params.__.barOffSet)
         .attr("width", 0)
@@ -22,9 +20,9 @@ define(["d3", "utils/utils"], function(d3, utils) {
 
     function createBars (orientation, params) {
       if (orientation == 'vertical') {
-        createBarsV.call(this, params);
+        return createBarsV.call(this, params);
       } else {
-        createBarsH.call(this, params);
+        return createBarsH.call(this, params);
       }
     }
 
@@ -46,9 +44,9 @@ define(["d3", "utils/utils"], function(d3, utils) {
 
     function transitionBars (orientation, params) {
       if (orientation == 'vertical') {
-        transitionBarsV.call(this, params);
+        return transitionBarsV.call(this, params);
       } else {
-        transitionBarsH.call(this, params);
+        return transitionBarsH.call(this, params);
       }
     }
 
@@ -59,3 +57,4 @@ define(["d3", "utils/utils"], function(d3, utils) {
     };
 
 });
+

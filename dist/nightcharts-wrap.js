@@ -442,14 +442,12 @@ define("almond", function(){});
 define('draw',['require'],function(require) {
   
 
-  return function (chart, selection, data) {
+  return function (Chart, selection, data) {
     if (data) {
-      //return selection.datum(data).call(chart);
-      return chart.call( null, selection.datum(data) );
+      return new Chart(selection.datum(data));
     }
     return function (data) {
-      //selection.datum(data).call(chart);
-      return chart.call( null, selection.datum(data) );
+      return new Chart(selection.datum(data));
     }
   }
 
@@ -10157,10 +10155,11 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
   
     function applyXScale (orientation, params) {
+
       if (orientation == 'vertical') {
-        applyXScaleV.call(this, params);
+        return applyXScaleV.call(this, params);
       } else {
-        applyXScaleH.call(this, params);
+        return applyXScaleH.call(this, params);
       }
     }
   
@@ -10178,9 +10177,9 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     function applyYScale (orientation, params) {
       if (orientation == 'vertical') {
-        applyYScaleV.call(this, params);
+        return applyYScaleV.call(this, params);
       } else {
-        applyYScaleH.call(this, params);
+        return applyYScaleH.call(this, params);
       }  
     }
   
@@ -10197,9 +10196,9 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     function transitionXAxis (orientation, params) {
       if (orientation == 'vertical') {
-        transitionXAxisV.call(this, params);
+        return transitionXAxisV.call(this, params);
       } else {
-        transitionXAxisH.call(this, params);
+        return transitionXAxisH.call(this, params);
       }  
     }
   
@@ -10217,9 +10216,9 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     function transitionYAxis (orientation, params) {
       if (orientation == 'vertical') {
-        transitionYAxisV.call(this, params);
+        return transitionYAxisV.call(this, params);
       } else {
-        transitionYAxisH.call(this, params);
+        return transitionYAxisH.call(this, params);
       }  
     } 
 
@@ -10250,11 +10249,12 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
     };
 
 });
+
+
 define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     function createBarsV (params) {
-      return this
-        .append("rect")
+      return this.append("rect")
         .attr("class", "bar")
         .attr("x", function(d) { return params.xScale(d[1]); })
         .attr("width", params.xScale.rangeBand())
@@ -10263,8 +10263,7 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function createBarsH (params) {
-      return this
-        .append("rect")
+      return this.append("rect")
         .attr("class", "bar")
         .attr("x", params.__.barOffSet)
         .attr("width", 0)
@@ -10274,9 +10273,9 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     function createBars (orientation, params) {
       if (orientation == 'vertical') {
-        createBarsV.call(this, params);
+        return createBarsV.call(this, params);
       } else {
-        createBarsH.call(this, params);
+        return createBarsH.call(this, params);
       }
     }
 
@@ -10298,9 +10297,9 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     function transitionBars (orientation, params) {
       if (orientation == 'vertical') {
-        transitionBarsV.call(this, params);
+        return transitionBarsV.call(this, params);
       } else {
-        transitionBarsH.call(this, params);
+        return transitionBarsH.call(this, params);
       }
     }
 
@@ -10311,6 +10310,8 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     };
 
 });
+
+
 // **The default configuration module for the bar.bar module**
 
 define('bar/config',['require'],function(require) {
@@ -10374,6 +10375,7 @@ define('bar/bar',[
     }
 
     function bar (selection) { 
+      var self = this;
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
@@ -10381,9 +10383,9 @@ define('bar/bar',[
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
       //xScale = orientation[__.orientation].xScale();
-      self.setXScale(__.orientation);
+      xScale = self.setXScale(__.orientation)();
       //yScale = orientation[__.orientation].yScale();
-      self.setYScale(__.orientation);
+      yScale = self.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       // Presently no assumption is made about the chart orientation.
@@ -10437,10 +10439,10 @@ define('bar/bar',[
         }
 
         self.applyYScale.call(yScale, __.orientation, params); 
-        self.applyXScale.call(yScale, __.orientation, params);
+        self.applyXScale.call(xScale, __.orientation, params);
 
         // Select the svg element, if it exists.
-        svg = d3.select(this).selectAll("svg").data([data]);
+        svg = selection.selectAll("svg").data([data]);
 
         // Otherwise, create the skeletal chart.
         gEnter = svg.enter().append("svg").append("g");

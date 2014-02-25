@@ -1,4 +1,4 @@
-define(["d3", "utils/utils"], function(d3, utils) {
+define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     // Sets the range and domain for the linear scale.
     function applyLinearScale (params, range) {
@@ -29,10 +29,11 @@ define(["d3", "utils/utils"], function(d3, utils) {
     }
   
     function applyXScale (orientation, params) {
+
       if (orientation == 'vertical') {
-        applyXScaleV.call(this, params);
+        return applyXScaleV.call(this, params);
       } else {
-        applyXScaleH.call(this, params);
+        return applyXScaleH.call(this, params);
       }
     }
   
@@ -50,9 +51,9 @@ define(["d3", "utils/utils"], function(d3, utils) {
   
     function applyYScale (orientation, params) {
       if (orientation == 'vertical') {
-        applyYScaleV.call(this, params);
+        return applyYScaleV.call(this, params);
       } else {
-        applyYScaleH.call(this, params);
+        return applyYScaleH.call(this, params);
       }  
     }
   
@@ -69,9 +70,9 @@ define(["d3", "utils/utils"], function(d3, utils) {
   
     function transitionXAxis (orientation, params) {
       if (orientation == 'vertical') {
-        transitionXAxisV.call(this, params);
+        return transitionXAxisV.call(this, params);
       } else {
-        transitionXAxisH.call(this, params);
+        return transitionXAxisH.call(this, params);
       }  
     }
   
@@ -89,9 +90,9 @@ define(["d3", "utils/utils"], function(d3, utils) {
   
     function transitionYAxis (orientation, params) {
       if (orientation == 'vertical') {
-        transitionYAxisV.call(this, params);
+        return transitionYAxisV.call(this, params);
       } else {
-        transitionYAxisH.call(this, params);
+        return transitionYAxisH.call(this, params);
       }  
     } 
 
@@ -122,3 +123,4 @@ define(["d3", "utils/utils"], function(d3, utils) {
     };
 
 });
+

@@ -1,6 +1,6 @@
 // **The bar.bar module**
 
-define([
+define('bar/bar',[
     "d3", 
     "utils/utils",
     "bar/config", 
@@ -20,6 +20,7 @@ define([
     }
 
     function bar (selection) { 
+      var self = this;
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
@@ -27,9 +28,9 @@ define([
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
       //xScale = orientation[__.orientation].xScale();
-      self.setXScale(__.orientation);
+      xScale = self.setXScale(__.orientation)();
       //yScale = orientation[__.orientation].yScale();
-      self.setYScale(__.orientation);
+      yScale = self.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       // Presently no assumption is made about the chart orientation.
@@ -83,10 +84,10 @@ define([
         }
 
         self.applyYScale.call(yScale, __.orientation, params); 
-        self.applyXScale.call(yScale, __.orientation, params);
+        self.applyXScale.call(xScale, __.orientation, params);
 
         // Select the svg element, if it exists.
-        svg = d3.select(this).selectAll("svg").data([data]);
+        svg = selection.selectAll("svg").data([data]);
 
         // Otherwise, create the skeletal chart.
         gEnter = svg.enter().append("svg").append("g");
