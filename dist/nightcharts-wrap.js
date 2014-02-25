@@ -10418,8 +10418,8 @@ define('bar/bar',[
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       // Presently no assumption is made about the chart orientation.
-      xAxis = self.setXAxis(__.x_axis)
-      yAxis = self.setYAxis(__.y_axis)
+      xAxis = self.setXAxis(__.x_axis, xScale);
+      yAxis = self.setYAxis(__.y_axis, yScale);
       
       selection.each( function (dat) {
 
