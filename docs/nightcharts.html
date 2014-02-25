@@ -210,7 +210,7 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">applyLinearScale</span> <span class="params">(params, range)</span> {</span>
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">_applyLinearScale</span> <span class="params">(params, range)</span> {</span>
       <span class="keyword">var</span> max;
       <span class="keyword">if</span> (params.__.max) {
         max = params.__.max;
@@ -233,32 +233,32 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">applyOrdinalScale</span> <span class="params">(params, range)</span> {</span>
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">_applyOrdinalScale</span> <span class="params">(params, range)</span> {</span>
       <span class="keyword">return</span> <span class="keyword">this</span>
         .rangeRoundBands(range, params.__.padding)
         .domain(params.data.map(<span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">0</span>]; }));
     }
   
-    <span class="function"><span class="keyword">function</span> <span class="title">applyXScaleV</span> <span class="params">(params)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">_applyXScaleV</span> <span class="params">(params)</span> {</span>
       <span class="keyword">var</span> range = [<span class="number">0</span>, params.w()];
-      <span class="keyword">return</span> applyOrdinalScale.call(<span class="keyword">this</span>, params, range);
+      <span class="keyword">return</span> _applyOrdinalScale.call(<span class="keyword">this</span>, params, range);
     }
   
-    <span class="function"><span class="keyword">function</span> <span class="title">applyXScaleH</span> <span class="params">(params)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">_applyXScaleH</span> <span class="params">(params)</span> {</span>
       <span class="keyword">var</span> range = [<span class="number">0</span>, params.w()];
-      <span class="keyword">return</span> applyLinearScale.call(<span class="keyword">this</span>, params, range);
+      <span class="keyword">return</span> _applyLinearScale.call(<span class="keyword">this</span>, params, range);
     }
   
     <span class="function"><span class="keyword">function</span> <span class="title">applyXScale</span> <span class="params">(orientation, params)</span> {</span>
 
       <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span>) {
-        <span class="keyword">return</span> applyXScaleV.call(<span class="keyword">this</span>, params);
+        <span class="keyword">return</span> _applyXScaleV.call(<span class="keyword">this</span>, params);
       } <span class="keyword">else</span> {
-        <span class="keyword">return</span> applyXScaleH.call(<span class="keyword">this</span>, params);
+        <span class="keyword">return</span> _applyXScaleH.call(<span class="keyword">this</span>, params);
       }
     }
   
-    <span class="function"><span class="keyword">function</span> <span class="title">applyYScaleV</span> <span class="params">(params)</span> {</span></pre></div></div>
+    <span class="function"><span class="keyword">function</span> <span class="title">_applyYScaleV</span> <span class="params">(params)</span> {</span></pre></div></div>
             
         </li>
         
@@ -274,10 +274,10 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> range = [params.h(), <span class="number">0</span>];
-      <span class="keyword">return</span> applyLinearScale.call(<span class="keyword">this</span>, params, range);
+      <span class="keyword">return</span> _applyLinearScale.call(<span class="keyword">this</span>, params, range);
     }
   
-    <span class="function"><span class="keyword">function</span> <span class="title">applyYScaleH</span> <span class="params">(params)</span> {</span></pre></div></div>
+    <span class="function"><span class="keyword">function</span> <span class="title">_applyYScaleH</span> <span class="params">(params)</span> {</span></pre></div></div>
             
         </li>
         
@@ -293,43 +293,43 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> range = [params.h(), <span class="number">0</span>];
-      <span class="keyword">return</span> applyOrdinalScale.call(<span class="keyword">this</span>, params, range);
+      <span class="keyword">return</span> _applyOrdinalScale.call(<span class="keyword">this</span>, params, range);
     }
   
     <span class="function"><span class="keyword">function</span> <span class="title">applyYScale</span> <span class="params">(orientation, params)</span> {</span>
       <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span>) {
-        <span class="keyword">return</span> applyYScaleV.call(<span class="keyword">this</span>, params);
+        <span class="keyword">return</span> _applyYScaleV.call(<span class="keyword">this</span>, params);
       } <span class="keyword">else</span> {
-        <span class="keyword">return</span> applyYScaleH.call(<span class="keyword">this</span>, params);
+        <span class="keyword">return</span> _applyYScaleH.call(<span class="keyword">this</span>, params);
       }  
     }
   
-    <span class="function"><span class="keyword">function</span> <span class="title">transitionXAxisV</span> <span class="params">(params)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">_transitionXAxisV</span> <span class="params">(params)</span> {</span>
       <span class="keyword">return</span> <span class="keyword">this</span>
         .attr(<span class="string">"transform"</span>, <span class="string">"translate(0,"</span> + params.yScale.range()[<span class="number">0</span>] + <span class="string">")"</span>)
         .call(params.xAxis);
     }
   
-    <span class="function"><span class="keyword">function</span> <span class="title">transitionXAxisH</span> <span class="params">(params)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">_transitionXAxisH</span> <span class="params">(params)</span> {</span>
       <span class="keyword">return</span> <span class="keyword">this</span>.attr(<span class="string">"transform"</span>, <span class="string">"translate("</span> + params.__.barOffSet
         + <span class="string">","</span> + params.h() + <span class="string">")"</span>).call(params.xAxis);
     }
   
     <span class="function"><span class="keyword">function</span> <span class="title">transitionXAxis</span> <span class="params">(orientation, params)</span> {</span>
       <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span>) {
-        <span class="keyword">return</span> transitionXAxisV.call(<span class="keyword">this</span>, params);
+        <span class="keyword">return</span> _transitionXAxisV.call(<span class="keyword">this</span>, params);
       } <span class="keyword">else</span> {
-        <span class="keyword">return</span> transitionXAxisH.call(<span class="keyword">this</span>, params);
+        <span class="keyword">return</span> _transitionXAxisH.call(<span class="keyword">this</span>, params);
       }  
     }
   
-    <span class="function"><span class="keyword">function</span> <span class="title">transitionYAxisV</span> <span class="params">(params)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">_transitionYAxisV</span> <span class="params">(params)</span> {</span>
       <span class="keyword">return</span> <span class="keyword">this</span>.call(params.yAxis)
         .selectAll(<span class="string">"g"</span>)
         .delay(params.delay);
     }
   
-    <span class="function"><span class="keyword">function</span> <span class="title">transitionYAxisH</span> <span class="params">(params)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">_transitionYAxisH</span> <span class="params">(params)</span> {</span>
       <span class="keyword">return</span> <span class="keyword">this</span>.call(params.yAxis)
         .selectAll(<span class="string">"g"</span>)
         .delay(params.delay);
@@ -337,9 +337,9 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
   
     <span class="function"><span class="keyword">function</span> <span class="title">transitionYAxis</span> <span class="params">(orientation, params)</span> {</span>
       <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span>) {
-        <span class="keyword">return</span> transitionYAxisV.call(<span class="keyword">this</span>, params);
+        <span class="keyword">return</span> _transitionYAxisV.call(<span class="keyword">this</span>, params);
       } <span class="keyword">else</span> {
-        <span class="keyword">return</span> transitionYAxisH.call(<span class="keyword">this</span>, params);
+        <span class="keyword">return</span> _transitionYAxisH.call(<span class="keyword">this</span>, params);
       }  
     } 
 
@@ -359,6 +359,26 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
       }  
     }
 
+    <span class="function"><span class="keyword">function</span> <span class="title">setXAxis</span> <span class="params">(orientation)</span> {</span>
+      <span class="keyword">var</span> xAxis = d3.svg.axis().scale(xScale);
+      d3.entries(__.x_axis).forEach(<span class="function"><span class="keyword">function</span><span class="params">(o)</span> {</span>
+        <span class="keyword">if</span> (o.value !== <span class="literal">undefined</span>) {
+          xAxis[o.key](o.value);
+        }
+      });
+      <span class="keyword">return</span> xAxis;
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">setYAxis</span> <span class="params">(orientation)</span> {</span>
+      <span class="keyword">var</span> yAxis = d3.svg.axis().scale(yScale);
+      d3.entries(__.y_axis).forEach(<span class="function"><span class="keyword">function</span><span class="params">(o)</span> {</span>
+        <span class="keyword">if</span> (o.value !== <span class="literal">undefined</span>) {
+          yAxis[o.key](o.value);
+        }
+      });
+      <span class="keyword">return</span> yAxis;
+    }
+
     <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(orientation, params)</span> {</span>
       <span class="keyword">this</span>.applyXScale = applyXScale;
       <span class="keyword">this</span>.applyYScale = applyYScale;
@@ -366,6 +386,8 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
       <span class="keyword">this</span>.transitionYAxis = transitionYAxis;
       <span class="keyword">this</span>.setYScale = setYScale;
       <span class="keyword">this</span>.setXScale = setXScale;
+      <span class="keyword">this</span>.setXAxis = setXAxis;
+      <span class="keyword">this</span>.setYAxis = setYAxis;
       <span class="keyword">return</span> <span class="keyword">this</span>;
     };
 
@@ -571,8 +593,14 @@ can pass boolean or object with d3-tip configuration.</p>
   
   <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(user_config)</span> {</span>
 
-    <span class="keyword">var</span> config = user_config || {},
-       __, w, h, xScale, yScale, xAxis, yAxis;
+    <span class="keyword">var</span> config = user_config || {}
+      , __
+      , w
+      , h
+      , xScale
+      , yScale
+      , xAxis
+      , yAxis;
 
     __ = utils.extend(default_config, config);
 
@@ -581,7 +609,6 @@ can pass boolean or object with d3-tip configuration.</p>
     }
 
     <span class="function"><span class="keyword">function</span> <span class="title">bar</span> <span class="params">(selection)</span> {</span> 
-      <span class="keyword">var</span> self = <span class="keyword">this</span>;
 
       w = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> __.width - __.margin.right - __.margin.left; };
       h = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> __.height - __.margin.top - __.margin.bottom; };</pre></div></div>
@@ -596,12 +623,12 @@ can pass boolean or object with d3-tip configuration.</p>
                 <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>Scales are functions that map from an input domain to an output range.
-Presently no assumption is made about the chart orientation.
-xScale = orientation[__.orientation].xScale();</p>
+Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      xScale = self.setXScale(__.orientation)();</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      xScale = <span class="keyword">this</span>.setXScale(__.orientation)();
+      yScale = <span class="keyword">this</span>.setYScale(__.orientation)();</pre></div></div>
             
         </li>
         
@@ -612,11 +639,27 @@ xScale = orientation[__.orientation].xScale();</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
-              <p>yScale = orientation[__.orientation].yScale();</p>
+              <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">SVG-Axes</a>
+Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      yScale = self.setYScale(__.orientation)();</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      xAxis = <span class="keyword">this</span>.setXAxis(__.x_axis)
+      yAxis = <span class="keyword">this</span>.setYAxis(__.y_axis)
+      
+      selection.each( <span class="function"><span class="keyword">function</span> <span class="params">(dat)</span> {</span>
+
+        <span class="keyword">var</span> data
+          , tooltip = __.tooltip
+          , tip
+          , svg
+          , gEnter
+          , g
+          , bars
+          , transition
+          , bars_t
+          , bars_ex
+          , params;</pre></div></div>
             
         </li>
         
@@ -626,39 +669,6 @@ xScale = orientation[__.orientation].xScale();</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-19">&#182;</a>
-              </div>
-              <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">SVG-Axes</a>
-Presently no assumption is made about the chart orientation.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      xAxis = d3.svg.axis().scale(xScale);
-      d3.entries(__.x_axis).forEach(<span class="function"><span class="keyword">function</span><span class="params">(o)</span> {</span>
-        <span class="keyword">if</span> (o.value !== <span class="literal">undefined</span>) {
-          xAxis[o.key](o.value);
-        }
-      });
-      yAxis = d3.svg.axis().scale(yScale);
-      d3.entries(__.y_axis).forEach(<span class="function"><span class="keyword">function</span><span class="params">(o)</span> {</span>
-        <span class="keyword">if</span> (o.value !== <span class="literal">undefined</span>) {
-          yAxis[o.key](o.value);
-        }
-      });
-
-      selection.each(<span class="function"><span class="keyword">function</span><span class="params">(dat)</span> {</span>
-
-        <span class="keyword">var</span> data, 
-          tooltip = __.tooltip, 
-          tip, svg, gEnter, g, bars, transition, bars_t, bars_ex, params;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-20">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>data structure:
 0: name
@@ -681,11 +691,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Attention, delay can not be longer of transition time! Test!</p>
 
@@ -706,17 +716,17 @@ Presently no assumption is made about the chart orientation.</p>
           delay: delay,
         }
 
-        self.applyYScale.call(yScale, __.orientation, params); 
-        self.applyXScale.call(xScale, __.orientation, params);</pre></div></div>
+        <span class="keyword">this</span>.applyYScale.call(yScale, __.orientation, params); 
+        <span class="keyword">this</span>.applyXScale.call(xScale, __.orientation, params);</pre></div></div>
             
         </li>
         
         
-        <li id="section-22">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>Select the svg element, if it exists.</p>
 
@@ -727,11 +737,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>Otherwise, create the skeletal chart.</p>
 
@@ -742,11 +752,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>Initializing the tooltip.</p>
 
@@ -763,11 +773,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>Update the outer dimensions.</p>
 
@@ -779,11 +789,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>Update the inner dimensions.</p>
 
@@ -796,11 +806,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>Transitions root.</p>
 
@@ -811,18 +821,34 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>Update the y axis.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.transitionYAxis.call(
+          transition.selectAll(<span class="string">'.y.axis'</span>), __.orientation, params);</pre></div></div>
+            
+        </li>
+        
+        
         <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
-              <p>Update the y axis.</p>
+              <p>Update the x axis.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        self.transitionYAxis.call(
-          transition.selectAll(<span class="string">'.y.axis'</span>), __.orientation, params);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.transitionXAxis.call(
+          transition.selectAll(<span class="string">'.x.axis'</span>), __.orientation, params);</pre></div></div>
             
         </li>
         
@@ -833,29 +859,7 @@ Presently no assumption is made about the chart orientation.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
-              <p>orientation[__.orientation]
- .transitionYAxis
- .call(transition.selectAll(&#39;.y.axis&#39;), params);</p>
-<p>Update the x axis.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        self.transitionXAxis.call(
-          transition.selectAll(<span class="string">'.x.axis'</span>), __.orientation, params);</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-30">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
-              </div>
-              <p>orientation[__.orientation]
- .transitionXAxis
- .call(transition.select(&quot;.x.axis&quot;), params);</p>
-<p>Select the bar elements, if they exists.</p>
+              <p>Select the bar elements, if they exists.</p>
 
             </div>
             
@@ -865,11 +869,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Exit phase (let us push out old bars before the new ones come in).</p>
 
@@ -881,34 +885,20 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Otherwise, create them.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        bars = self.createBars.call(bars.enter(), __.orientation, params)
-          .on(<span class="string">'click'</span>, __.handleClick);</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-33">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
-              </div>
-              <p>bars = orientation[<strong>.orientation].createBars.call(bars.enter(), params)
- .on(&#39;click&#39;, </strong>.handleClick);</p>
+            <div class="content"><div class='highlight'><pre>        bars = <span class="keyword">this</span>.createBars.call(bars.enter(), __.orientation, params)
+          .on(<span class="string">'click'</span>, __.handleClick);
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (tooltip) {
+        <span class="keyword">if</span> (tooltip) {
           bars
            .on(<span class="string">'mouseover'</span>, tip.show)
            .on(<span class="string">'mouseout'</span>, tip.hide);
@@ -917,35 +907,20 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>And transition them.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        self.transitionBars.call(transition.selectAll(<span class="string">'.bar'</span>), __.orientation, params)
-          .call(utils.endall, data, __.handleTransitionEnd);</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-35">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
-              </div>
-              <p>orientation[<strong>.orientation].transitionBars
- .call(transition.selectAll(&#39;.bar&#39;), params)
- .call(utils.endall, data, </strong>.handleTransitionEnd);</p>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.transitionBars
+          .call(transition.selectAll(<span class="string">'.bar'</span>), __.orientation, params)
+          .call(utils.endall, data, __.handleTransitionEnd);
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        
         <span class="keyword">return</span> selection;
 
       });
@@ -965,11 +940,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p><strong>frame.states module</strong></p>
 <p>Used by the <em>frame.state_machine</em> module.
@@ -1030,11 +1005,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p><strong>frame.state_machine module</strong></p>
 <p>From <a href="http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/">http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/</a></p>
@@ -1067,11 +1042,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-38">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>getLastEvent();</p>
 
@@ -1084,11 +1059,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p><strong>frame.frame module</strong></p>
 
@@ -1127,11 +1102,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>Initial frame. The chart is rendered for the first time.</p>
 
@@ -1142,11 +1117,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-41">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>Fired when all the chart related transitions within a frame are 
 terminated.
@@ -1187,11 +1162,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-42">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>Re-render the chart</p>
 
@@ -1204,11 +1179,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-43">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>When no data is left to consume, let us stop the running frames!</p>
 
@@ -1233,11 +1208,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-44">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>TODO: there is a lot of repetition here!</p>
 
@@ -1256,11 +1231,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-45">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p>TODO:
 for next and prev we are allowing multiple prev-next events to be 
@@ -1357,11 +1332,11 @@ define(<span class="string">'chart'</span>,[
         </li>
         
         
-        <li id="section-46">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <p>&quot;bar/orientation&quot;,</p>
 
