@@ -10402,20 +10402,24 @@ define('bar/bar',[
       return d[0];
     }
 
-    function bar (selection) { 
+    function Bar (selection) {
+
+      var self = this instanceof Bar
+               ? this
+               : new Bar();
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      xScale = this.setXScale(__.orientation)();
-      yScale = this.setYScale(__.orientation)();
+      xScale = self.setXScale(__.orientation)();
+      yScale = self.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       // Presently no assumption is made about the chart orientation.
-      xAxis = this.setXAxis(__.x_axis)
-      yAxis = this.setYAxis(__.y_axis)
+      xAxis = self.setXAxis(__.x_axis)
+      yAxis = self.setYAxis(__.y_axis)
       
       selection.each( function (dat) {
 
@@ -10461,8 +10465,8 @@ define('bar/bar',[
           delay: delay,
         }
 
-        this.applyYScale.call(yScale, __.orientation, params); 
-        this.applyXScale.call(xScale, __.orientation, params);
+        self.applyYScale.call(yScale, __.orientation, params); 
+        self.applyXScale.call(xScale, __.orientation, params);
 
         // Select the svg element, if it exists.
         svg = selection.selectAll("svg").data([data]);
@@ -10491,11 +10495,11 @@ define('bar/bar',[
         transition = g.transition().duration(__.duration)
         
         // Update the y axis.
-        this.transitionYAxis.call(
+        self.transitionYAxis.call(
           transition.selectAll('.y.axis'), __.orientation, params);
 
         // Update the x axis.
-        this.transitionXAxis.call(
+        self.transitionXAxis.call(
           transition.selectAll('.x.axis'), __.orientation, params);
 
         // Select the bar elements, if they exists.
@@ -10507,7 +10511,7 @@ define('bar/bar',[
           .transition().duration(__.duration).style('opacity', 0).remove();
 
         // Otherwise, create them.
-        bars = this.createBars.call(bars.enter(), __.orientation, params)
+        bars = self.createBars.call(bars.enter(), __.orientation, params)
           .on('click', __.handleClick);
 
         if (tooltip) {
@@ -10517,7 +10521,7 @@ define('bar/bar',[
         }
           
         // And transition them.
-        this.transitionBars
+        self.transitionBars
           .call(transition.selectAll('.bar'), __.orientation, params)
           .call(utils.endall, data, __.handleTransitionEnd);
 
@@ -10527,11 +10531,11 @@ define('bar/bar',[
 
     }
 
-    utils.getset(bar, __);
-    common_mixins.call(bar.prototype);
-    bar_mixins.call(bar.prototype);
+    utils.getset(Bar, __);
+    common_mixins.call(Bar.prototype);
+    bar_mixins.call(Bar.prototype);
 
-    return bar;
+    return Bar;
 
   }
 

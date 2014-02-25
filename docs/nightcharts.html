@@ -608,7 +608,11 @@ can pass boolean or object with d3-tip configuration.</p>
       <span class="keyword">return</span> d[<span class="number">0</span>];
     }
 
-    <span class="function"><span class="keyword">function</span> <span class="title">bar</span> <span class="params">(selection)</span> {</span> 
+    <span class="function"><span class="keyword">function</span> <span class="title">Bar</span> <span class="params">(selection)</span> {</span>
+
+      <span class="keyword">var</span> self = <span class="keyword">this</span> <span class="keyword">instanceof</span> Bar
+               ? <span class="keyword">this</span>
+               : <span class="keyword">new</span> Bar();
 
       w = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> __.width - __.margin.right - __.margin.left; };
       h = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> __.height - __.margin.top - __.margin.bottom; };</pre></div></div>
@@ -627,8 +631,8 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      xScale = <span class="keyword">this</span>.setXScale(__.orientation)();
-      yScale = <span class="keyword">this</span>.setYScale(__.orientation)();</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      xScale = self.setXScale(__.orientation)();
+      yScale = self.setYScale(__.orientation)();</pre></div></div>
             
         </li>
         
@@ -644,8 +648,8 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      xAxis = <span class="keyword">this</span>.setXAxis(__.x_axis)
-      yAxis = <span class="keyword">this</span>.setYAxis(__.y_axis)
+            <div class="content"><div class='highlight'><pre>      xAxis = self.setXAxis(__.x_axis)
+      yAxis = self.setYAxis(__.y_axis)
       
       selection.each( <span class="function"><span class="keyword">function</span> <span class="params">(dat)</span> {</span>
 
@@ -716,8 +720,8 @@ Presently no assumption is made about the chart orientation.</p>
           delay: delay,
         }
 
-        <span class="keyword">this</span>.applyYScale.call(yScale, __.orientation, params); 
-        <span class="keyword">this</span>.applyXScale.call(xScale, __.orientation, params);</pre></div></div>
+        self.applyYScale.call(yScale, __.orientation, params); 
+        self.applyXScale.call(xScale, __.orientation, params);</pre></div></div>
             
         </li>
         
@@ -831,7 +835,7 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.transitionYAxis.call(
+            <div class="content"><div class='highlight'><pre>        self.transitionYAxis.call(
           transition.selectAll(<span class="string">'.y.axis'</span>), __.orientation, params);</pre></div></div>
             
         </li>
@@ -847,7 +851,7 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.transitionXAxis.call(
+            <div class="content"><div class='highlight'><pre>        self.transitionXAxis.call(
           transition.selectAll(<span class="string">'.x.axis'</span>), __.orientation, params);</pre></div></div>
             
         </li>
@@ -895,7 +899,7 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        bars = <span class="keyword">this</span>.createBars.call(bars.enter(), __.orientation, params)
+            <div class="content"><div class='highlight'><pre>        bars = self.createBars.call(bars.enter(), __.orientation, params)
           .on(<span class="string">'click'</span>, __.handleClick);
 
         <span class="keyword">if</span> (tooltip) {
@@ -917,7 +921,7 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.transitionBars
+            <div class="content"><div class='highlight'><pre>        self.transitionBars
           .call(transition.selectAll(<span class="string">'.bar'</span>), __.orientation, params)
           .call(utils.endall, data, __.handleTransitionEnd);
 
@@ -927,11 +931,11 @@ Presently no assumption is made about the chart orientation.</p>
 
     }
 
-    utils.getset(bar, __);
-    common_mixins.call(bar.prototype);
-    bar_mixins.call(bar.prototype);
+    utils.getset(Bar, __);
+    common_mixins.call(Bar.prototype);
+    bar_mixins.call(Bar.prototype);
 
-    <span class="keyword">return</span> bar;
+    <span class="keyword">return</span> Bar;
 
   }
 
