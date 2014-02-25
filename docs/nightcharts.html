@@ -359,7 +359,7 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
       }  
     }
 
-    <span class="function"><span class="keyword">function</span> <span class="title">setXAxis</span> <span class="params">(orientation)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">setXAxis</span> <span class="params">(x_axis, xScale)</span> {</span>
       <span class="keyword">var</span> xAxis = d3.svg.axis().scale(xScale);
       d3.entries(__.x_axis).forEach(<span class="function"><span class="keyword">function</span><span class="params">(o)</span> {</span>
         <span class="keyword">if</span> (o.value !== <span class="literal">undefined</span>) {
@@ -369,7 +369,7 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
       <span class="keyword">return</span> xAxis;
     }
 
-    <span class="function"><span class="keyword">function</span> <span class="title">setYAxis</span> <span class="params">(orientation)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">setYAxis</span> <span class="params">(y_axis, yScale)</span> {</span>
       <span class="keyword">var</span> yAxis = d3.svg.axis().scale(yScale);
       d3.entries(__.y_axis).forEach(<span class="function"><span class="keyword">function</span><span class="params">(o)</span> {</span>
         <span class="keyword">if</span> (o.value !== <span class="literal">undefined</span>) {
