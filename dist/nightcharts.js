@@ -121,8 +121,6 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
 
 define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
 
-  return (function() {
-
     // Sets the range and domain for the linear scale.
     function applyLinearScale (params, range) {
       var max;
@@ -234,24 +232,18 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }  
     }
 
-    return function(orientation, params) {
-      this.applyXScale = utils.schonfinkelize(applyXScale, orientation, params);
-      this.applyYScale = utils.schonfinkelize(applyYScale, orientation, params);
-      this.transitionXAxis = utils.schonfinkelize(transitionXAxis, orientation, params);
-      this.transitionYAxis = utils.schonfinkelize(transitionYAxis, orientation, params);
-      this.setYScale = utils.schonfinkelize(setYScale, orientation);
-      this.setXScale = utils.schonfinkelize(setXScale, orientation);
+    return function (orientation, params) {
+      this.applyXScale = applyXScale;
+      this.applyYScale = applyYScale;
+      this.transitionXAxis = transitionXAxis;
+      this.transitionYAxis = transitionYAxis;
+      this.setYScale = setYScale;
+      this.setXScale = setXScale;
       return this;
     };
 
-  })();
-
 });
 define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
-
-  return (function() {
-
-
 
     function createBarsV (params) {
       return this
@@ -305,13 +297,11 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
       }
     }
 
-    return function(orientation, params) {
-      this.createBars = utils.schonfinkelize(createBars, orientation, params);
-      this.transitionBars = utils.schonfinkelize(transitionBars, orientation, params);
+    return function (orientation, params) {
+      this.createBars = createBars;
+      this.transitionBars = transitionBars;
       return this;
     };
-
-  })();
 
 });
 // **The default configuration module for the bar.bar module**
@@ -365,11 +355,11 @@ define('bar/bar',[
     "mixins/bar_mixins",
   ], function(d3, utils, default_config, common_mixins, bar_mixins) {
   
-  function Bar (user_config) {
+  function Chart (user_config) {
 
-    var self = this instanceof Todo
+    var self = this instanceof Chart
              ? this
-             : new Bar();
+             : new Chart();
 
     var config = user_config || {},
        __, w, h, xScale, yScale, xAxis, yAxis;
@@ -388,9 +378,9 @@ define('bar/bar',[
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
       //xScale = orientation[__.orientation].xScale();
-      this.setXScale(__.orientation);
+      self.setXScale(__.orientation);
       //yScale = orientation[__.orientation].yScale();
-      this.setYScale(__.orientation);
+      self.setYScale(__.orientation);
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       // Presently no assumption is made about the chart orientation.
@@ -524,6 +514,8 @@ define('bar/bar',[
     return bar;
 
   }
+
+  return Chart;
 
 });
 

@@ -195,9 +195,7 @@ instead also accounts for <code>exits</code> during the transition.</p>
 });
 
 
-define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">"d3"</span>, <span class="string">"utils/utils"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils)</span> {</span>
-
-  <span class="keyword">return</span> (<span class="function"><span class="keyword">function</span><span class="params">()</span> {</span></pre></div></div>
+define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">"d3"</span>, <span class="string">"utils/utils"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils)</span> {</span></pre></div></div>
             
         </li>
         
@@ -360,24 +358,18 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
       }  
     }
 
-    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span><span class="params">(orientation, params)</span> {</span>
-      <span class="keyword">this</span>.applyXScale = utils.schonfinkelize(applyXScale, orientation, params);
-      <span class="keyword">this</span>.applyYScale = utils.schonfinkelize(applyYScale, orientation, params);
-      <span class="keyword">this</span>.transitionXAxis = utils.schonfinkelize(transitionXAxis, orientation, params);
-      <span class="keyword">this</span>.transitionYAxis = utils.schonfinkelize(transitionYAxis, orientation, params);
-      <span class="keyword">this</span>.setYScale = utils.schonfinkelize(setYScale, orientation);
-      <span class="keyword">this</span>.setXScale = utils.schonfinkelize(setXScale, orientation);
+    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(orientation, params)</span> {</span>
+      <span class="keyword">this</span>.applyXScale = applyXScale;
+      <span class="keyword">this</span>.applyYScale = applyYScale;
+      <span class="keyword">this</span>.transitionXAxis = transitionXAxis;
+      <span class="keyword">this</span>.transitionYAxis = transitionYAxis;
+      <span class="keyword">this</span>.setYScale = setYScale;
+      <span class="keyword">this</span>.setXScale = setXScale;
       <span class="keyword">return</span> <span class="keyword">this</span>;
     };
 
-  })();
-
 });
 define(<span class="string">'mixins/bar_mixins'</span>,[<span class="string">"d3"</span>, <span class="string">"utils/utils"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils)</span> {</span>
-
-  <span class="keyword">return</span> (<span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
-
-
 
     <span class="function"><span class="keyword">function</span> <span class="title">createBarsV</span> <span class="params">(params)</span> {</span>
       <span class="keyword">return</span> <span class="keyword">this</span>
@@ -431,13 +423,11 @@ define(<span class="string">'mixins/bar_mixins'</span>,[<span class="string">"d3
       }
     }
 
-    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span><span class="params">(orientation, params)</span> {</span>
-      <span class="keyword">this</span>.createBars = utils.schonfinkelize(createBars, orientation, params);
-      <span class="keyword">this</span>.transitionBars = utils.schonfinkelize(transitionBars, orientation, params);
+    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(orientation, params)</span> {</span>
+      <span class="keyword">this</span>.createBars = createBars;
+      <span class="keyword">this</span>.transitionBars = transitionBars;
       <span class="keyword">return</span> <span class="keyword">this</span>;
     };
-
-  })();
 
 });</pre></div></div>
             
@@ -578,11 +568,11 @@ can pass boolean or object with d3-tip configuration.</p>
     <span class="string">"mixins/bar_mixins"</span>,
   ], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils, default_config, common_mixins, bar_mixins)</span> {</span>
   
-  <span class="function"><span class="keyword">function</span> <span class="title">Bar</span> <span class="params">(user_config)</span> {</span>
+  <span class="function"><span class="keyword">function</span> <span class="title">Chart</span> <span class="params">(user_config)</span> {</span>
 
-    <span class="keyword">var</span> self = <span class="keyword">this</span> <span class="keyword">instanceof</span> Todo
+    <span class="keyword">var</span> self = <span class="keyword">this</span> <span class="keyword">instanceof</span> Chart
              ? <span class="keyword">this</span>
-             : <span class="keyword">new</span> Bar();
+             : <span class="keyword">new</span> Chart();
 
     <span class="keyword">var</span> config = user_config || {},
        __, w, h, xScale, yScale, xAxis, yAxis;
@@ -613,7 +603,7 @@ xScale = orientation[__.orientation].xScale();</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">this</span>.setXScale(__.orientation);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      self.setXScale(__.orientation);</pre></div></div>
             
         </li>
         
@@ -628,7 +618,7 @@ xScale = orientation[__.orientation].xScale();</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">this</span>.setYScale(__.orientation);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      self.setYScale(__.orientation);</pre></div></div>
             
         </li>
         
@@ -968,6 +958,8 @@ Presently no assumption is made about the chart orientation.</p>
     <span class="keyword">return</span> bar;
 
   }
+
+  <span class="keyword">return</span> Chart;
 
 });</pre></div></div>
             

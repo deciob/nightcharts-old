@@ -1,7 +1,5 @@
 define(["d3", "utils/utils"], function(d3, utils) {
 
-  return (function() {
-
     // Sets the range and domain for the linear scale.
     function applyLinearScale (params, range) {
       var max;
@@ -113,16 +111,14 @@ define(["d3", "utils/utils"], function(d3, utils) {
       }  
     }
 
-    return function(orientation, params) {
-      this.applyXScale = utils.schonfinkelize(applyXScale, orientation, params);
-      this.applyYScale = utils.schonfinkelize(applyYScale, orientation, params);
-      this.transitionXAxis = utils.schonfinkelize(transitionXAxis, orientation, params);
-      this.transitionYAxis = utils.schonfinkelize(transitionYAxis, orientation, params);
-      this.setYScale = utils.schonfinkelize(setYScale, orientation);
-      this.setXScale = utils.schonfinkelize(setXScale, orientation);
+    return function (orientation, params) {
+      this.applyXScale = applyXScale;
+      this.applyYScale = applyYScale;
+      this.transitionXAxis = transitionXAxis;
+      this.transitionYAxis = transitionYAxis;
+      this.setYScale = setYScale;
+      this.setXScale = setXScale;
       return this;
     };
-
-  })();
 
 });

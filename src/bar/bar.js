@@ -8,11 +8,11 @@ define([
     "mixins/bar_mixins",
   ], function(d3, utils, default_config, common_mixins, bar_mixins) {
   
-  function Bar (user_config) {
+  function Chart (user_config) {
 
-    var self = this instanceof Todo
+    var self = this instanceof Chart
              ? this
-             : new Bar();
+             : new Chart();
 
     var config = user_config || {},
        __, w, h, xScale, yScale, xAxis, yAxis;
@@ -31,9 +31,9 @@ define([
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
       //xScale = orientation[__.orientation].xScale();
-      this.setXScale(__.orientation);
+      self.setXScale(__.orientation);
       //yScale = orientation[__.orientation].yScale();
-      this.setYScale(__.orientation);
+      self.setYScale(__.orientation);
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       // Presently no assumption is made about the chart orientation.
@@ -167,6 +167,8 @@ define([
     return bar;
 
   }
+
+  return Chart;
 
 });
 

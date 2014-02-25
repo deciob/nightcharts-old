@@ -1,9 +1,5 @@
 define(["d3", "utils/utils"], function(d3, utils) {
 
-  return (function() {
-
-
-
     function createBarsV (params) {
       return this
         .append("rect")
@@ -56,12 +52,10 @@ define(["d3", "utils/utils"], function(d3, utils) {
       }
     }
 
-    return function(orientation, params) {
-      this.createBars = utils.schonfinkelize(createBars, orientation, params);
-      this.transitionBars = utils.schonfinkelize(transitionBars, orientation, params);
+    return function (orientation, params) {
+      this.createBars = createBars;
+      this.transitionBars = transitionBars;
       return this;
     };
-
-  })();
 
 });
