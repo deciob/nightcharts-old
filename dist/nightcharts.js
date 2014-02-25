@@ -365,7 +365,11 @@ define('bar/bar',[
     "mixins/bar_mixins",
   ], function(d3, utils, default_config, common_mixins, bar_mixins) {
   
-  return function (user_config) {
+  function Bar (user_config) {
+
+    var self = this instanceof Todo
+             ? this
+             : new Bar();
 
     var config = user_config || {},
        __, w, h, xScale, yScale, xAxis, yAxis;
@@ -439,8 +443,8 @@ define('bar/bar',[
           delay: delay,
         }
 
-        this.applyYScale.call(yScale, __.orientation, params); 
-        this.applyXScale.call(yScale, __.orientation, params);
+        self.applyYScale.call(yScale, __.orientation, params); 
+        self.applyXScale.call(yScale, __.orientation, params);
 
         // Select the svg element, if it exists.
         svg = d3.select(this).selectAll("svg").data([data]);
@@ -469,14 +473,14 @@ define('bar/bar',[
         transition = g.transition().duration(__.duration)
         
         // Update the y axis.
-        this.transitionYAxis.call(
+        self.transitionYAxis.call(
           transition.selectAll('.y.axis'), __.orientation, params);
         //orientation[__.orientation]
         //  .transitionYAxis
         //  .call(transition.selectAll('.y.axis'), params);
 
         // Update the x axis.
-        this.transitionXAxis.call(
+        self.transitionXAxis.call(
           transition.selectAll('.x.axis'), __.orientation, params);
         //orientation[__.orientation]
         //  .transitionXAxis
@@ -491,7 +495,7 @@ define('bar/bar',[
           .transition().duration(__.duration).style('opacity', 0).remove();
 
         // Otherwise, create them.
-        bars = this.createBars.call(bars.enter(), __.orientation, params)
+        bars = self.createBars.call(bars.enter(), __.orientation, params)
           .on('click', __.handleClick);
         //bars = orientation[__.orientation].createBars.call(bars.enter(), params)
         //  .on('click', __.handleClick);
@@ -503,7 +507,7 @@ define('bar/bar',[
         }
           
         // And transition them.
-        this.transitionBars.call(transition.selectAll('.bar'), __.orientation, params)
+        self.transitionBars.call(transition.selectAll('.bar'), __.orientation, params)
           .call(utils.endall, data, __.handleTransitionEnd);
         //orientation[__.orientation].transitionBars
         //  .call(transition.selectAll('.bar'), params)
@@ -514,8 +518,8 @@ define('bar/bar',[
     }
 
     utils.getset(bar, __);
-    common_mixins.call(bar.prototype);
-    bar_mixins.call(bar.prototype);
+    common_mixins.call(Bar.prototype);
+    bar_mixins.call(Bar.prototype);
 
     return bar;
 

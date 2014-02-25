@@ -578,7 +578,11 @@ can pass boolean or object with d3-tip configuration.</p>
     <span class="string">"mixins/bar_mixins"</span>,
   ], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils, default_config, common_mixins, bar_mixins)</span> {</span>
   
-  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(user_config)</span> {</span>
+  <span class="function"><span class="keyword">function</span> <span class="title">Bar</span> <span class="params">(user_config)</span> {</span>
+
+    <span class="keyword">var</span> self = <span class="keyword">this</span> <span class="keyword">instanceof</span> Todo
+             ? <span class="keyword">this</span>
+             : <span class="keyword">new</span> Bar();
 
     <span class="keyword">var</span> config = user_config || {},
        __, w, h, xScale, yScale, xAxis, yAxis;
@@ -714,8 +718,8 @@ Presently no assumption is made about the chart orientation.</p>
           delay: delay,
         }
 
-        <span class="keyword">this</span>.applyYScale.call(yScale, __.orientation, params); 
-        <span class="keyword">this</span>.applyXScale.call(yScale, __.orientation, params);</pre></div></div>
+        self.applyYScale.call(yScale, __.orientation, params); 
+        self.applyXScale.call(yScale, __.orientation, params);</pre></div></div>
             
         </li>
         
@@ -829,7 +833,7 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.transitionYAxis.call(
+            <div class="content"><div class='highlight'><pre>        self.transitionYAxis.call(
           transition.selectAll(<span class="string">'.y.axis'</span>), __.orientation, params);</pre></div></div>
             
         </li>
@@ -848,7 +852,7 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.transitionXAxis.call(
+            <div class="content"><div class='highlight'><pre>        self.transitionXAxis.call(
           transition.selectAll(<span class="string">'.x.axis'</span>), __.orientation, params);</pre></div></div>
             
         </li>
@@ -899,7 +903,7 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        bars = <span class="keyword">this</span>.createBars.call(bars.enter(), __.orientation, params)
+            <div class="content"><div class='highlight'><pre>        bars = self.createBars.call(bars.enter(), __.orientation, params)
           .on(<span class="string">'click'</span>, __.handleClick);</pre></div></div>
             
         </li>
@@ -935,7 +939,7 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.transitionBars.call(transition.selectAll(<span class="string">'.bar'</span>), __.orientation, params)
+            <div class="content"><div class='highlight'><pre>        self.transitionBars.call(transition.selectAll(<span class="string">'.bar'</span>), __.orientation, params)
           .call(utils.endall, data, __.handleTransitionEnd);</pre></div></div>
             
         </li>
@@ -958,8 +962,8 @@ Presently no assumption is made about the chart orientation.</p>
     }
 
     utils.getset(bar, __);
-    common_mixins.call(bar.prototype);
-    bar_mixins.call(bar.prototype);
+    common_mixins.call(Bar.prototype);
+    bar_mixins.call(Bar.prototype);
 
     <span class="keyword">return</span> bar;
 
