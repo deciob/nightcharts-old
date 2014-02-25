@@ -10,8 +10,14 @@ define('bar/bar',[
   
   return function (user_config) {
 
-    var config = user_config || {},
-       __, w, h, xScale, yScale, xAxis, yAxis;
+    var config = user_config || {}
+      , __
+      , w
+      , h
+      , xScale
+      , yScale
+      , xAxis
+      , yAxis;
 
     __ = utils.extend(default_config, config);
 
@@ -20,38 +26,33 @@ define('bar/bar',[
     }
 
     function bar (selection) { 
-      var self = this;
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      //xScale = orientation[__.orientation].xScale();
-      xScale = self.setXScale(__.orientation)();
-      //yScale = orientation[__.orientation].yScale();
-      yScale = self.setYScale(__.orientation)();
+      xScale = this.setXScale(__.orientation)();
+      yScale = this.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
       // Presently no assumption is made about the chart orientation.
-      xAxis = d3.svg.axis().scale(xScale);
-      d3.entries(__.x_axis).forEach(function(o) {
-        if (o.value !== undefined) {
-          xAxis[o.key](o.value);
-        }
-      });
-      yAxis = d3.svg.axis().scale(yScale);
-      d3.entries(__.y_axis).forEach(function(o) {
-        if (o.value !== undefined) {
-          yAxis[o.key](o.value);
-        }
-      });
+      xAxis = this.setXAxis(__.x_axis)
+      yAxis = this.setYAxis(__.y_axis)
+      
+      selection.each( function (dat) {
 
-      selection.each(function(dat) {
-
-        var data, 
-          tooltip = __.tooltip, 
-          tip, svg, gEnter, g, bars, transition, bars_t, bars_ex, params;
+        var data
+          , tooltip = __.tooltip
+          , tip
+          , svg
+          , gEnter
+          , g
+          , bars
+          , transition
+          , bars_t
+          , bars_ex
+          , params;
 
         // data structure:
         // 0: name
@@ -83,8 +84,8 @@ define('bar/bar',[
           delay: delay,
         }
 
-        self.applyYScale.call(yScale, __.orientation, params); 
-        self.applyXScale.call(xScale, __.orientation, params);
+        this.applyYScale.call(yScale, __.orientation, params); 
+        this.applyXScale.call(xScale, __.orientation, params);
 
         // Select the svg element, if it exists.
         svg = selection.selectAll("svg").data([data]);
@@ -113,18 +114,12 @@ define('bar/bar',[
         transition = g.transition().duration(__.duration)
         
         // Update the y axis.
-        self.transitionYAxis.call(
+        this.transitionYAxis.call(
           transition.selectAll('.y.axis'), __.orientation, params);
-        //orientation[__.orientation]
-        //  .transitionYAxis
-        //  .call(transition.selectAll('.y.axis'), params);
 
         // Update the x axis.
-        self.transitionXAxis.call(
+        this.transitionXAxis.call(
           transition.selectAll('.x.axis'), __.orientation, params);
-        //orientation[__.orientation]
-        //  .transitionXAxis
-        //  .call(transition.select(".x.axis"), params);
 
         // Select the bar elements, if they exists.
         bars = g.select(".bars").selectAll(".bar")
@@ -135,10 +130,8 @@ define('bar/bar',[
           .transition().duration(__.duration).style('opacity', 0).remove();
 
         // Otherwise, create them.
-        bars = self.createBars.call(bars.enter(), __.orientation, params)
+        bars = this.createBars.call(bars.enter(), __.orientation, params)
           .on('click', __.handleClick);
-        //bars = orientation[__.orientation].createBars.call(bars.enter(), params)
-        //  .on('click', __.handleClick);
 
         if (tooltip) {
           bars
@@ -147,12 +140,10 @@ define('bar/bar',[
         }
           
         // And transition them.
-        self.transitionBars.call(transition.selectAll('.bar'), __.orientation, params)
+        this.transitionBars
+          .call(transition.selectAll('.bar'), __.orientation, params)
           .call(utils.endall, data, __.handleTransitionEnd);
-        //orientation[__.orientation].transitionBars
-        //  .call(transition.selectAll('.bar'), params)
-        //  .call(utils.endall, data, __.handleTransitionEnd);
-        
+
         return selection;
 
       });
