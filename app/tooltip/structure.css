@@ -10,7 +10,7 @@
 
 .d3-tip {
   padding: 5px;
-  background-color: rgba(228, 246, 238, 0.8);
+  background-color: rgba(245, 245, 245, 0.9);
 }
 
 #tooltip-viz .y.axis line, #tooltip-viz .y.axis path, #tooltip-viz .x.axis line {
