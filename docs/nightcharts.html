@@ -241,7 +241,11 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
   
     <span class="function"><span class="keyword">function</span> <span class="title">_applyXScaleV</span> <span class="params">(params)</span> {</span>
       <span class="keyword">var</span> range = [<span class="number">0</span>, params.w()];
-      <span class="keyword">return</span> _applyOrdinalScale.call(<span class="keyword">this</span>, params, range);
+      <span class="keyword">if</span> (timescale) {
+        <span class="keyword">return</span> _applyLinearScale.call(<span class="keyword">this</span>, params, range);
+      } <span class="keyword">else</span> {
+        <span class="keyword">return</span> _applyOrdinalScale.call(<span class="keyword">this</span>, params, range);
+      }
     }
   
     <span class="function"><span class="keyword">function</span> <span class="title">_applyXScaleH</span> <span class="params">(params)</span> {</span>
@@ -250,7 +254,6 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
     }
   
     <span class="function"><span class="keyword">function</span> <span class="title">applyXScale</span> <span class="params">(orientation, params)</span> {</span>
-
       <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span>) {
         <span class="keyword">return</span> _applyXScaleV.call(<span class="keyword">this</span>, params);
       } <span class="keyword">else</span> {

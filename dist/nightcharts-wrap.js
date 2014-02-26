@@ -10146,7 +10146,11 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     function _applyXScaleV (params) {
       var range = [0, params.w()];
-      return _applyOrdinalScale.call(this, params, range);
+      if (timescale) {
+        return _applyLinearScale.call(this, params, range);
+      } else {
+        return _applyOrdinalScale.call(this, params, range);
+      }
     }
   
     function _applyXScaleH (params) {
@@ -10155,7 +10159,6 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
   
     function applyXScale (orientation, params) {
-
       if (orientation == 'vertical') {
         return _applyXScaleV.call(this, params);
       } else {
