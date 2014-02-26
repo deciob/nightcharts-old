@@ -104,8 +104,12 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }  
     }
 
-    function setXScale (orientation) {
-      if (orientation == 'vertical') {
+    function setXScale (orientation, timescale) {
+      if (orientation == 'vertical' && timescale) {
+        return d3.time.scale();
+      } else if (orientation != 'vertical' && timescale) {
+        return new Error('Timescale is only for horizontal graphs.')
+      } else if (orientation == 'vertical') {
         return d3.scale.ordinal;
       } else {
         return d3.scale.linear;

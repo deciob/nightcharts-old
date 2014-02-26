@@ -34,6 +34,8 @@ define(function(require) {
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
+      // is the xAxis a timescale?
+      timescale: false
     };
   
 });

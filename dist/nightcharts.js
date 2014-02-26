@@ -225,8 +225,12 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }  
     }
 
-    function setXScale (orientation) {
-      if (orientation == 'vertical') {
+    function setXScale (orientation, timescale) {
+      if (orientation == 'vertical' && timescale) {
+        return d3.time.scale();
+      } else if (orientation != 'vertical' && timescale) {
+        return new Error('Timescale is only for horizontal graphs.')
+      } else if (orientation == 'vertical') {
         return d3.scale.ordinal;
       } else {
         return d3.scale.linear;
@@ -365,6 +369,8 @@ define('bar/config',['require'],function(require) {
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
+      // is the xAxis a timescale?
+      timescale: false
     };
   
 });
@@ -408,7 +414,7 @@ define('bar/bar',[
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      xScale = self.setXScale(__.orientation)();
+      xScale = self.setXScale(__.orientation, __.timescale)();
       yScale = self.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
