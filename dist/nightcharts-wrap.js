@@ -10136,6 +10136,14 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }
       return this.range(range).domain([0, max]);
     }
+
+    // TODO TODO TODO !!!
+    function _applyTimeScale (params, range) {
+      var data = params.__.data
+        , d0 = params.__.parseTime(data[0][0])
+        , d1 = params.__.parseTime(data[data.length - 1][0]);
+      return this.range(range).domain([d0, d1]);
+    }
   
     // Sets the range and domain for the ordinal scale.
     function _applyOrdinalScale (params, range) {
@@ -10147,7 +10155,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
     function _applyXScaleV (params) {
       var range = [0, params.w()];
       if (timescale) {
-        return _applyLinearScale.call(this, params, range);
+        return _applyTimeScale.call(this, params, range);
       } else {
         return _applyOrdinalScale.call(this, params, range);
       }
@@ -10378,7 +10386,8 @@ define('bar/config',['require'],function(require) {
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
       // is the xAxis a timescale?
-      timescale: false
+      timescale: true,
+      parseTime: d3.time.format("%Y").parse
     };
   
 });

@@ -229,6 +229,26 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
+              <p>TODO TODO TODO !!!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">_applyTimeScale</span> <span class="params">(params, range)</span> {</span>
+      <span class="keyword">var</span> data = params.__.data
+        , d0 = params.__.parseTime(data[<span class="number">0</span>][<span class="number">0</span>])
+        , d1 = params.__.parseTime(data[data.length - <span class="number">1</span>][<span class="number">0</span>]);
+      <span class="keyword">return</span> <span class="keyword">this</span>.range(range).domain([d0, d1]);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
               <p>Sets the range and domain for the ordinal scale.</p>
 
             </div>
@@ -242,7 +262,7 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
     <span class="function"><span class="keyword">function</span> <span class="title">_applyXScaleV</span> <span class="params">(params)</span> {</span>
       <span class="keyword">var</span> range = [<span class="number">0</span>, params.w()];
       <span class="keyword">if</span> (timescale) {
-        <span class="keyword">return</span> _applyLinearScale.call(<span class="keyword">this</span>, params, range);
+        <span class="keyword">return</span> _applyTimeScale.call(<span class="keyword">this</span>, params, range);
       } <span class="keyword">else</span> {
         <span class="keyword">return</span> _applyOrdinalScale.call(<span class="keyword">this</span>, params, range);
       }
@@ -266,11 +286,11 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
         </li>
         
         
-        <li id="section-8">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>Note the inverted range for the y-scale: bigger is up!</p>
 
@@ -285,11 +305,11 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
         </li>
         
         
-        <li id="section-9">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>Note the inverted range for the y-scale: bigger is up!</p>
 
@@ -464,11 +484,11 @@ define(<span class="string">'mixins/bar_mixins'</span>,[<span class="string">"d3
         </li>
         
         
-        <li id="section-10">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p><strong>The default configuration module for the bar.bar module</strong></p>
 
@@ -483,11 +503,11 @@ define(<span class="string">'mixins/bar_mixins'</span>,[<span class="string">"d3
         </li>
         
         
-        <li id="section-11">
+        <li id="section-12">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p>layout</p>
 
@@ -503,11 +523,11 @@ define(<span class="string">'mixins/bar_mixins'</span>,[<span class="string">"d3
         </li>
         
         
-        <li id="section-12">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>axes</p>
 
@@ -527,11 +547,11 @@ define(<span class="string">'mixins/bar_mixins'</span>,[<span class="string">"d3
         </li>
         
         
-        <li id="section-13">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>data</p>
 
@@ -545,11 +565,11 @@ define(<span class="string">'mixins/bar_mixins'</span>,[<span class="string">"d3
         </li>
         
         
-        <li id="section-14">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>events</p>
 
@@ -561,11 +581,11 @@ define(<span class="string">'mixins/bar_mixins'</span>,[<span class="string">"d3
         </li>
         
         
-        <li id="section-15">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p><a href="https://github.com/Caged/d3-tip">d3-tip</a> tooltips,
 can pass boolean or object with d3-tip configuration.</p>
@@ -577,17 +597,18 @@ can pass boolean or object with d3-tip configuration.</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>is the xAxis a timescale?</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      timescale: <span class="literal">false</span>
+            <div class="content"><div class='highlight'><pre>      timescale: <span class="literal">true</span>,
+      parseTime: d3.time.format(<span class="string">"%Y"</span>).parse
     };
   
 });</pre></div></div>
@@ -595,11 +616,11 @@ can pass boolean or object with d3-tip configuration.</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p><strong>The bar.bar module</strong></p>
 
@@ -642,11 +663,11 @@ can pass boolean or object with d3-tip configuration.</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>Scales are functions that map from an input domain to an output range.
 Presently no assumption is made about the chart orientation.</p>
@@ -659,11 +680,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">SVG-Axes</a>
 Presently no assumption is made about the chart orientation.</p>
@@ -690,11 +711,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>data structure:
 0: name
@@ -717,11 +738,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>Attention, delay can not be longer of transition time! Test!</p>
 
@@ -748,11 +769,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>Select the svg element, if it exists.</p>
 
@@ -763,11 +784,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>Otherwise, create the skeletal chart.</p>
 
@@ -778,11 +799,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>Initializing the tooltip.</p>
 
@@ -799,11 +820,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>Update the outer dimensions.</p>
 
@@ -815,11 +836,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>Update the inner dimensions.</p>
 
@@ -832,11 +853,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>Transitions root.</p>
 
@@ -847,11 +868,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Update the y axis.</p>
 
@@ -863,11 +884,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Update the x axis.</p>
 
@@ -879,11 +900,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Select the bar elements, if they exists.</p>
 
@@ -895,11 +916,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>Exit phase (let us push out old bars before the new ones come in).</p>
 
@@ -911,11 +932,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Otherwise, create them.</p>
 
@@ -933,11 +954,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>And transition them.</p>
 
@@ -966,11 +987,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p><strong>frame.states module</strong></p>
 <p>Used by the <em>frame.state_machine</em> module.
@@ -1031,11 +1052,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p><strong>frame.state_machine module</strong></p>
 <p>From <a href="http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/">http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/</a></p>
@@ -1068,11 +1089,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>getLastEvent();</p>
 
@@ -1085,11 +1106,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p><strong>frame.frame module</strong></p>
 
@@ -1128,11 +1149,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-38">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>Initial frame. The chart is rendered for the first time.</p>
 
@@ -1143,11 +1164,11 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>Fired when all the chart related transitions within a frame are 
 terminated.
@@ -1188,11 +1209,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-40">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>Re-render the chart</p>
 
@@ -1205,11 +1226,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-41">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p>When no data is left to consume, let us stop the running frames!</p>
 
@@ -1234,11 +1255,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-42">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <p>TODO: there is a lot of repetition here!</p>
 
@@ -1257,11 +1278,11 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
         </li>
         
         
-        <li id="section-43">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
               <p>TODO:
 for next and prev we are allowing multiple prev-next events to be 
@@ -1358,11 +1379,11 @@ define(<span class="string">'chart'</span>,[
         </li>
         
         
-        <li id="section-44">
+        <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
               <p>&quot;bar/orientation&quot;,</p>
 
