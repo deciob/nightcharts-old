@@ -16,7 +16,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       var data = params.__.data
         , d0 = params.__.parseTime(data[0][0])
         , d1 = params.__.parseTime(data[data.length - 1][0]);
-      return this.range(range).domain([d0, d1]));
+      return this.range(range).domain([d0, d1]);
     }
   
     // Sets the range and domain for the ordinal scale.
