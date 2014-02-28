@@ -35,7 +35,8 @@ define(function(require) {
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
       // is the xAxis a timescale?
-      timescale: false
+      timescale: true,
+      parseTime: d3.time.format("%Y").parse
     };
   
 });
