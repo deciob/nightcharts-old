@@ -394,7 +394,7 @@ define('bar/config',['require'],function(require) {
       tooltip: false,
       // is the xAxis a timescale?
       // false or function: d3.time.format("%Y").parse
-      parseTime: false,
+      parseDate: false,
     };
   
 });
