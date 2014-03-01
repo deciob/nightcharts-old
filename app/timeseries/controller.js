@@ -13,9 +13,8 @@ define([
 
     d3.json(args.data_url, function (err, data) {
       
-      data = data.year.map( function(year, index) {
-        console.log(year)
-        return [year.toString(), data.world_urban_pop[index]];
+      data = data.month.map( function(month, index) {
+        return [month, data.temperature[index]];
       });
 
       barchart = chart.bar()
@@ -23,7 +22,7 @@ define([
         .width(600)
         .height(200)
         .duration(0)
-        .parseTime(d3.time.format("%Y").parse);
+        .parseDate(d3.time.format("%m").parse);
       chart.draw(barchart, selection, data);
     });
 

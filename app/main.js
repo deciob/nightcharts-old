@@ -72,7 +72,7 @@ define({
       module: 'timeseries/controller',
       args: {
         //chart: {$ref: "chart_constructor"},
-        data_url: 'app/inline/data.json',
+        data_url: 'app/timeseries/data.json',
         el: {$ref: "timeseries_example"},
         selector: '#timeseries-viz'
       }
