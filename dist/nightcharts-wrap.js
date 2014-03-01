@@ -10139,10 +10139,10 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     // TODO TODO TODO !!!
     function _applyTimeScale (params, range) {
-      var data = params.data
-        , d0 = params.__.parseTime(data[0][0])
-        , d1 = params.__.parseTime(data[data.length - 1][0]);
-      return this.range(range).domain([d0, d1]);
+      var data = params.data;
+        //, d0 = params.__.parseTime(data[0][0])
+        //, d1 = params.__.parseTime(data[data.length - 1][0]);
+      return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
     }
   
     // Sets the range and domain for the ordinal scale.
@@ -10154,7 +10154,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     function _applyXScaleV (params) {
       var range = [0, params.w()];
-      if (params.__.parseTime) {
+      if (params.__.parseDate) {
         return _applyTimeScale.call(this, params, range);
       } else {
         return _applyOrdinalScale.call(this, params, range);
@@ -10241,10 +10241,10 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }  
     }
 
-    function setXScale (orientation, parseTime) {
-      if (orientation == 'vertical' && parseTime) {
+    function setXScale (orientation, parseDate) {
+      if (orientation == 'vertical' && parseDate) {
         return d3.time.scale;
-      } else if (orientation != 'vertical' && parseTime) {
+      } else if (orientation != 'vertical' && parseDate) {
         return new Error('Timescale is only for horizontal graphs.')
       } else if (orientation == 'vertical') {
         return d3.scale.ordinal;
@@ -10304,7 +10304,7 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
         .attr("class", "bar")
         .attr("x", function(d) { 
           return params.xScale(d[1]); })
-        .attr("width", 20)
+        .attr("width", 25)
         .attr("y", params.h() + params.__.barOffSet)
         .attr("height", 0);
     }
@@ -10443,7 +10443,7 @@ define('bar/bar',[
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      xScale = self.setXScale(__.orientation, __.parseTime)();
+      xScale = self.setXScale(__.orientation, __.parseDate)();
       yScale = self.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)

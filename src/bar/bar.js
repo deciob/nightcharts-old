@@ -36,7 +36,7 @@ define('bar/bar',[
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      xScale = self.setXScale(__.orientation, __.parseTime)();
+      xScale = self.setXScale(__.orientation, __.parseDate)();
       yScale = self.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)

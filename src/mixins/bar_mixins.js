@@ -14,7 +14,7 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
         .attr("class", "bar")
         .attr("x", function(d) { 
           return params.xScale(d[1]); })
-        .attr("width", 20)
+        .attr("width", 25)
         .attr("y", params.h() + params.__.barOffSet)
         .attr("height", 0);
     }
