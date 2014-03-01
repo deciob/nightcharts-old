@@ -67,7 +67,7 @@ define({
     insert: { at: 'dom.first!.timeseries' }
   },
 
-  tooltip_controller: {
+  timeseries_controller: {
     create: {
       module: 'timeseries/controller',
       args: {
