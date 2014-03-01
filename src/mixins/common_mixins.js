@@ -13,7 +13,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     // TODO TODO TODO !!!
     function _applyTimeScale (params, range) {
-      var data = params.__.data
+      var data = params.data
         , d0 = params.__.parseTime(data[0][0])
         , d1 = params.__.parseTime(data[data.length - 1][0]);
       return this.range(range).domain([d0, d1]);
@@ -117,7 +117,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     function setXScale (orientation, parseTime) {
       if (orientation == 'vertical' && parseTime) {
-        return d3.time.scale();
+        return d3.time.scale;
       } else if (orientation != 'vertical' && parseTime) {
         return new Error('Timescale is only for horizontal graphs.')
       } else if (orientation == 'vertical') {

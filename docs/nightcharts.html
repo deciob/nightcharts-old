@@ -234,7 +234,7 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">_applyTimeScale</span> <span class="params">(params, range)</span> {</span>
-      <span class="keyword">var</span> data = params.__.data
+      <span class="keyword">var</span> data = params.data
         , d0 = params.__.parseTime(data[<span class="number">0</span>][<span class="number">0</span>])
         , d1 = params.__.parseTime(data[data.length - <span class="number">1</span>][<span class="number">0</span>]);
       <span class="keyword">return</span> <span class="keyword">this</span>.range(range).domain([d0, d1]);
@@ -376,7 +376,7 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
 
     <span class="function"><span class="keyword">function</span> <span class="title">setXScale</span> <span class="params">(orientation, parseTime)</span> {</span>
       <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span> &amp;&amp; parseTime) {
-        <span class="keyword">return</span> d3.time.scale();
+        <span class="keyword">return</span> d3.time.scale;
       } <span class="keyword">else</span> <span class="keyword">if</span> (orientation != <span class="string">'vertical'</span> &amp;&amp; parseTime) {
         <span class="keyword">return</span> <span class="keyword">new</span> Error(<span class="string">'Timescale is only for horizontal graphs.'</span>)
       } <span class="keyword">else</span> <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span>) {
@@ -432,6 +432,16 @@ define(<span class="string">'mixins/bar_mixins'</span>,[<span class="string">"d3
         .attr(<span class="string">"height"</span>, <span class="number">0</span>);
     }
 
+    <span class="function"><span class="keyword">function</span> <span class="title">createTimeBarsV</span> <span class="params">(params)</span> {</span>
+      <span class="keyword">return</span> <span class="keyword">this</span>.append(<span class="string">"rect"</span>)
+        .attr(<span class="string">"class"</span>, <span class="string">"bar"</span>)
+        .attr(<span class="string">"x"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> 
+          <span class="keyword">return</span> params.xScale(d[<span class="number">1</span>]); })
+        .attr(<span class="string">"width"</span>, <span class="number">20</span>)
+        .attr(<span class="string">"y"</span>, params.h() + params.__.barOffSet)
+        .attr(<span class="string">"height"</span>, <span class="number">0</span>);
+    }
+
     <span class="function"><span class="keyword">function</span> <span class="title">createBarsH</span> <span class="params">(params)</span> {</span>
       <span class="keyword">return</span> <span class="keyword">this</span>.append(<span class="string">"rect"</span>)
         .attr(<span class="string">"class"</span>, <span class="string">"bar"</span>)
@@ -442,8 +452,10 @@ define(<span class="string">'mixins/bar_mixins'</span>,[<span class="string">"d3
     }
 
     <span class="function"><span class="keyword">function</span> <span class="title">createBars</span> <span class="params">(orientation, params)</span> {</span>
-      <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span>) {
+      <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span> &amp;&amp; !params.__.parseTime) {
         <span class="keyword">return</span> createBarsV.call(<span class="keyword">this</span>, params);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span> &amp;&amp; params.__.parseTime) {
+        <span class="keyword">return</span> createTimeBarsV.call(<span class="keyword">this</span>, params);
       } <span class="keyword">else</span> {
         <span class="keyword">return</span> createBarsH.call(<span class="keyword">this</span>, params);
       }
@@ -763,8 +775,8 @@ Presently no assumption is made about the chart orientation.</p>
           delay: delay,
         }
 
-        self.applyYScale.call(yScale, __.orientation, params); 
-        self.applyXScale.call(xScale, __.orientation, params);</pre></div></div>
+        self.applyXScale.call(xScale, __.orientation, params);
+        self.applyYScale.call(yScale, __.orientation, params);</pre></div></div>
             
         </li>
         

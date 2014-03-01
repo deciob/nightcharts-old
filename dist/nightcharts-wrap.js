@@ -10139,7 +10139,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     // TODO TODO TODO !!!
     function _applyTimeScale (params, range) {
-      var data = params.__.data
+      var data = params.data
         , d0 = params.__.parseTime(data[0][0])
         , d1 = params.__.parseTime(data[data.length - 1][0]);
       return this.range(range).domain([d0, d1]);
@@ -10243,7 +10243,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     function setXScale (orientation, parseTime) {
       if (orientation == 'vertical' && parseTime) {
-        return d3.time.scale();
+        return d3.time.scale;
       } else if (orientation != 'vertical' && parseTime) {
         return new Error('Timescale is only for horizontal graphs.')
       } else if (orientation == 'vertical') {
@@ -10299,6 +10299,16 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
         .attr("height", 0);
     }
 
+    function createTimeBarsV (params) {
+      return this.append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { 
+          return params.xScale(d[1]); })
+        .attr("width", 20)
+        .attr("y", params.h() + params.__.barOffSet)
+        .attr("height", 0);
+    }
+
     function createBarsH (params) {
       return this.append("rect")
         .attr("class", "bar")
@@ -10309,8 +10319,10 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function createBars (orientation, params) {
-      if (orientation == 'vertical') {
+      if (orientation == 'vertical' && !params.__.parseTime) {
         return createBarsV.call(this, params);
+      } else if (orientation == 'vertical' && params.__.parseTime) {
+        return createTimeBarsV.call(this, params);
       } else {
         return createBarsH.call(this, params);
       }
@@ -10483,8 +10495,8 @@ define('bar/bar',[
           delay: delay,
         }
 
-        self.applyYScale.call(yScale, __.orientation, params); 
         self.applyXScale.call(xScale, __.orientation, params);
+        self.applyYScale.call(yScale, __.orientation, params); 
 
         // Select the svg element, if it exists.
         svg = selection.selectAll("svg").data([data]);

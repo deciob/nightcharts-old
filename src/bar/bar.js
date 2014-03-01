@@ -88,8 +88,8 @@ define('bar/bar',[
           delay: delay,
         }
 
-        self.applyYScale.call(yScale, __.orientation, params); 
         self.applyXScale.call(xScale, __.orientation, params);
+        self.applyYScale.call(yScale, __.orientation, params); 
 
         // Select the svg element, if it exists.
         svg = selection.selectAll("svg").data([data]);
