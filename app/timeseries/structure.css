@@ -1,0 +1,20 @@
+
+#timeseries-viz rect {
+  fill: #FF530D;
+  shape-rendering: crispEdges;
+}
+
+#timeseries-viz .y.axis line, #timeseries-viz .y.axis path {
+  fill: none;
+  stroke: #555;
+}
+
+#timeseries-viz .x.axis line {
+  fill: none;
+  stroke: none;
+}
+
+#timeseries-viz text {
+  fill: #555;
+  font-size: 0.9em;
+}

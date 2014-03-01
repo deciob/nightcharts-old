@@ -131,6 +131,14 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }
       return this.range(range).domain([0, max]);
     }
+
+    // TODO TODO TODO !!!
+    function _applyTimeScale (params, range) {
+      var data = params.data
+        , d0 = params.__.parseTime(data[0][0])
+        , d1 = params.__.parseTime(data[data.length - 1][0]);
+      return this.range(range).domain([d0, d1]);
+    }
   
     // Sets the range and domain for the ordinal scale.
     function _applyOrdinalScale (params, range) {
@@ -141,7 +149,11 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     function _applyXScaleV (params) {
       var range = [0, params.w()];
-      return _applyOrdinalScale.call(this, params, range);
+      if (params.__.parseTime) {
+        return _applyTimeScale.call(this, params, range);
+      } else {
+        return _applyOrdinalScale.call(this, params, range);
+      }
     }
   
     function _applyXScaleH (params) {
@@ -150,7 +162,6 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
   
     function applyXScale (orientation, params) {
-
       if (orientation == 'vertical') {
         return _applyXScaleV.call(this, params);
       } else {
@@ -225,8 +236,12 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }  
     }
 
-    function setXScale (orientation) {
-      if (orientation == 'vertical') {
+    function setXScale (orientation, parseTime) {
+      if (orientation == 'vertical' && parseTime) {
+        return d3.time.scale;
+      } else if (orientation != 'vertical' && parseTime) {
+        return new Error('Timescale is only for horizontal graphs.')
+      } else if (orientation == 'vertical') {
         return d3.scale.ordinal;
       } else {
         return d3.scale.linear;
@@ -279,6 +294,16 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
         .attr("height", 0);
     }
 
+    function createTimeBarsV (params) {
+      return this.append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { 
+          return params.xScale(d[1]); })
+        .attr("width", 20)
+        .attr("y", params.h() + params.__.barOffSet)
+        .attr("height", 0);
+    }
+
     function createBarsH (params) {
       return this.append("rect")
         .attr("class", "bar")
@@ -289,8 +314,10 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function createBars (orientation, params) {
-      if (orientation == 'vertical') {
+      if (orientation == 'vertical' && !params.__.parseTime) {
         return createBarsV.call(this, params);
+      } else if (orientation == 'vertical' && params.__.parseTime) {
+        return createTimeBarsV.call(this, params);
       } else {
         return createBarsH.call(this, params);
       }
@@ -365,6 +392,9 @@ define('bar/config',['require'],function(require) {
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
+      // is the xAxis a timescale?
+      // false or function: d3.time.format("%Y").parse
+      parseTime: false,
     };
   
 });
@@ -401,14 +431,14 @@ define('bar/bar',[
 
       var self = this instanceof Bar
                ? this
-               : new Bar();
+               : new Bar(selection);
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      xScale = self.setXScale(__.orientation)();
+      xScale = self.setXScale(__.orientation, __.parseTime)();
       yScale = self.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
@@ -460,8 +490,8 @@ define('bar/bar',[
           delay: delay,
         }
 
-        self.applyYScale.call(yScale, __.orientation, params); 
         self.applyXScale.call(xScale, __.orientation, params);
+        self.applyYScale.call(yScale, __.orientation, params); 
 
         // Select the svg element, if it exists.
         svg = selection.selectAll("svg").data([data]);

@@ -10,18 +10,11 @@
 		},
 		packages: [
 			// Define application-level packages
-			{
-				name: 'chart', location: 'app/chart', main: 'chart_constructor',
-			},
-			{
-				name: 'welcome', location: 'app/welcome',
-			},
-			{
-        name: 'inline', location: 'app/inline',
-			},
-			{
-        name: 'tooltip', location: 'app/tooltip',
-			},
+			{name: 'chart', location: 'app/chart', main: 'chart_constructor',},
+			{name: 'welcome', location: 'app/welcome',},
+			{name: 'inline', location: 'app/inline',},
+			{name: 'tooltip', location: 'app/tooltip',},
+			{name: 'timeseries', location: 'app/timeseries',},
 
 			// Define a theme package, and configure it to always use the css module loader
 			// No need to use AMD 'css!' plugin to load things in this package, it will happen

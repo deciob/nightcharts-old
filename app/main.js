@@ -56,6 +56,29 @@ define({
     }
   },
 
+  // Create a simple view by rendering html, replacing some i18n strings
+  // and loading CSS.  Then, insert into the DOM
+  timeseries_example: {
+    render: {
+      template: { module: 'text!timeseries/template.html' },
+      replace: { module: 'i18n!timeseries/strings' },
+      css: { module: 'css!timeseries/structure.css' }
+    },
+    insert: { at: 'dom.first!.timeseries' }
+  },
+
+  tooltip_controller: {
+    create: {
+      module: 'timeseries/controller',
+      args: {
+        //chart: {$ref: "chart_constructor"},
+        data_url: 'app/inline/data.json',
+        el: {$ref: "timeseries_example"},
+        selector: '#timeseries-viz'
+      }
+    }
+  },
+
 	// Wire.js plugins
 	plugins: [
 		{ module: 'wire/dom', classes: { init: 'loading' } },
