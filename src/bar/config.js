@@ -17,6 +17,7 @@ define(function(require) {
         outerTickSize: 0,
         orient: 'bottom',
         tickValues: void 0,
+        tickFormat: null,
       },
       y_axis: {
         outerTickSize: 0,
@@ -37,6 +38,10 @@ define(function(require) {
       // is the xAxis a timescale?
       // false or function: d3.time.format("%Y").parse
       parseDate: false,
+      parseAxisDate: false,
+      // false or string: 'month', 'year', etc.
+      // used for extending the timescale on the margins.
+      time_offset: false
     };
   
 });

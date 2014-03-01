@@ -11,12 +11,30 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       return this.range(range).domain([0, max]);
     }
 
-    // TODO TODO TODO !!!
     function _applyTimeScale (params, range) {
       var data = params.data;
-        //, d0 = params.__.parseTime(data[0][0])
-        //, d1 = params.__.parseTime(data[data.length - 1][0]);
       return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
+    }
+
+    function _applyTimeScale (params, range) {
+      // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
+      var data = params.data,
+          t1 = data[0][0],
+          t2 = data[data.length - 1][0],
+          offset = params.__.time_offset,
+          t0,
+          t3;
+      if (params.__.time_offset) {
+        t0 = d3.time[offset].offset(t1, -1);
+        t3 = d3.time[offset].offset(t2, +1);
+        return this
+          .domain([t0, t3])
+          .range([t0, t3].map(d3.time.scale()
+            .domain([t1, t2])
+            .range([0, params.w()])));
+      } else {
+        return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
+      }
     }
   
     // Sets the range and domain for the ordinal scale.

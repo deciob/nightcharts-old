@@ -62,8 +62,14 @@ define('bar/bar',[
         // 0: name
         // 1: value
         data = dat.map(function(d, i) {
+          var x;
+          if (__.parseDate) {
+            x = __.parseDate(__.categoricalValue.call(dat, d));
+          } else {
+            x = __.categoricalValue.call(dat, d);
+          }
           return [
-            __.categoricalValue.call(dat, d), 
+            x, 
             __.quantativeValue.call(dat, d)
           ];
         });
@@ -86,6 +92,11 @@ define('bar/bar',[
           xAxis: xAxis,
           yAxis: yAxis,
           delay: delay,
+          date_adjust: (w()/data.length)/2
+        }
+
+        if (__.parseDate) {
+          params.bar_width = (w() / data.length) - .5;
         }
 
         self.applyXScale.call(xScale, __.orientation, params);
@@ -103,7 +114,12 @@ define('bar/bar',[
         }
         gEnter.append("g").attr("class", "bars");
         gEnter.append("g").attr("class", "x axis");
-        gEnter.append("g").attr("class", "y axis");
+        if (__.parseDate) {
+          gEnter.append("g").attr("class", "y axis")
+           .attr("transform", "translate(-" + (params.date_adjust + 5) + ",0)");
+        } else {
+          gEnter.append("g").attr("class", "y axis");
+        }
 
         // Update the outer dimensions.
         svg.attr("width", __.width)

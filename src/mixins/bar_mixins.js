@@ -3,7 +3,7 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     function createBarsV (params) {
       return this.append("rect")
         .attr("class", "bar")
-        .attr("x", function(d) { return params.xScale(d[1]); })
+        .attr("x", function(d) { return params.xScale(d[0]); })
         .attr("width", params.xScale.rangeBand())
         .attr("y", params.h() + params.__.barOffSet)
         .attr("height", 0);
@@ -13,8 +13,9 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
       return this.append("rect")
         .attr("class", "bar")
         .attr("x", function(d) { 
-          return params.xScale(d[1]); })
-        .attr("width", 25)
+          return params.xScale(d[0]) - params.date_adjust; 
+        })
+        .attr("width", params.bar_width)
         .attr("y", params.h() + params.__.barOffSet)
         .attr("height", 0);
     }
@@ -29,9 +30,9 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function createBars (orientation, params) {
-      if (orientation == 'vertical' && !params.__.parseTime) {
+      if (orientation == 'vertical' && !params.__.parseDate) {
         return createBarsV.call(this, params);
-      } else if (orientation == 'vertical' && params.__.parseTime) {
+      } else if (orientation == 'vertical' && params.__.parseDate) {
         return createTimeBarsV.call(this, params);
       } else {
         return createBarsH.call(this, params);
@@ -41,6 +42,15 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     function transitionBarsV (params) {
       return this.delay(params.delay)
         .attr("x", function(d) { return params.xScale(d[0]); })
+        .attr("y", function(d) { return params.yScale(d[1]); })
+        .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
+    }
+
+    function transitionTimeBarsV (params) {
+      return this.delay(params.delay)
+        .attr("x", function(d) { 
+          return params.xScale(d[0]) - params.date_adjust; 
+        })
         .attr("y", function(d) { return params.yScale(d[1]); })
         .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
     }
@@ -55,8 +65,10 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function transitionBars (orientation, params) {
-      if (orientation == 'vertical') {
+      if (orientation == 'vertical' && !params.__.parseDate) {
         return transitionBarsV.call(this, params);
+      } else if (orientation == 'vertical' && params.__.parseDate) {
+        return transitionTimeBarsV.call(this, params);
       } else {
         return transitionBarsH.call(this, params);
       }
