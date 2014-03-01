@@ -149,7 +149,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     function _applyXScaleV (params) {
       var range = [0, params.w()];
-      if (timescale) {
+      if (params.__.parseTime) {
         return _applyTimeScale.call(this, params, range);
       } else {
         return _applyOrdinalScale.call(this, params, range);
@@ -236,10 +236,10 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }  
     }
 
-    function setXScale (orientation, timescale) {
-      if (orientation == 'vertical' && timescale) {
+    function setXScale (orientation, parseTime) {
+      if (orientation == 'vertical' && parseTime) {
         return d3.time.scale();
-      } else if (orientation != 'vertical' && timescale) {
+      } else if (orientation != 'vertical' && parseTime) {
         return new Error('Timescale is only for horizontal graphs.')
       } else if (orientation == 'vertical') {
         return d3.scale.ordinal;
@@ -381,8 +381,8 @@ define('bar/config',['require'],function(require) {
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
       // is the xAxis a timescale?
-      timescale: true,
-      parseTime: d3.time.format("%Y").parse
+      // false or function: d3.time.format("%Y").parse
+      parseTime: false,
     };
   
 });
@@ -419,14 +419,14 @@ define('bar/bar',[
 
       var self = this instanceof Bar
                ? this
-               : new Bar();
+               : new Bar(selection);
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      xScale = self.setXScale(__.orientation, __.timescale)();
+      xScale = self.setXScale(__.orientation, __.parseTime)();
       yScale = self.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)

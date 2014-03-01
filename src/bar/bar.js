@@ -29,14 +29,14 @@ define('bar/bar',[
 
       var self = this instanceof Bar
                ? this
-               : new Bar();
+               : new Bar(selection);
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      xScale = self.setXScale(__.orientation, __.timescale)();
+      xScale = self.setXScale(__.orientation, __.parseTime)();
       yScale = self.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)

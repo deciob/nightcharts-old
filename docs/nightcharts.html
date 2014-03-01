@@ -261,7 +261,7 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
   
     <span class="function"><span class="keyword">function</span> <span class="title">_applyXScaleV</span> <span class="params">(params)</span> {</span>
       <span class="keyword">var</span> range = [<span class="number">0</span>, params.w()];
-      <span class="keyword">if</span> (timescale) {
+      <span class="keyword">if</span> (params.__.parseTime) {
         <span class="keyword">return</span> _applyTimeScale.call(<span class="keyword">this</span>, params, range);
       } <span class="keyword">else</span> {
         <span class="keyword">return</span> _applyOrdinalScale.call(<span class="keyword">this</span>, params, range);
@@ -374,10 +374,10 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
       }  
     }
 
-    <span class="function"><span class="keyword">function</span> <span class="title">setXScale</span> <span class="params">(orientation, timescale)</span> {</span>
-      <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span> &amp;&amp; timescale) {
+    <span class="function"><span class="keyword">function</span> <span class="title">setXScale</span> <span class="params">(orientation, parseTime)</span> {</span>
+      <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span> &amp;&amp; parseTime) {
         <span class="keyword">return</span> d3.time.scale();
-      } <span class="keyword">else</span> <span class="keyword">if</span> (orientation != <span class="string">'vertical'</span> &amp;&amp; timescale) {
+      } <span class="keyword">else</span> <span class="keyword">if</span> (orientation != <span class="string">'vertical'</span> &amp;&amp; parseTime) {
         <span class="keyword">return</span> <span class="keyword">new</span> Error(<span class="string">'Timescale is only for horizontal graphs.'</span>)
       } <span class="keyword">else</span> <span class="keyword">if</span> (orientation == <span class="string">'vertical'</span>) {
         <span class="keyword">return</span> d3.scale.ordinal;
@@ -603,12 +603,12 @@ can pass boolean or object with d3-tip configuration.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
-              <p>is the xAxis a timescale?</p>
+              <p>is the xAxis a timescale?
+false or function: d3.time.format(&quot;%Y&quot;).parse</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      timescale: <span class="literal">true</span>,
-      parseTime: d3.time.format(<span class="string">"%Y"</span>).parse
+            <div class="content"><div class='highlight'><pre>      parseTime: <span class="literal">false</span>,
     };
   
 });</pre></div></div>
@@ -655,7 +655,7 @@ can pass boolean or object with d3-tip configuration.</p>
 
       <span class="keyword">var</span> self = <span class="keyword">this</span> <span class="keyword">instanceof</span> Bar
                ? <span class="keyword">this</span>
-               : <span class="keyword">new</span> Bar();
+               : <span class="keyword">new</span> Bar(selection);
 
       w = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> __.width - __.margin.right - __.margin.left; };
       h = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> __.height - __.margin.top - __.margin.bottom; };</pre></div></div>
@@ -674,7 +674,7 @@ Presently no assumption is made about the chart orientation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      xScale = self.setXScale(__.orientation, __.timescale)();
+            <div class="content"><div class='highlight'><pre>      xScale = self.setXScale(__.orientation, __.parseTime)();
       yScale = self.setYScale(__.orientation)();</pre></div></div>
             
         </li>
