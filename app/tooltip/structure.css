@@ -1,11 +1,11 @@
 
 #tooltip-viz rect {
-  fill: #7EBDA2;
+  fill: #526F75;
   shape-rendering: crispEdges;
 }
 
 #tooltip-viz rect:hover {
-  fill: #abe0c9;
+  fill: #94B4BF;
 }
 
 .d3-tip {

@@ -1,3 +1,3 @@
 define({
-  graph_title: 'Urban Population, 1950-2050 (millions):'
+  graph_title: 'UK Mean Temperature (Degrees C), year 2012'
 });

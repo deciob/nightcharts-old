@@ -1,6 +1,7 @@
 
 #timeseries-viz rect {
-  fill: #FF530D;
+  /*fill: #3D4F73;*/
+  fill: #721401;
   shape-rendering: crispEdges;
 }
 

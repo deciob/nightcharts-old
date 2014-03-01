@@ -132,12 +132,30 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       return this.range(range).domain([0, max]);
     }
 
-    // TODO TODO TODO !!!
     function _applyTimeScale (params, range) {
       var data = params.data;
-        //, d0 = params.__.parseTime(data[0][0])
-        //, d1 = params.__.parseTime(data[data.length - 1][0]);
       return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
+    }
+
+    function _applyTimeScale (params, range) {
+      // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
+      var data = params.data,
+          t1 = data[0][0],
+          t2 = data[data.length - 1][0],
+          offset = params.__.time_offset,
+          t0,
+          t3;
+      if (params.__.time_offset) {
+        t0 = d3.time[offset].offset(t1, -1);
+        t3 = d3.time[offset].offset(t2, +1);
+        return this
+          .domain([t0, t3])
+          .range([t0, t3].map(d3.time.scale()
+            .domain([t1, t2])
+            .range([0, params.w()])));
+      } else {
+        return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
+      }
     }
   
     // Sets the range and domain for the ordinal scale.
@@ -288,7 +306,7 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     function createBarsV (params) {
       return this.append("rect")
         .attr("class", "bar")
-        .attr("x", function(d) { return params.xScale(d[1]); })
+        .attr("x", function(d) { return params.xScale(d[0]); })
         .attr("width", params.xScale.rangeBand())
         .attr("y", params.h() + params.__.barOffSet)
         .attr("height", 0);
@@ -298,8 +316,9 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
       return this.append("rect")
         .attr("class", "bar")
         .attr("x", function(d) { 
-          return params.xScale(d[1]); })
-        .attr("width", 25)
+          return params.xScale(d[0]) - params.date_adjust; 
+        })
+        .attr("width", params.bar_width)
         .attr("y", params.h() + params.__.barOffSet)
         .attr("height", 0);
     }
@@ -314,9 +333,9 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function createBars (orientation, params) {
-      if (orientation == 'vertical' && !params.__.parseTime) {
+      if (orientation == 'vertical' && !params.__.parseDate) {
         return createBarsV.call(this, params);
-      } else if (orientation == 'vertical' && params.__.parseTime) {
+      } else if (orientation == 'vertical' && params.__.parseDate) {
         return createTimeBarsV.call(this, params);
       } else {
         return createBarsH.call(this, params);
@@ -326,6 +345,15 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     function transitionBarsV (params) {
       return this.delay(params.delay)
         .attr("x", function(d) { return params.xScale(d[0]); })
+        .attr("y", function(d) { return params.yScale(d[1]); })
+        .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
+    }
+
+    function transitionTimeBarsV (params) {
+      return this.delay(params.delay)
+        .attr("x", function(d) { 
+          return params.xScale(d[0]) - params.date_adjust; 
+        })
         .attr("y", function(d) { return params.yScale(d[1]); })
         .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
     }
@@ -340,8 +368,10 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function transitionBars (orientation, params) {
-      if (orientation == 'vertical') {
+      if (orientation == 'vertical' && !params.__.parseDate) {
         return transitionBarsV.call(this, params);
+      } else if (orientation == 'vertical' && params.__.parseDate) {
+        return transitionTimeBarsV.call(this, params);
       } else {
         return transitionBarsH.call(this, params);
       }
@@ -375,6 +405,7 @@ define('bar/config',['require'],function(require) {
         outerTickSize: 0,
         orient: 'bottom',
         tickValues: void 0,
+        tickFormat: null,
       },
       y_axis: {
         outerTickSize: 0,
@@ -394,7 +425,11 @@ define('bar/config',['require'],function(require) {
       tooltip: false,
       // is the xAxis a timescale?
       // false or function: d3.time.format("%Y").parse
-      parseTime: false,
+      parseDate: false,
+      parseAxisDate: false,
+      // false or string: 'month', 'year', etc.
+      // used for extending the timescale on the margins.
+      time_offset: false
     };
   
 });
@@ -464,8 +499,14 @@ define('bar/bar',[
         // 0: name
         // 1: value
         data = dat.map(function(d, i) {
+          var x;
+          if (__.parseDate) {
+            x = __.parseDate(__.categoricalValue.call(dat, d));
+          } else {
+            x = __.categoricalValue.call(dat, d);
+          }
           return [
-            __.categoricalValue.call(dat, d), 
+            x, 
             __.quantativeValue.call(dat, d)
           ];
         });
@@ -488,6 +529,11 @@ define('bar/bar',[
           xAxis: xAxis,
           yAxis: yAxis,
           delay: delay,
+          date_adjust: (w()/data.length)/2
+        }
+
+        if (__.parseDate) {
+          params.bar_width = (w() / data.length) - .5;
         }
 
         self.applyXScale.call(xScale, __.orientation, params);
@@ -505,7 +551,12 @@ define('bar/bar',[
         }
         gEnter.append("g").attr("class", "bars");
         gEnter.append("g").attr("class", "x axis");
-        gEnter.append("g").attr("class", "y axis");
+        if (__.parseDate) {
+          gEnter.append("g").attr("class", "y axis")
+           .attr("transform", "translate(-" + (params.date_adjust + 5) + ",0)");
+        } else {
+          gEnter.append("g").attr("class", "y axis");
+        }
 
         // Update the outer dimensions.
         svg.attr("width", __.width)
