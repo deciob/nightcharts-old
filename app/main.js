@@ -21,17 +21,17 @@ define({
 		insert: { at: 'dom.first!.inline' }
 	},
 
-  inline_controller: {
-  	create: {
-      module: 'inline/controller',
-      args: {
-        //chart: {$ref: "chart_constructor"},
-        data_url: 'app/inline/data.json',
-        el: {$ref: "inline_example"},
-        selector: '#inline-viz'
-      }
-    }
-  },
+  //inline_controller: {
+  //	create: {
+  //    module: 'inline/controller',
+  //    args: {
+  //      //chart: {$ref: "chart_constructor"},
+  //      data_url: 'app/inline/data.json',
+  //      el: {$ref: "inline_example"},
+  //      selector: '#inline-viz'
+  //    }
+  //  }
+  //},
 
   // Create a simple view by rendering html, replacing some i18n strings
 	// and loading CSS.  Then, insert into the DOM
@@ -44,17 +44,17 @@ define({
 		insert: { at: 'dom.first!.tooltip' }
 	},
 
-  tooltip_controller: {
-  	create: {
-      module: 'tooltip/controller',
-      args: {
-        //chart: {$ref: "chart_constructor"},
-        data_url: 'app/tooltip/data.json',
-        el: {$ref: "tooltip_example"},
-        selector: '#tooltip-viz'
-      }
-    }
-  },
+  //tooltip_controller: {
+  //	create: {
+  //    module: 'tooltip/controller',
+  //    args: {
+  //      //chart: {$ref: "chart_constructor"},
+  //      data_url: 'app/tooltip/data.json',
+  //      el: {$ref: "tooltip_example"},
+  //      selector: '#tooltip-viz'
+  //    }
+  //  }
+  //},
 
   // Create a simple view by rendering html, replacing some i18n strings
   // and loading CSS.  Then, insert into the DOM
@@ -67,17 +67,17 @@ define({
     insert: { at: 'dom.first!.timeseries' }
   },
 
-  timeseries_controller: {
-    create: {
-      module: 'timeseries/controller',
-      args: {
-        //chart: {$ref: "chart_constructor"},
-        data_url: 'app/timeseries/data.json',
-        el: {$ref: "timeseries_example"},
-        selector: '#timeseries-viz'
-      }
-    }
-  },
+  //timeseries_controller: {
+  //  create: {
+  //    module: 'timeseries/controller',
+  //    args: {
+  //      //chart: {$ref: "chart_constructor"},
+  //      data_url: 'app/timeseries/data.json',
+  //      el: {$ref: "timeseries_example"},
+  //      selector: '#timeseries-viz'
+  //    }
+  //  }
+  //},
 
   // Create a simple view by rendering html, replacing some i18n strings
   // and loading CSS.  Then, insert into the DOM
@@ -95,7 +95,7 @@ define({
       module: 'line/controller',
       args: {
         //chart: {$ref: "chart_constructor"},
-        data_url: 'app/timeseries/data.json',
+        data_url: 'app/line/data.json',
         el: {$ref: "line_example"},
         selector: '#line-viz'
       }

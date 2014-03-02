@@ -14,9 +14,17 @@ define([
     d3.json(args.data_url, function (err, data) {
 
       var parse = d3.time.format("%b, %Y").parse;
+      var formatted_data = []
+      var max = 0;
       
-      data = data.month.map( function(month, index) {
-        return [month + ', ' + data.year, data.temperature[index]];
+      data.temperature.forEach( function (t, index) {
+        var m = d3.max( t, function(d) {return parseFloat(d); } );
+        if (m > max) { max = m; }
+        formatted_data.push(
+          data.month.map( function (m, i) {
+            return [m, data.temperature[index][i]];
+          })
+        )
       });
 
       linechart = chart.line()
@@ -25,9 +33,10 @@ define([
         .height(200)
         .duration(0)
         .barOffSet(140)
-        .parseDate(parse)
-        .x_axis({tickFormat: d3.time.format("%b")});
-      chart.draw(linechart, selection, data);
+        //.parseDate(parse)
+        .max(max);
+        //.x_axis({tickFormat: d3.time.format("%b")});
+      chart.draw(linechart, selection, formatted_data);
     });
 
   };

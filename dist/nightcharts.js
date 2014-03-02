@@ -187,7 +187,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     function _applyTimeScale (params, range) {
       // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
-      var data = params.data,
+      var data = params.x_axis_data || params.data,  // FIXME this hack!
           t1 = data[0][0],
           t2 = data[data.length - 1][0],
           offset = params.__.time_offset,
@@ -208,9 +208,10 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     // Sets the range and domain for the ordinal scale.
     function _applyOrdinalScale (params, range) {
+      var data = params.x_axis_data || params.data;  // FIXME this hack!
       return this
         .rangeRoundBands(range, params.__.padding)
-        .domain(params.data.map(function(d) { return d[0]; }));
+        .domain(data.map(function(d) { return d[0]; }));
     }
   
     function _applyXScaleV (params) {
@@ -436,10 +437,33 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
 
 define('mixins/line_mixins',["d3", "utils/utils"], function(d3, utils) {
 
+  function normalizeData (data, __) {
+    var parsed_data = [];
+    data.forEach( function (dataset, index) {
+      parsed_data.push(dataset.map(function(d, i) {
+        var x;
+        if (__.parseDate) {
+          x = __.parseDate(__.categoricalValue.call(dataset, d));
+        } else {
+          x = __.categoricalValue.call(dataset, d);
+        }
+        return [
+          x, 
+          __.quantativeValue.call(dataset, d)
+        ];
+      }));
+    });
+    if (__.invert_data) {
+      //parsed_data = data.reverse();  // TODO
+    }
+    return parsed_data;
+  }
+
   function line (params) {
-    return d3.svg.line().x(function(d) {
+    return d3.svg.line().x(function(d, i) {
+        console.log(d, i)
         return params.xScale(d[0]);
-      }).y(function(d) {
+      }).y(function(d, i) {
         return params.yScale(d[1]);
       });
   }
@@ -457,6 +481,7 @@ define('mixins/line_mixins',["d3", "utils/utils"], function(d3, utils) {
   return function (orientation, params) {
     this.createLines = createLines;
     this.transitionLines = transitionLines;
+    this.normalizeData = normalizeData;
     return this;
   };
   
@@ -688,17 +713,15 @@ define('line/line',[
   
   return function (user_config) {
 
-    var config = user_config || {}
-      , __
-      , w
-      , h
-      , xScale
-      , yScale
-      , xAxis
-      , yAxis
-      , line;
-
-    __ = utils.extend(default_config, config);
+    var config = user_config || {},
+        __ = utils.extend(default_config, config),
+        w,
+        h,
+        xScale,
+        yScale,
+        xAxis,
+        yAxis,
+        line;
 
     function dataIdentifier (d) {
       return d[0];
@@ -708,137 +731,125 @@ define('line/line',[
 
       var self = this instanceof Line
                ? this
-               : new Line(selection);
+               : new Line(selection),
+          data = self.normalizeData(selection.datum(), __),
+          tooltip = __.tooltip,
+          tip,
+          svg,
+          gEnter,
+          g,
+          lines,
+          transition,
+          params;
+
+      function delay (d, i) { 
+        return i / data[0].length * __.duration; 
+      };
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
-  
+
       // Scales are functions that map from an input domain to an output range.
-      // Only vertical line graphs make sense.
       xScale = self.setXScale('vertical', __.parseDate)();
       yScale = self.setYScale('vertical')();
   
-      // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
+      // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes).
       xAxis = self.setXAxis(__.x_axis, xScale);
       yAxis = self.setYAxis(__.y_axis, yScale);
+
+      params = {
+        data: data,
+        x_axis_data: data[0], // FIXME this hack!
+        __: __,
+        h: h,
+        w: w,
+        yScale: yScale,
+        xScale: xScale,
+        xAxis: xAxis,
+        yAxis: yAxis,
+        delay: delay,
+      }
+
+      self.applyXScale.call(xScale, 'vertical', params);
+      self.applyYScale.call(yScale, 'vertical', params);
       
-      selection.each( function (dat) {
+      // Select the svg element, if it exists.
+      svg = selection.selectAll("svg").data([data]);
+      // Otherwise, create the skeletal chart.
+      gEnter = svg.enter().append("svg").append("g");
+      // Initializing the tooltip.
+      if (tooltip) {
+        tip = utils.tip(tooltip);
+        gEnter.call(tip);
+      }
 
-        var data
-          , tooltip = __.tooltip
-          , tip
-          , svg
-          , gEnter
-          , g
-          , lines
-          , transition
-          , params;
+      gEnter.append("g").attr("class", "lines");
+      gEnter.append("g").attr("class", "x axis");
+      if (__.parseDate) {
+        gEnter.append("g").attr("class", "y axis")
+         .attr("transform", "translate(-" + (__.date_adjust) + ",0)");
+      } else {
+        gEnter.append("g").attr("class", "y axis");
+      }
 
-        // data structure:
-        // 0: name
-        // 1: value
-        data = dat.map(function(d, i) {
-          var x;
-          if (__.parseDate) {
-            x = __.parseDate(__.categoricalValue.call(dat, d));
-          } else {
-            x = __.categoricalValue.call(dat, d);
-          }
-          return [
-            x, 
-            __.quantativeValue.call(dat, d)
-          ];
-        });
-        if (__.invert_data) {
-          data = data.reverse();
-        }
+      // Update the outer dimensions.
+      svg.attr("width", __.width)
+        .attr("height", __.height);
 
-        function delay (d, i) {
-          // Attention, delay can not be longer of transition time! Test!
-          return i / data.length * __.duration;
-        }
+      // Update the inner dimensions.
+      g = svg.select("g")
+        .attr("transform", "translate(" + 
+        __.margin.left + "," + __.margin.top + ")");
 
-        params = {
-          data: data,
-          __: __,
-          h: h,
-          w: w,
-          yScale: yScale,
-          xScale: xScale,
-          xAxis: xAxis,
-          yAxis: yAxis,
-          delay: delay,
-        }
+      // Transitions root.
+      transition = g.transition().duration(__.duration);
 
-        self.applyXScale.call(xScale, 'vertical', params);
-        self.applyYScale.call(yScale, 'vertical', params);
+      // Update the y axis.
+      self.transitionYAxis.call(
+        transition.selectAll('.y.axis'), 'vertical', params);
 
-        // Select the svg element, if it exists.
-        svg = selection.selectAll("svg").data([data]);
+      // Update the x axis.
+      self.transitionXAxis.call(
+        transition.selectAll('.x.axis'), 'vertical', params);
 
-        // Otherwise, create the skeletal chart.
-        gEnter = svg.enter().append("svg").append("g");
-        // Initializing the tooltip.
-        if (tooltip) {
-          tip = utils.tip(tooltip);
-          gEnter.call(tip);
-        }
-        gEnter.append("g").attr("class", "lines");
-        gEnter.append("g").attr("class", "x axis");
-        if (__.parseDate) {
-          gEnter.append("g").attr("class", "y axis")
-           .attr("transform", "translate(-" + (__.date_adjust) + ",0)");
-        } else {
-          gEnter.append("g").attr("class", "y axis");
-        }
+      // Select the line elements, if they exists.
+      lines = g.selectAll(".line")
+        .data(data, dataIdentifier);
 
-        // Update the outer dimensions.
-        svg.attr("width", __.width)
-          .attr("height", __.height);
+      // Exit phase (let us push out old lines before the new ones come in).
+      lines.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();
 
-        // Update the inner dimensions.
-        g = svg.select("g")
-          .attr("transform", "translate(" + 
-          __.margin.left + "," + __.margin.top + ")");
+      // Otherwise, create them.
+      lines = self.createLines.call(lines.enter(), params)
+        .on('click', __.handleClick);
+      
+//      selection.each( function (dat) {
+// 
 
-        // Transitions root.
-        transition = g.transition().duration(__.duration)
-        
-        // Update the y axis.
-        self.transitionYAxis.call(
-          transition.selectAll('.y.axis'), 'vertical', params);
+//
 
-        // Update the x axis.
-        self.transitionXAxis.call(
-          transition.selectAll('.x.axis'), 'vertical', params);
+//
+      
 
-        // Select the line elements, if they exists.
-        lines = g.select(".lines").selectAll(".line")
-          .data([data], dataIdentifier);
+//
+//        if (tooltip) {
+//          lines
+//           .on('mouseover', tip.show)
+//           .on('mouseout', tip.hide);
+//        }
+//          
+//        // TODO
+//        //// And transition them.
+//        //self.transitionLines
+//        //  .call(transition.selectAll('.line'), 'vertical', params)
+//        //  .call(utils.endall, data, __.handleTransitionEnd);
+//
+//        return selection;
+//
+//      });
 
-        // Exit phase (let us push out old lines before the new ones come in).
-        lines.exit()
-          .transition().duration(__.duration).style('opacity', 0).remove();
-
-        // Otherwise, create them.
-        lines = self.createLines.call(lines.enter(), params)
-          .on('click', __.handleClick);
-
-        if (tooltip) {
-          lines
-           .on('mouseover', tip.show)
-           .on('mouseout', tip.hide);
-        }
-          
-        // TODO
-        //// And transition them.
-        //self.transitionLines
-        //  .call(transition.selectAll('.line'), 'vertical', params)
-        //  .call(utils.endall, data, __.handleTransitionEnd);
-
-        return selection;
-
-      });
+      return selection;
 
     }
 
