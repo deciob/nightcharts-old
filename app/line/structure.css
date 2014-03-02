@@ -1,0 +1,22 @@
+
+
+#line-viz .y.axis line, #line-viz .y.axis path {
+  fill: none;
+  stroke: #555;
+}
+
+#line-viz .x.axis line {
+  fill: none;
+  stroke: none;
+}
+
+#line-viz text {
+  fill: #555;
+  font-size: 0.9em;
+}
+
+#line-viz .line {
+  fill: none;
+  stroke: #719E1D;
+  stroke-width: 1.5px;
+}

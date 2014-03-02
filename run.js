@@ -15,6 +15,7 @@
 			{name: 'inline', location: 'app/inline',},
 			{name: 'tooltip', location: 'app/tooltip',},
 			{name: 'timeseries', location: 'app/timeseries',},
+			{name: 'line', location: 'app/line',},
 
 			// Define a theme package, and configure it to always use the css module loader
 			// No need to use AMD 'css!' plugin to load things in this package, it will happen

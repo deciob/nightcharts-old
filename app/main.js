@@ -79,6 +79,29 @@ define({
     }
   },
 
+  // Create a simple view by rendering html, replacing some i18n strings
+  // and loading CSS.  Then, insert into the DOM
+  line_example: {
+    render: {
+      template: { module: 'text!line/template.html' },
+      replace: { module: 'i18n!line/strings' },
+      css: { module: 'css!line/structure.css' }
+    },
+    insert: { at: 'dom.first!.line' }
+  },
+
+  line_controller: {
+    create: {
+      module: 'line/controller',
+      args: {
+        //chart: {$ref: "chart_constructor"},
+        data_url: 'app/timeseries/data.json',
+        el: {$ref: "line_example"},
+        selector: '#line-viz'
+      }
+    }
+  },
+
 	// Wire.js plugins
 	plugins: [
 		{ module: 'wire/dom', classes: { init: 'loading' } },
