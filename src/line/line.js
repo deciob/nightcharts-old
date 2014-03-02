@@ -1,12 +1,12 @@
-// **The bar.bar module**
+// **The line.line module**
 
-define('bar/bar',[
+define('line/line',[
     "d3", 
     "utils/utils",
-    "bar/config", 
+    "line/config", 
     "mixins/common_mixins",
-    "mixins/bar_mixins",
-  ], function(d3, utils, default_config, common_mixins, bar_mixins) {
+    "mixins/line_mixins",
+  ], function(d3, utils, default_config, common_mixins, line_mixins) {
   
   return function (user_config) {
 
@@ -17,7 +17,8 @@ define('bar/bar',[
       , xScale
       , yScale
       , xAxis
-      , yAxis;
+      , yAxis
+      , line;
 
     __ = utils.extend(default_config, config);
 
@@ -25,22 +26,21 @@ define('bar/bar',[
       return d[0];
     }
 
-    function Bar (selection) {
+    function Line (selection) {
 
-      var self = this instanceof Bar
+      var self = this instanceof Line
                ? this
-               : new Bar(selection);
+               : new Line(selection);
 
       w = function () { return __.width - __.margin.right - __.margin.left; };
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
   
       // Scales are functions that map from an input domain to an output range.
-      // Presently no assumption is made about the chart orientation.
-      xScale = self.setXScale(__.orientation, __.parseDate)();
-      yScale = self.setYScale(__.orientation)();
+      // Only vertical line graphs make sense.
+      xScale = self.setXScale('vertical', __.parseDate)();
+      yScale = self.setYScale('vertical')();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
-      // Presently no assumption is made about the chart orientation.
       xAxis = self.setXAxis(__.x_axis, xScale);
       yAxis = self.setYAxis(__.y_axis, yScale);
       
@@ -52,7 +52,7 @@ define('bar/bar',[
           , svg
           , gEnter
           , g
-          , bars
+          , lines
           , transition
           , params;
 
@@ -90,15 +90,10 @@ define('bar/bar',[
           xAxis: xAxis,
           yAxis: yAxis,
           delay: delay,
-          date_adjust: (w()/data.length)/2
         }
 
-        if (__.parseDate) {
-          params.bar_width = (w() / data.length) - .5;
-        }
-
-        self.applyXScale.call(xScale, __.orientation, params);
-        self.applyYScale.call(yScale, __.orientation, params); 
+        self.applyXScale.call(xScale, 'vertical', params);
+        self.applyYScale.call(yScale, 'vertical', params);
 
         // Select the svg element, if it exists.
         svg = selection.selectAll("svg").data([data]);
@@ -110,11 +105,11 @@ define('bar/bar',[
           tip = utils.tip(tooltip);
           gEnter.call(tip);
         }
-        gEnter.append("g").attr("class", "bars");
+        gEnter.append("g").attr("class", "lines");
         gEnter.append("g").attr("class", "x axis");
         if (__.parseDate) {
           gEnter.append("g").attr("class", "y axis")
-           .attr("transform", "translate(-" + (params.date_adjust + 5) + ",0)");
+           .attr("transform", "translate(-" + (__.date_adjust) + ",0)");
         } else {
           gEnter.append("g").attr("class", "y axis");
         }
@@ -133,34 +128,35 @@ define('bar/bar',[
         
         // Update the y axis.
         self.transitionYAxis.call(
-          transition.selectAll('.y.axis'), __.orientation, params);
+          transition.selectAll('.y.axis'), 'vertical', params);
 
         // Update the x axis.
         self.transitionXAxis.call(
-          transition.selectAll('.x.axis'), __.orientation, params);
+          transition.selectAll('.x.axis'), 'vertical', params);
 
-        // Select the bar elements, if they exists.
-        bars = g.select(".bars").selectAll(".bar")
-          .data(data, dataIdentifier);
+        // Select the line elements, if they exists.
+        lines = g.select(".lines").selectAll(".line")
+          .data([data], dataIdentifier);
 
-        // Exit phase (let us push out old bars before the new ones come in).
-        bars.exit()
+        // Exit phase (let us push out old lines before the new ones come in).
+        lines.exit()
           .transition().duration(__.duration).style('opacity', 0).remove();
 
         // Otherwise, create them.
-        bars = self.createBars.call(bars.enter(), __.orientation, params)
+        lines = self.createLines.call(lines.enter(), params)
           .on('click', __.handleClick);
 
         if (tooltip) {
-          bars
+          lines
            .on('mouseover', tip.show)
            .on('mouseout', tip.hide);
         }
           
-        // And transition them.
-        self.transitionBars
-          .call(transition.selectAll('.bar'), __.orientation, params)
-          .call(utils.endall, data, __.handleTransitionEnd);
+        // TODO
+        //// And transition them.
+        //self.transitionLines
+        //  .call(transition.selectAll('.line'), 'vertical', params)
+        //  .call(utils.endall, data, __.handleTransitionEnd);
 
         return selection;
 
@@ -168,11 +164,11 @@ define('bar/bar',[
 
     }
 
-    utils.getset(Bar, __);
-    common_mixins.call(Bar.prototype);
-    bar_mixins.call(Bar.prototype);
+    utils.getset(Line, __);
+    common_mixins.call(Line.prototype);
+    line_mixins.call(Line.prototype);
 
-    return Bar;
+    return Line;
 
   }
 

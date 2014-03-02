@@ -454,6 +454,54 @@ define('draw',['require'],function(require) {
 });
 
 
+// **The default base configuration module**
+
+define('base_config',['require'],function(require) {
+    
+    return {
+      duration: 900,  // transition duration
+      colour: 'LightSteelBlue',
+      // layout
+      margin: {top: 20, right: 20, bottom: 40, left: 40},
+      width: 500,
+      height: 400,
+      padding: .1,
+      barOffSet: 4,
+      // axes
+      x_axis: {
+        outerTickSize: 0,
+        orient: 'bottom',
+        tickValues: void 0,
+        tickFormat: null,
+      },
+      y_axis: {
+        outerTickSize: 0,
+        orient: 'left',
+        tickValues: void 0,
+      },
+      // data
+      max: void 0,         // Max value for the linear scale
+      invert_data: false,  // Data sorting
+      categoricalValue: function (d) { return d[0]; },
+      quantativeValue: function (d) { return d[1]; },
+      // events
+      handleClick: function (d, i) { return void 0; },
+      handleTransitionEnd: function(d) { return void 0; },
+      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
+      // can pass boolean or object with d3-tip configuration.
+      tooltip: false,
+      // is the xAxis a timescale?
+      // false or function: d3.time.format("%Y").parse
+      parseDate: false,
+      parseAxisDate: false,
+      // false or string: 'month', 'year', etc.
+      // used for extending the timescale on the margins.
+      time_offset: false
+    };
+  
+});
+
+
 !function() {
   var d3 = {
     version: "3.4.1"
@@ -10391,51 +10439,48 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
 });
 
 
+define('mixins/line_mixins',["d3", "utils/utils"], function(d3, utils) {
+
+  function line (params) {
+    return d3.svg.line().x(function(d) {
+        return params.xScale(d);
+      }).y(function(d) {
+        return params.yScale(d);
+      });
+  }
+
+  function createLines (params) {
+    return this.append("path")
+      //.datum(data)
+      .attr("class", "line")
+      .attr("d", line(params) );
+  }
+
+  function transitionLines (params) {
+    
+  }
+
+  return function (orientation, params) {
+    this.createLines = createLines;
+    this.transitionLines = transitionLines;
+    return this;
+  };
+  
+});
+
+
 // **The default configuration module for the bar.bar module**
 
-define('bar/config',['require'],function(require) {
+define('bar/config',[
+    "base_config",
+    "utils/utils",
+  ], function(base_config, utils) {
     
-    return {
-      duration: 900,  // transition duration
-      colour: 'LightSteelBlue',
-      // layout
-      margin: {top: 20, right: 20, bottom: 40, left: 40},
-      width: 500,
-      height: 400,
-      padding: .1,
-      barOffSet: 4,
-      orientation: 'vertical',
-      // axes
-      x_axis: {
-        outerTickSize: 0,
-        orient: 'bottom',
-        tickValues: void 0,
-        tickFormat: null,
-      },
-      y_axis: {
-        outerTickSize: 0,
-        orient: 'left',
-        tickValues: void 0,
-      },
-      // data
-      max: void 0,         // Max value for the linear scale
-      invert_data: false,  // Data sorting
-      categoricalValue: function (d) { return d[0]; },
-      quantativeValue: function (d) { return d[1]; },
-      // events
-      handleClick: function (d, i) { return void 0; },
-      handleTransitionEnd: function(d) { return void 0; },
-      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
-      // can pass boolean or object with d3-tip configuration.
-      tooltip: false,
-      // is the xAxis a timescale?
-      // false or function: d3.time.format("%Y").parse
-      parseDate: false,
-      parseAxisDate: false,
-      // false or string: 'month', 'year', etc.
-      // used for extending the timescale on the margins.
-      time_offset: false
-    };
+  var config = {
+    orientation: 'vertical',
+  };
+
+  return utils.extend(base_config, config);
   
 });
 
@@ -10496,8 +10541,6 @@ define('bar/bar',[
           , g
           , bars
           , transition
-          , bars_t
-          , bars_ex
           , params;
 
         // data structure:
@@ -10583,17 +10626,17 @@ define('bar/bar',[
         self.transitionXAxis.call(
           transition.selectAll('.x.axis'), __.orientation, params);
 
-        // Select the bar elements, if they exists.
-        bars = g.select(".bars").selectAll(".bar")
-          .data(data, dataIdentifier);
-
-        // Exit phase (let us push out old bars before the new ones come in).
-        bars.exit()
-          .transition().duration(__.duration).style('opacity', 0).remove();
-
-        // Otherwise, create them.
-        bars = self.createBars.call(bars.enter(), __.orientation, params)
-          .on('click', __.handleClick);
+//        // Select the bar elements, if they exists.
+//        bars = g.select(".bars").selectAll(".bar")
+//          .data(data, dataIdentifier);
+//
+//        // Exit phase (let us push out old bars before the new ones come in).
+//        bars.exit()
+//          .transition().duration(__.duration).style('opacity', 0).remove();
+//
+//        // Otherwise, create them.
+//        bars = self.createBars.call(bars.enter(), __.orientation, params)
+//          .on('click', __.handleClick);
 
         if (tooltip) {
           bars
@@ -10623,6 +10666,196 @@ define('bar/bar',[
 });
 
 
+// **The default configuration module for the line.line module**
+
+define('line/config',[
+    "base_config",
+    "utils/utils",
+  ], function(base_config, utils) {
+    
+  var config = {
+    date_adjust: 5
+  };
+
+  return utils.extend(base_config, config);
+  
+});
+
+
+// **The line.line module**
+
+define('line/line',[
+    "d3", 
+    "utils/utils",
+    "line/config", 
+    "mixins/common_mixins",
+    "mixins/line_mixins",
+  ], function(d3, utils, default_config, common_mixins, line_mixins) {
+  
+  return function (user_config) {
+
+    var config = user_config || {}
+      , __
+      , w
+      , h
+      , xScale
+      , yScale
+      , xAxis
+      , yAxis
+      , line;
+
+    __ = utils.extend(default_config, config);
+
+    function dataIdentifier (d) {
+      return d[0];
+    }
+
+    function Line (selection) {
+
+      var self = this instanceof Line
+               ? this
+               : new Line(selection);
+
+      w = function () { return __.width - __.margin.right - __.margin.left; };
+      h = function () { return __.height - __.margin.top - __.margin.bottom; };
+  
+      // Scales are functions that map from an input domain to an output range.
+      // Only vertical line graphs make sense.
+      xScale = self.setXScale('vertical', __.parseDate)();
+      yScale = self.setYScale('vertical')();
+  
+      // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
+      xAxis = self.setXAxis(__.x_axis, xScale);
+      yAxis = self.setYAxis(__.y_axis, yScale);
+      
+      selection.each( function (dat) {
+
+        var data
+          , tooltip = __.tooltip
+          , tip
+          , svg
+          , gEnter
+          , g
+          , lines
+          , transition
+          , params;
+
+        // data structure:
+        // 0: name
+        // 1: value
+        data = dat.map(function(d, i) {
+          var x;
+          if (__.parseDate) {
+            x = __.parseDate(__.categoricalValue.call(dat, d));
+          } else {
+            x = __.categoricalValue.call(dat, d);
+          }
+          return [
+            x, 
+            __.quantativeValue.call(dat, d)
+          ];
+        });
+        if (__.invert_data) {
+          data = data.reverse();
+        }
+
+        function delay (d, i) {
+          // Attention, delay can not be longer of transition time! Test!
+          return i / data.length * __.duration;
+        }
+
+        params = {
+          data: data,
+          __: __,
+          h: h,
+          w: w,
+          yScale: yScale,
+          xScale: xScale,
+          xAxis: xAxis,
+          yAxis: yAxis,
+          delay: delay,
+        }
+
+        self.applyXScale.call(xScale, 'vertical', params);
+        self.applyYScale.call(yScale, 'vertical', params);
+
+        // Select the svg element, if it exists.
+        svg = selection.selectAll("svg").data([data]);
+
+        // Otherwise, create the skeletal chart.
+        gEnter = svg.enter().append("svg").append("g");
+        // Initializing the tooltip.
+        if (tooltip) {
+          tip = utils.tip(tooltip);
+          gEnter.call(tip);
+        }
+        gEnter.append("g").attr("class", "lines");
+        gEnter.append("g").attr("class", "x axis");
+        if (__.parseDate) {
+          gEnter.append("g").attr("class", "y axis")
+           .attr("transform", "translate(-" + (__.date_adjust) + ",0)");
+        } else {
+          gEnter.append("g").attr("class", "y axis");
+        }
+
+        // Update the outer dimensions.
+        svg.attr("width", __.width)
+          .attr("height", __.height);
+
+        // Update the inner dimensions.
+        g = svg.select("g")
+          .attr("transform", "translate(" + 
+          __.margin.left + "," + __.margin.top + ")");
+
+        // Transitions root.
+        transition = g.transition().duration(__.duration)
+        
+        // Update the y axis.
+        self.transitionYAxis.call(
+          transition.selectAll('.y.axis'), 'vertical', params);
+
+        // Update the x axis.
+        self.transitionXAxis.call(
+          transition.selectAll('.x.axis'), 'vertical', params);
+
+//        // Select the line elements, if they exists.
+//        lines = g.select(".lines").selectAll(".line")
+//          .data(data, dataIdentifier);
+//
+//        // Exit phase (let us push out old lines before the new ones come in).
+//        lines.exit()
+//          .transition().duration(__.duration).style('opacity', 0).remove();
+//
+//        // Otherwise, create them.
+//        lines = self.createLines.call(lines.enter(), params)
+//          .on('click', __.handleClick);
+
+        if (tooltip) {
+          lines
+           .on('mouseover', tip.show)
+           .on('mouseout', tip.hide);
+        }
+          
+        //// And transition them.
+        //self.transitionLines
+        //  .call(transition.selectAll('.line'), 'vertical', params)
+        //  .call(utils.endall, data, __.handleTransitionEnd);
+
+        return selection;
+
+      });
+
+    }
+
+    utils.getset(Line, __);
+    common_mixins.call(Line.prototype);
+    line_mixins.call(Line.prototype);
+
+    return Line;
+
+  }
+
+});
 // **frame.states module**
 
 // Used by the *frame.state_machine* module.
@@ -10898,27 +11131,34 @@ define('frame/frame',[
 
 define('chart',[
   "draw",
+  "base_config",
   "utils/utils",
   "mixins/common_mixins",
   "mixins/bar_mixins",
+  "mixins/line_mixins",
   "bar/config", 
   "bar/bar",
-  //"bar/orientation",
+  "line/config",
+  "line/line",
   "frame/states",
   "frame/state_machine",
   "frame/frame"
-], function(draw, utils, common_mixins, bar_mixins, __, bar, states, StateMachine, Frame) {
+], function(draw, base_config, utils, common_mixins, bar_mixins, line_mixins, bar_config, bar, line_config, line, states, StateMachine, Frame) {
 
   return {
+    draw: draw,
+    base_config: base_config,
     utils: utils,
     common_mixins: common_mixins,
     bar_mixins: bar_mixins,
-    bar:bar,
-    __: __, 
+    line_mixins: line_mixins,
+    bar_config: bar_config,
+    bar: bar,
+    line_config: line_config,
+    line: line,
     Frame: Frame,
     states: states, 
     StateMachine: StateMachine,
-    draw: draw,
   };
 
 });
