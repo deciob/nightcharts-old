@@ -18,7 +18,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
 
     function _applyTimeScale (params, range) {
       // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
-      var data = params.data,
+      var data = params.x_axis_data || params.data,  // FIXME this hack!
           t1 = data[0][0],
           t2 = data[data.length - 1][0],
           offset = params.__.time_offset,
@@ -39,9 +39,10 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     // Sets the range and domain for the ordinal scale.
     function _applyOrdinalScale (params, range) {
+      var data = params.x_axis_data || params.data;  // FIXME this hack!
       return this
         .rangeRoundBands(range, params.__.padding)
-        .domain(params.data.map(function(d) { return d[0]; }));
+        .domain(data.map(function(d) { return d[0]; }));
     }
   
     function _applyXScaleV (params) {

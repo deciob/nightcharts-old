@@ -389,7 +389,7 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> data = params.data,
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> data = params.x_axis_data || params.data,  <span class="comment">// FIXME this hack!</span>
           t1 = data[<span class="number">0</span>][<span class="number">0</span>],
           t2 = data[data.length - <span class="number">1</span>][<span class="number">0</span>],
           offset = params.__.time_offset,
@@ -422,9 +422,10 @@ define(<span class="string">'mixins/common_mixins'</span>,[<span class="string">
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">_applyOrdinalScale</span> <span class="params">(params, range)</span> {</span>
+      <span class="keyword">var</span> data = params.x_axis_data || params.data;  <span class="comment">// FIXME this hack!</span>
       <span class="keyword">return</span> <span class="keyword">this</span>
         .rangeRoundBands(range, params.__.padding)
-        .domain(params.data.map(<span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">0</span>]; }));
+        .domain(data.map(<span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">0</span>]; }));
     }
   
     <span class="function"><span class="keyword">function</span> <span class="title">_applyXScaleV</span> <span class="params">(params)</span> {</span>
@@ -676,10 +677,45 @@ define(<span class="string">'mixins/bar_mixins'</span>,[<span class="string">"d3
 
 define(<span class="string">'mixins/line_mixins'</span>,[<span class="string">"d3"</span>, <span class="string">"utils/utils"</span>], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils)</span> {</span>
 
+  <span class="function"><span class="keyword">function</span> <span class="title">normalizeData</span> <span class="params">(data, __)</span> {</span>
+    <span class="keyword">var</span> parsed_data = [];
+    data.forEach( <span class="function"><span class="keyword">function</span> <span class="params">(dataset, index)</span> {</span>
+      parsed_data.push(dataset.map(<span class="function"><span class="keyword">function</span><span class="params">(d, i)</span> {</span>
+        <span class="keyword">var</span> x;
+        <span class="keyword">if</span> (__.parseDate) {
+          x = __.parseDate(__.categoricalValue.call(dataset, d));
+        } <span class="keyword">else</span> {
+          x = __.categoricalValue.call(dataset, d);
+        }
+        <span class="keyword">return</span> [
+          x, 
+          __.quantativeValue.call(dataset, d)
+        ];
+      }));
+    });
+    <span class="keyword">if</span> (__.invert_data) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>parsed_data = data.reverse();  // TODO</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    }
+    <span class="keyword">return</span> parsed_data;
+  }
+
   <span class="function"><span class="keyword">function</span> <span class="title">line</span> <span class="params">(params)</span> {</span>
-    <span class="keyword">return</span> d3.svg.line().x(<span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span>
+    <span class="keyword">return</span> d3.svg.line().x(<span class="function"><span class="keyword">function</span><span class="params">(d, i)</span> {</span>
         <span class="keyword">return</span> params.xScale(d[<span class="number">0</span>]);
-      }).y(<span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span>
+      }).y(<span class="function"><span class="keyword">function</span><span class="params">(d, i)</span> {</span>
         <span class="keyword">return</span> params.yScale(d[<span class="number">1</span>]);
       });
   }
@@ -697,6 +733,7 @@ define(<span class="string">'mixins/line_mixins'</span>,[<span class="string">"d
   <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(orientation, params)</span> {</span>
     <span class="keyword">this</span>.createLines = createLines;
     <span class="keyword">this</span>.transitionLines = transitionLines;
+    <span class="keyword">this</span>.normalizeData = normalizeData;
     <span class="keyword">return</span> <span class="keyword">this</span>;
   };
   
@@ -705,11 +742,11 @@ define(<span class="string">'mixins/line_mixins'</span>,[<span class="string">"d
         </li>
         
         
-        <li id="section-19">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p><strong>The default configuration module for the bar.bar module</strong></p>
 
@@ -731,11 +768,11 @@ define(<span class="string">'mixins/line_mixins'</span>,[<span class="string">"d
         </li>
         
         
-        <li id="section-20">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p><strong>The bar.bar module</strong></p>
 
@@ -778,11 +815,11 @@ define(<span class="string">'mixins/line_mixins'</span>,[<span class="string">"d
         </li>
         
         
-        <li id="section-21">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>Scales are functions that map from an input domain to an output range.
 Presently no assumption is made about the chart orientation.</p>
@@ -795,11 +832,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">SVG-Axes</a>
 Presently no assumption is made about the chart orientation.</p>
@@ -824,11 +861,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>data structure:
 0: name
@@ -857,11 +894,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>Attention, delay can not be longer of transition time! Test!</p>
 
@@ -893,11 +930,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>Select the svg element, if it exists.</p>
 
@@ -908,11 +945,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>Otherwise, create the skeletal chart.</p>
 
@@ -923,11 +960,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>Initializing the tooltip.</p>
 
@@ -949,11 +986,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Update the outer dimensions.</p>
 
@@ -965,11 +1002,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Update the inner dimensions.</p>
 
@@ -982,11 +1019,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Transitions root.</p>
 
@@ -997,11 +1034,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>Update the y axis.</p>
 
@@ -1013,11 +1050,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Update the x axis.</p>
 
@@ -1029,11 +1066,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>Select the bar elements, if they exists.</p>
 
@@ -1045,11 +1082,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>Exit phase (let us push out old bars before the new ones come in).</p>
 
@@ -1061,11 +1098,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>Otherwise, create them.</p>
 
@@ -1083,11 +1120,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>And transition them.</p>
 
@@ -1116,11 +1153,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p><strong>The default configuration module for the line.line module</strong></p>
 
@@ -1142,11 +1179,11 @@ Presently no assumption is made about the chart orientation.</p>
         </li>
         
         
-        <li id="section-38">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p><strong>The line.line module</strong></p>
 
@@ -1162,17 +1199,15 @@ Presently no assumption is made about the chart orientation.</p>
   
   <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(user_config)</span> {</span>
 
-    <span class="keyword">var</span> config = user_config || {}
-      , __
-      , w
-      , h
-      , xScale
-      , yScale
-      , xAxis
-      , yAxis
-      , line;
-
-    __ = utils.extend(default_config, config);
+    <span class="keyword">var</span> config = user_config || {},
+        __ = utils.extend(default_config, config),
+        w,
+        h,
+        xScale,
+        yScale,
+        xAxis,
+        yAxis,
+        line;
 
     <span class="function"><span class="keyword">function</span> <span class="title">dataIdentifier</span> <span class="params">(d)</span> {</span>
       <span class="keyword">return</span> d[<span class="number">0</span>];
@@ -1182,27 +1217,23 @@ Presently no assumption is made about the chart orientation.</p>
 
       <span class="keyword">var</span> self = <span class="keyword">this</span> <span class="keyword">instanceof</span> Line
                ? <span class="keyword">this</span>
-               : <span class="keyword">new</span> Line(selection);
+               : <span class="keyword">new</span> Line(selection),
+          data = self.normalizeData(selection.datum(), __),
+          tooltip = __.tooltip,
+          tip,
+          svg,
+          gEnter,
+          g,
+          lines,
+          transition,
+          params;
+
+      <span class="function"><span class="keyword">function</span> <span class="title">delay</span> <span class="params">(d, i)</span> {</span> 
+        <span class="keyword">return</span> i / data[<span class="number">0</span>].length * __.duration; 
+      };
 
       w = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> __.width - __.margin.right - __.margin.left; };
       h = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> __.height - __.margin.top - __.margin.bottom; };</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-39">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
-              </div>
-              <p>Scales are functions that map from an input domain to an output range.
-Only vertical line graphs make sense.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      xScale = self.setXScale(<span class="string">'vertical'</span>, __.parseDate)();
-      yScale = self.setYScale(<span class="string">'vertical'</span>)();</pre></div></div>
             
         </li>
         
@@ -1213,24 +1244,12 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
-              <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">SVG-Axes</a></p>
+              <p>Scales are functions that map from an input domain to an output range.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      xAxis = self.setXAxis(__.x_axis, xScale);
-      yAxis = self.setYAxis(__.y_axis, yScale);
-      
-      selection.each( <span class="function"><span class="keyword">function</span> <span class="params">(dat)</span> {</span>
-
-        <span class="keyword">var</span> data
-          , tooltip = __.tooltip
-          , tip
-          , svg
-          , gEnter
-          , g
-          , lines
-          , transition
-          , params;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      xScale = self.setXScale(<span class="string">'vertical'</span>, __.parseDate)();
+      yScale = self.setYScale(<span class="string">'vertical'</span>)();</pre></div></div>
             
         </li>
         
@@ -1241,29 +1260,28 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
-              <p>data structure:
-0: name
-1: value</p>
+              <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">SVG-Axes</a>.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        data = dat.map(<span class="function"><span class="keyword">function</span><span class="params">(d, i)</span> {</span>
-          <span class="keyword">var</span> x;
-          <span class="keyword">if</span> (__.parseDate) {
-            x = __.parseDate(__.categoricalValue.call(dat, d));
-          } <span class="keyword">else</span> {
-            x = __.categoricalValue.call(dat, d);
-          }
-          <span class="keyword">return</span> [
-            x, 
-            __.quantativeValue.call(dat, d)
-          ];
-        });
-        <span class="keyword">if</span> (__.invert_data) {
-          data = data.reverse();
-        }
+            <div class="content"><div class='highlight'><pre>      xAxis = self.setXAxis(__.x_axis, xScale);
+      yAxis = self.setYAxis(__.y_axis, yScale);
 
-        <span class="function"><span class="keyword">function</span> <span class="title">delay</span> <span class="params">(d, i)</span> {</span></pre></div></div>
+      params = {
+        data: data,
+        x_axis_data: data[<span class="number">0</span>], <span class="comment">// FIXME this hack!</span>
+        __: __,
+        h: h,
+        w: w,
+        yScale: yScale,
+        xScale: xScale,
+        xAxis: xAxis,
+        yAxis: yAxis,
+        delay: delay,
+      }
+
+      self.applyXScale.call(xScale, <span class="string">'vertical'</span>, params);
+      self.applyYScale.call(yScale, <span class="string">'vertical'</span>, params);</pre></div></div>
             
         </li>
         
@@ -1274,27 +1292,11 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
-              <p>Attention, delay can not be longer of transition time! Test!</p>
+              <p>Select the svg element, if it exists.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">return</span> i / data.length * __.duration;
-        }
-
-        params = {
-          data: data,
-          __: __,
-          h: h,
-          w: w,
-          yScale: yScale,
-          xScale: xScale,
-          xAxis: xAxis,
-          yAxis: yAxis,
-          delay: delay,
-        }
-
-        self.applyXScale.call(xScale, <span class="string">'vertical'</span>, params);
-        self.applyYScale.call(yScale, <span class="string">'vertical'</span>, params);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      svg = selection.selectAll(<span class="string">"svg"</span>).data([data]);</pre></div></div>
             
         </li>
         
@@ -1305,11 +1307,11 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
-              <p>Select the svg element, if it exists.</p>
+              <p>Otherwise, create the skeletal chart.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        svg = selection.selectAll(<span class="string">"svg"</span>).data([data]);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      gEnter = svg.enter().append(<span class="string">"svg"</span>).append(<span class="string">"g"</span>);</pre></div></div>
             
         </li>
         
@@ -1320,11 +1322,23 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
-              <p>Otherwise, create the skeletal chart.</p>
+              <p>Initializing the tooltip.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        gEnter = svg.enter().append(<span class="string">"svg"</span>).append(<span class="string">"g"</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (tooltip) {
+        tip = utils.tip(tooltip);
+        gEnter.call(tip);
+      }
+
+      gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, <span class="string">"lines"</span>);
+      gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, <span class="string">"x axis"</span>);
+      <span class="keyword">if</span> (__.parseDate) {
+        gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, <span class="string">"y axis"</span>)
+         .attr(<span class="string">"transform"</span>, <span class="string">"translate(-"</span> + (__.date_adjust) + <span class="string">",0)"</span>);
+      } <span class="keyword">else</span> {
+        gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, <span class="string">"y axis"</span>);
+      }</pre></div></div>
             
         </li>
         
@@ -1335,22 +1349,12 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
-              <p>Initializing the tooltip.</p>
+              <p>Update the outer dimensions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (tooltip) {
-          tip = utils.tip(tooltip);
-          gEnter.call(tip);
-        }
-        gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, <span class="string">"lines"</span>);
-        gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, <span class="string">"x axis"</span>);
-        <span class="keyword">if</span> (__.parseDate) {
-          gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, <span class="string">"y axis"</span>)
-           .attr(<span class="string">"transform"</span>, <span class="string">"translate(-"</span> + (__.date_adjust) + <span class="string">",0)"</span>);
-        } <span class="keyword">else</span> {
-          gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, <span class="string">"y axis"</span>);
-        }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      svg.attr(<span class="string">"width"</span>, __.width)
+        .attr(<span class="string">"height"</span>, __.height);</pre></div></div>
             
         </li>
         
@@ -1361,12 +1365,13 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
-              <p>Update the outer dimensions.</p>
+              <p>Update the inner dimensions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        svg.attr(<span class="string">"width"</span>, __.width)
-          .attr(<span class="string">"height"</span>, __.height);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      g = svg.select(<span class="string">"g"</span>)
+        .attr(<span class="string">"transform"</span>, <span class="string">"translate("</span> + 
+        __.margin.left + <span class="string">","</span> + __.margin.top + <span class="string">")"</span>);</pre></div></div>
             
         </li>
         
@@ -1377,13 +1382,11 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
-              <p>Update the inner dimensions.</p>
+              <p>Transitions root.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        g = svg.select(<span class="string">"g"</span>)
-          .attr(<span class="string">"transform"</span>, <span class="string">"translate("</span> + 
-          __.margin.left + <span class="string">","</span> + __.margin.top + <span class="string">")"</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      transition = g.transition().duration(__.duration);</pre></div></div>
             
         </li>
         
@@ -1394,11 +1397,12 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
-              <p>Transitions root.</p>
+              <p>Update the y axis.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        transition = g.transition().duration(__.duration)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      self.transitionYAxis.call(
+        transition.selectAll(<span class="string">'.y.axis'</span>), <span class="string">'vertical'</span>, params);</pre></div></div>
             
         </li>
         
@@ -1409,12 +1413,12 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
-              <p>Update the y axis.</p>
+              <p>Update the x axis.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        self.transitionYAxis.call(
-          transition.selectAll(<span class="string">'.y.axis'</span>), <span class="string">'vertical'</span>, params);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      self.transitionXAxis.call(
+        transition.selectAll(<span class="string">'.x.axis'</span>), <span class="string">'vertical'</span>, params);</pre></div></div>
             
         </li>
         
@@ -1425,12 +1429,12 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
-              <p>Update the x axis.</p>
+              <p>Select the line elements, if they exists.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        self.transitionXAxis.call(
-          transition.selectAll(<span class="string">'.x.axis'</span>), <span class="string">'vertical'</span>, params);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      lines = g.selectAll(<span class="string">".line"</span>)
+        .data(data, dataIdentifier);</pre></div></div>
             
         </li>
         
@@ -1441,12 +1445,12 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
-              <p>Select the line elements, if they exists.</p>
+              <p>Exit phase (let us push out old lines before the new ones come in).</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        lines = g.select(<span class="string">".lines"</span>).selectAll(<span class="string">".line"</span>)
-          .data([data], dataIdentifier);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      lines.exit()
+        .transition().duration(__.duration).style(<span class="string">'opacity'</span>, <span class="number">0</span>).remove();</pre></div></div>
             
         </li>
         
@@ -1457,12 +1461,12 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
-              <p>Exit phase (let us push out old lines before the new ones come in).</p>
+              <p>Otherwise, create them.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        lines.exit()
-          .transition().duration(__.duration).style(<span class="string">'opacity'</span>, <span class="number">0</span>).remove();</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      lines = self.createLines.call(lines.enter(), params)
+        .on(<span class="string">'click'</span>, __.handleClick);</pre></div></div>
             
         </li>
         
@@ -1473,18 +1477,9 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
-              <p>Otherwise, create them.</p>
+              <pre><code> selection.each( function (dat) {</code></pre>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>        lines = self.createLines.call(lines.enter(), params)
-          .on(<span class="string">'click'</span>, __.handleClick);
-
-        <span class="keyword">if</span> (tooltip) {
-          lines
-           .on(<span class="string">'mouseover'</span>, tip.show)
-           .on(<span class="string">'mouseout'</span>, tip.hide);
-        }</pre></div></div>
             
         </li>
         
@@ -1495,17 +1490,25 @@ Only vertical line graphs make sense.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
-              <p>TODO
-// And transition them.
-self.transitionLines
- .call(transition.selectAll(&#39;.line&#39;), &#39;vertical&#39;, params)
- .call(utils.endall, data, __.handleTransitionEnd);</p>
+              <pre><code>   if (tooltip) {
+     lines
+      .on(&#39;mouseover&#39;, tip.show)
+      .on(&#39;mouseout&#39;, tip.hide);
+   }
+
+   // TODO
+   //// And transition them.
+   //self.transitionLines
+   //  .call(transition.selectAll(&#39;.line&#39;), &#39;vertical&#39;, params)
+   //  .call(utils.endall, data, __.handleTransitionEnd);
+
+   return selection;
+
+ });</code></pre>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">return</span> selection;
-
-      });
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">return</span> selection;
 
     }
 
