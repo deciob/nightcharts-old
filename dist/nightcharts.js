@@ -1127,6 +1127,8 @@ define('frame/frame',[
 
 
 define('chart',[
+  "d3", 
+  "d3_tip",
   "draw",
   "base_config",
   "utils/utils",
@@ -1140,9 +1142,12 @@ define('chart',[
   "frame/states",
   "frame/state_machine",
   "frame/frame"
-], function(draw, base_config, utils, common_mixins, bar_mixins, line_mixins, bar_config, bar, line_config, line, states, StateMachine, Frame) {
+], function(d3, d3_tip, draw, base_config, utils, common_mixins, bar_mixins, line_mixins, bar_config, bar, line_config, line, states, StateMachine, Frame) {
+
+  d3.d3_tip = d3_tip;
 
   return {
+    d3: d3,
     draw: draw,
     base_config: base_config,
     utils: utils,

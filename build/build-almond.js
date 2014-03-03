@@ -6,10 +6,13 @@
     almond: '../lib/almond/almond',
     chart: '../src/chart'
   },
-  //exclude: ['d3'],
+  //exclude: ['d3', 'd3_tip'],
   //shim: {
   //  d3: {
   //    exports: 'd3'
+  //  },
+  //  d3_tip: {
+  //    exports: 'd3_tip'
   //  }
   //},
 

@@ -1904,6 +1904,8 @@ fired without waiting for the current frame to end. Change?</p>
 
 
 define(<span class="string">'chart'</span>,[
+  <span class="string">"d3"</span>, 
+  <span class="string">"d3_tip"</span>,
   <span class="string">"draw"</span>,
   <span class="string">"base_config"</span>,
   <span class="string">"utils/utils"</span>,
@@ -1917,9 +1919,12 @@ define(<span class="string">'chart'</span>,[
   <span class="string">"frame/states"</span>,
   <span class="string">"frame/state_machine"</span>,
   <span class="string">"frame/frame"</span>
-], <span class="function"><span class="keyword">function</span><span class="params">(draw, base_config, utils, common_mixins, bar_mixins, line_mixins, bar_config, bar, line_config, line, states, StateMachine, Frame)</span> {</span>
+], <span class="function"><span class="keyword">function</span><span class="params">(d3, d3_tip, draw, base_config, utils, common_mixins, bar_mixins, line_mixins, bar_config, bar, line_config, line, states, StateMachine, Frame)</span> {</span>
+
+  d3.d3_tip = d3_tip;
 
   <span class="keyword">return</span> {
+    d3: d3,
     draw: draw,
     base_config: base_config,
     utils: utils,

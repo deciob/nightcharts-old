@@ -439,69 +439,6 @@ var requirejs, require, define;
 
 define("almond", function(){});
 
-define('draw',['require'],function(require) {
-  
-
-  return function (Chart, selection, data) {
-    if (data) {
-      return new Chart(selection.datum(data));
-    }
-    return function (data) {
-      return new Chart(selection.datum(data));
-    }
-  }
-
-});
-
-
-// **The default base configuration module**
-
-define('base_config',['require'],function(require) {
-    
-    return {
-      duration: 900,  // transition duration
-      colour: 'LightSteelBlue',
-      // layout
-      margin: {top: 20, right: 20, bottom: 40, left: 40},
-      width: 500,
-      height: 400,
-      padding: .1,
-      barOffSet: 4,
-      // axes
-      x_axis: {
-        outerTickSize: 0,
-        orient: 'bottom',
-        tickValues: void 0,
-        tickFormat: null,
-      },
-      y_axis: {
-        outerTickSize: 0,
-        orient: 'left',
-        tickValues: void 0,
-      },
-      // data
-      max: void 0,         // Max value for the linear scale
-      invert_data: false,  // Data sorting
-      categoricalValue: function (d) { return d[0]; },
-      quantativeValue: function (d) { return d[1]; },
-      // events
-      handleClick: function (d, i) { return void 0; },
-      handleTransitionEnd: function(d) { return void 0; },
-      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
-      // can pass boolean or object with d3-tip configuration.
-      tooltip: false,
-      // is the xAxis a timescale?
-      // false or function: d3.time.format("%Y").parse
-      parseDate: false,
-      parseAxisDate: false,
-      // false or string: 'month', 'year', etc.
-      // used for extending the timescale on the margins.
-      time_offset: false
-    };
-  
-});
-
-
 !function() {
   var d3 = {
     version: "3.4.1"
@@ -10067,6 +10004,69 @@ define('base_config',['require'],function(require) {
 
 }));
 
+define('draw',['require'],function(require) {
+  
+
+  return function (Chart, selection, data) {
+    if (data) {
+      return new Chart(selection.datum(data));
+    }
+    return function (data) {
+      return new Chart(selection.datum(data));
+    }
+  }
+
+});
+
+
+// **The default base configuration module**
+
+define('base_config',['require'],function(require) {
+    
+    return {
+      duration: 900,  // transition duration
+      colour: 'LightSteelBlue',
+      // layout
+      margin: {top: 20, right: 20, bottom: 40, left: 40},
+      width: 500,
+      height: 400,
+      padding: .1,
+      barOffSet: 4,
+      // axes
+      x_axis: {
+        outerTickSize: 0,
+        orient: 'bottom',
+        tickValues: void 0,
+        tickFormat: null,
+      },
+      y_axis: {
+        outerTickSize: 0,
+        orient: 'left',
+        tickValues: void 0,
+      },
+      // data
+      max: void 0,         // Max value for the linear scale
+      invert_data: false,  // Data sorting
+      categoricalValue: function (d) { return d[0]; },
+      quantativeValue: function (d) { return d[1]; },
+      // events
+      handleClick: function (d, i) { return void 0; },
+      handleTransitionEnd: function(d) { return void 0; },
+      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
+      // can pass boolean or object with d3-tip configuration.
+      tooltip: false,
+      // is the xAxis a timescale?
+      // false or function: d3.time.format("%Y").parse
+      parseDate: false,
+      parseAxisDate: false,
+      // false or string: 'month', 'year', etc.
+      // used for extending the timescale on the margins.
+      time_offset: false
+    };
+  
+});
+
+
 // **Useful functions that can be shared across modules**
 
 define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
@@ -10443,15 +10443,14 @@ define('mixins/line_mixins',["d3", "utils/utils"], function(d3, utils) {
 
   function line (params) {
     return d3.svg.line().x(function(d) {
-        return params.xScale(d);
+        return params.xScale(d[0]);
       }).y(function(d) {
-        return params.yScale(d);
+        return params.yScale(d[1]);
       });
   }
 
   function createLines (params) {
     return this.append("path")
-      //.datum(data)
       .attr("class", "line")
       .attr("d", line(params) );
   }
@@ -10626,17 +10625,17 @@ define('bar/bar',[
         self.transitionXAxis.call(
           transition.selectAll('.x.axis'), __.orientation, params);
 
-//        // Select the bar elements, if they exists.
-//        bars = g.select(".bars").selectAll(".bar")
-//          .data(data, dataIdentifier);
-//
-//        // Exit phase (let us push out old bars before the new ones come in).
-//        bars.exit()
-//          .transition().duration(__.duration).style('opacity', 0).remove();
-//
-//        // Otherwise, create them.
-//        bars = self.createBars.call(bars.enter(), __.orientation, params)
-//          .on('click', __.handleClick);
+        // Select the bar elements, if they exists.
+        bars = g.select(".bars").selectAll(".bar")
+          .data(data, dataIdentifier);
+
+        // Exit phase (let us push out old bars before the new ones come in).
+        bars.exit()
+          .transition().duration(__.duration).style('opacity', 0).remove();
+
+        // Otherwise, create them.
+        bars = self.createBars.call(bars.enter(), __.orientation, params)
+          .on('click', __.handleClick);
 
         if (tooltip) {
           bars
@@ -10818,17 +10817,17 @@ define('line/line',[
         self.transitionXAxis.call(
           transition.selectAll('.x.axis'), 'vertical', params);
 
-//        // Select the line elements, if they exists.
-//        lines = g.select(".lines").selectAll(".line")
-//          .data(data, dataIdentifier);
-//
-//        // Exit phase (let us push out old lines before the new ones come in).
-//        lines.exit()
-//          .transition().duration(__.duration).style('opacity', 0).remove();
-//
-//        // Otherwise, create them.
-//        lines = self.createLines.call(lines.enter(), params)
-//          .on('click', __.handleClick);
+        // Select the line elements, if they exists.
+        lines = g.select(".lines").selectAll(".line")
+          .data([data], dataIdentifier);
+
+        // Exit phase (let us push out old lines before the new ones come in).
+        lines.exit()
+          .transition().duration(__.duration).style('opacity', 0).remove();
+
+        // Otherwise, create them.
+        lines = self.createLines.call(lines.enter(), params)
+          .on('click', __.handleClick);
 
         if (tooltip) {
           lines
@@ -10836,6 +10835,7 @@ define('line/line',[
            .on('mouseout', tip.hide);
         }
           
+        // TODO
         //// And transition them.
         //self.transitionLines
         //  .call(transition.selectAll('.line'), 'vertical', params)
@@ -10856,6 +10856,8 @@ define('line/line',[
   }
 
 });
+
+
 // **frame.states module**
 
 // Used by the *frame.state_machine* module.
@@ -11130,6 +11132,8 @@ define('frame/frame',[
 
 
 define('chart',[
+  "d3", 
+  "d3_tip",
   "draw",
   "base_config",
   "utils/utils",
@@ -11143,9 +11147,12 @@ define('chart',[
   "frame/states",
   "frame/state_machine",
   "frame/frame"
-], function(draw, base_config, utils, common_mixins, bar_mixins, line_mixins, bar_config, bar, line_config, line, states, StateMachine, Frame) {
+], function(d3, d3_tip, draw, base_config, utils, common_mixins, bar_mixins, line_mixins, bar_config, bar, line_config, line, states, StateMachine, Frame) {
+
+  d3.d3_tip = d3_tip;
 
   return {
+    d3: d3,
     draw: draw,
     base_config: base_config,
     utils: utils,
