@@ -36,11 +36,12 @@ define(function(require) {
       tooltip: false,
       // is the xAxis a timescale?
       // false or function: d3.time.format("%Y").parse
-      parseDate: false,
-      parseAxisDate: false,
+      date: false,
+      date_type: 'string', // or 'epoc'
+      date_format: '%Y',
       // false or string: 'month', 'year', etc.
       // used for extending the timescale on the margins.
-      time_offset: false
+      date_offset: false
     };
   
 });

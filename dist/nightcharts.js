@@ -52,11 +52,12 @@ define('base_config',['require'],function(require) {
       tooltip: false,
       // is the xAxis a timescale?
       // false or function: d3.time.format("%Y").parse
-      parseDate: false,
-      parseAxisDate: false,
+      date: false,
+      date_type: 'string', // or 'epoc'
+      date_format: '%Y',
       // false or string: 'month', 'year', etc.
       // used for extending the timescale on the margins.
-      time_offset: false
+      date_offset: false
     };
   
 });
@@ -181,11 +182,6 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function _applyTimeScale (params, range) {
-      var data = params.data;
-      return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
-    }
-
-    function _applyTimeScale (params, range) {
       // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
       var data = params.x_axis_data || params.data,  // FIXME this hack!
           t1 = data[0][0],
@@ -216,7 +212,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     function _applyXScaleV (params) {
       var range = [0, params.w()];
-      if (params.__.parseDate) {
+      if (params.__.date) {
         return _applyTimeScale.call(this, params, range);
       } else {
         return _applyOrdinalScale.call(this, params, range);
@@ -303,10 +299,10 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }  
     }
 
-    function setXScale (orientation, parseDate) {
-      if (orientation == 'vertical' && parseDate) {
+    function setXScale (orientation, date) {
+      if (orientation == 'vertical' && date) {
         return d3.time.scale;
-      } else if (orientation != 'vertical' && parseDate) {
+      } else if (orientation != 'vertical' && date) {
         return new Error('Timescale is only for horizontal graphs.')
       } else if (orientation == 'vertical') {
         return d3.scale.ordinal;
@@ -437,13 +433,20 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
 
 define('mixins/line_mixins',["d3", "utils/utils"], function(d3, utils) {
 
+      //parse = d3.time.format("%Y-%m-%d").parse
+      //format = d3.time.format("%Y-%m-%d")
+      //format(new Date(2011, 0, 1))
+
   function normalizeData (data, __) {
     var parsed_data = [];
     data.forEach( function (dataset, index) {
       parsed_data.push(dataset.map(function(d, i) {
         var x;
-        if (__.parseDate) {
-          x = __.parseDate(__.categoricalValue.call(dataset, d));
+        if (__.date && __.date_type == 'string') {
+          x = d3.time.format(__.date_format)
+            .parse(__.categoricalValue.call(dataset, d));
+        } else if (__.date && __.date_type == 'epoch') {
+          x = d3.time.format(__.date_format)(new Date(__.categoricalValue.call(dataset, d) * 1000));
         } else {
           x = __.categoricalValue.call(dataset, d);
         }
@@ -692,6 +695,7 @@ define('line/config',[
   ], function(base_config, utils) {
     
   var config = {
+    // TODO this is an yAxis offset....
     date_adjust: 5
   };
 
@@ -749,7 +753,7 @@ define('line/line',[
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
 
       // Scales are functions that map from an input domain to an output range.
-      xScale = self.setXScale('vertical', __.parseDate)();
+      xScale = self.setXScale('vertical', __.date)();
       yScale = self.setYScale('vertical')();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes).
@@ -784,7 +788,7 @@ define('line/line',[
 
       gEnter.append("g").attr("class", "lines");
       gEnter.append("g").attr("class", "x axis");
-      if (__.parseDate) {
+      if (__.date) {
         gEnter.append("g").attr("class", "y axis")
          .attr("transform", "translate(-" + (__.date_adjust) + ",0)");
       } else {
@@ -823,20 +827,11 @@ define('line/line',[
       lines = self.createLines.call(lines.enter(), params)
         .on('click', __.handleClick);
       
-//      selection.each( function (dat) {
-// 
-
-//
-
-//
-      
-
-//
-//        if (tooltip) {
-//          lines
-//           .on('mouseover', tip.show)
-//           .on('mouseout', tip.hide);
-//        }
+      if (tooltip) {
+        lines
+         .on('mouseover', tip.show)
+         .on('mouseout', tip.hide);
+      }
 //          
 //        // TODO
 //        //// And transition them.

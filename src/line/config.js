@@ -6,6 +6,7 @@ define('line/config',[
   ], function(base_config, utils) {
     
   var config = {
+    // TODO this is an yAxis offset....
     date_adjust: 5
   };
 

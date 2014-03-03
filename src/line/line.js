@@ -47,7 +47,7 @@ define('line/line',[
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
 
       // Scales are functions that map from an input domain to an output range.
-      xScale = self.setXScale('vertical', __.parseDate)();
+      xScale = self.setXScale('vertical', __.date)();
       yScale = self.setYScale('vertical')();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes).
@@ -82,7 +82,7 @@ define('line/line',[
 
       gEnter.append("g").attr("class", "lines");
       gEnter.append("g").attr("class", "x axis");
-      if (__.parseDate) {
+      if (__.date) {
         gEnter.append("g").attr("class", "y axis")
          .attr("transform", "translate(-" + (__.date_adjust) + ",0)");
       } else {
@@ -121,30 +121,22 @@ define('line/line',[
       lines = self.createLines.call(lines.enter(), params)
         .on('click', __.handleClick);
       
-//      selection.each( function (dat) {
-// 
+      //TODO: FIXME
+      if (tooltip) {
+        lines
+         .on('mouseover', tip.show)
+         .on('mouseout', tip.hide);
+      }
+        
+      //TODO
+      //And transition them.
+      //self.transitionLines
+      //  .call(transition.selectAll('.line'), 'vertical', params)
+      //  .call(utils.endall, data, __.handleTransitionEnd);
 
-//
+      return selection;
 
-//
-      
-
-//
-//        if (tooltip) {
-//          lines
-//           .on('mouseover', tip.show)
-//           .on('mouseout', tip.hide);
-//        }
-//          
-//        // TODO
-//        //// And transition them.
-//        //self.transitionLines
-//        //  .call(transition.selectAll('.line'), 'vertical', params)
-//        //  .call(utils.endall, data, __.handleTransitionEnd);
-//
-//        return selection;
-//
-//      });
+    });
 
       return selection;
 
