@@ -47,7 +47,7 @@ define('line/line',[
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
 
       // Scales are functions that map from an input domain to an output range.
-      xScale = self.setXScale('vertical', __.date)();
+      xScale = self.setXScale('vertical', __.date_chart)();
       yScale = self.setYScale('vertical')();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes).
@@ -82,7 +82,7 @@ define('line/line',[
 
       gEnter.append("g").attr("class", "lines");
       gEnter.append("g").attr("class", "x axis");
-      if (__.date) {
+      if (__.date_chart) {
         gEnter.append("g").attr("class", "y axis")
          .attr("transform", "translate(-" + (__.date_adjust) + ",0)");
       } else {

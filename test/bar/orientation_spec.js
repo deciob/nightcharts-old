@@ -1,3 +1,5 @@
+// TODO: these are mixins now!!!!!! 
+
 define(['chai', 'bar/config','bar/orientation'], function(chai, __, orientation) {
 
   var params, 

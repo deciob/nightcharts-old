@@ -42,7 +42,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     function _applyXScaleV (params) {
       var range = [0, params.w()];
-      if (params.__.date) {
+      if (params.__.date_chart) {
         return _applyTimeScale.call(this, params, range);
       } else {
         return _applyOrdinalScale.call(this, params, range);
@@ -129,10 +129,10 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }  
     }
 
-    function setXScale (orientation, date) {
-      if (orientation == 'vertical' && date) {
+    function setXScale (orientation, date_chart) {
+      if (orientation == 'vertical' && date_chart) {
         return d3.time.scale;
-      } else if (orientation != 'vertical' && date) {
+      } else if (orientation != 'vertical' && date_chart) {
         return new Error('Timescale is only for horizontal graphs.')
       } else if (orientation == 'vertical') {
         return d3.scale.ordinal;

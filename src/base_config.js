@@ -36,7 +36,7 @@ define(function(require) {
       tooltip: false,
       // is the xAxis a timescale?
       // false or function: d3.time.format("%Y").parse
-      date: false,
+      date_chart: false,
       date_type: 'string', // or 'epoc'
       date_format: '%Y',
       // false or string: 'month', 'year', etc.

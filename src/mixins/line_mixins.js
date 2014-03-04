@@ -1,26 +1,27 @@
 define('mixins/line_mixins',["d3", "utils/utils"], function(d3, utils) {
 
-      //parse = d3.time.format("%Y-%m-%d").parse
-      //format = d3.time.format("%Y-%m-%d")
-      //format(new Date(2011, 0, 1))
-
+  
   function normalizeData (data, __) {
-    var parsed_data = [];
+    var parsed_data = [],
+        date_chart = __.date_chart,
+        date_format = __.date_format,
+        date_type = __.date_type,
+        categoricalValue = __.categoricalValue;
     data.forEach( function (dataset, index) {
       parsed_data.push(dataset.map(function(d, i) {
         var x;
-        if (__.date && __.date_type == 'string') {
-          x = d3.time.format(__.date_format)
-            .parse(__.categoricalValue.call(dataset, d));
-        } else if (__.date && __.date_type == 'epoch') {
-          x = d3.time.format(__.date_format)(new Date(__.categoricalValue.call(dataset, d) * 1000));
+        // The time data is encoded in a string:
+        if (date_chart && date_type == 'string') {
+          x = d3.time.format(date_format)
+            .parse(categoricalValue.call(dataset, d));
+        // The time data is encoded in an epoch number:
+        } else if (date_chart && __.date_type == 'epoch') {
+          x = new Date(categoricalValue.call(dataset, d) * 1000);
+        // Real categorical value:
         } else {
           x = __.categoricalValue.call(dataset, d);
         }
-        return [
-          x, 
-          __.quantativeValue.call(dataset, d)
-        ];
+        return [x, __.quantativeValue.call(dataset, d)];
       }));
     });
     if (__.invert_data) {

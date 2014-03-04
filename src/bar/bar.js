@@ -36,7 +36,7 @@ define('bar/bar',[
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      xScale = self.setXScale(__.orientation, __.parseDate)();
+      xScale = self.setXScale(__.orientation, __.date_chart)();
       yScale = self.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
@@ -61,8 +61,8 @@ define('bar/bar',[
         // 1: value
         data = dat.map(function(d, i) {
           var x;
-          if (__.parseDate) {
-            x = __.parseDate(__.categoricalValue.call(dat, d));
+          if (__.date_chart) {
+            x = __.date_chart(__.categoricalValue.call(dat, d));
           } else {
             x = __.categoricalValue.call(dat, d);
           }
@@ -93,7 +93,7 @@ define('bar/bar',[
           date_adjust: (w()/data.length)/2
         }
 
-        if (__.parseDate) {
+        if (__.date_chart) {
           params.bar_width = (w() / data.length) - .5;
         }
 
@@ -112,7 +112,7 @@ define('bar/bar',[
         }
         gEnter.append("g").attr("class", "bars");
         gEnter.append("g").attr("class", "x axis");
-        if (__.parseDate) {
+        if (__.date_chart) {
           gEnter.append("g").attr("class", "y axis")
            .attr("transform", "translate(-" + (params.date_adjust + 5) + ",0)");
         } else {
