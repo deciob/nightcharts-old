@@ -48,7 +48,7 @@ define('mixins/line_mixins',["d3", "utils/utils"], function(d3, utils) {
     
   }
 
-  return function (orientation, params) {
+  return function () {
     this.createLines = createLines;
     this.transitionLines = transitionLines;
     this.normalizeData = normalizeData;

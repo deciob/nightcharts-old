@@ -11,8 +11,9 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return copy;
   }
 
-  function extend (target, source) {
-    var target_clone = clone(target);
+  function extend (target, source, use_clone) {
+    var use_clone = (typeof use_clone === "undefined") ? true : use_clone,
+        target_clone = use_clone ? clone(target): target;
     for(prop in source) {
       target_clone[prop] = source[prop];
     }

@@ -11,6 +11,7 @@ define(function(require) {
       height: 400,
       padding: .1,
       barOffSet: 4,
+      orientation: 'vertical',
       // axes
       x_axis: {
         outerTickSize: 0,

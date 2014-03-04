@@ -27,6 +27,7 @@ define('base_config',['require'],function(require) {
       height: 400,
       padding: .1,
       barOffSet: 4,
+      orientation: 'vertical',
       // axes
       x_axis: {
         outerTickSize: 0,
@@ -52,7 +53,7 @@ define('base_config',['require'],function(require) {
       tooltip: false,
       // is the xAxis a timescale?
       // false or function: d3.time.format("%Y").parse
-      date: false,
+      date_chart: false,
       date_type: 'string', // or 'epoc'
       date_format: '%Y',
       // false or string: 'month', 'year', etc.
@@ -76,8 +77,9 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     return copy;
   }
 
-  function extend (target, source) {
-    var target_clone = clone(target);
+  function extend (target, source, use_clone) {
+    var use_clone = (typeof use_clone === "undefined") ? true : use_clone,
+        target_clone = use_clone ? clone(target): target;
     for(prop in source) {
       target_clone[prop] = source[prop];
     }
@@ -212,7 +214,7 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     function _applyXScaleV (params) {
       var range = [0, params.w()];
-      if (params.__.date) {
+      if (params.__.date_chart) {
         return _applyTimeScale.call(this, params, range);
       } else {
         return _applyOrdinalScale.call(this, params, range);
@@ -299,10 +301,10 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }  
     }
 
-    function setXScale (orientation, date) {
-      if (orientation == 'vertical' && date) {
+    function setXScale (orientation, date_chart) {
+      if (orientation == 'vertical' && date_chart) {
         return d3.time.scale;
-      } else if (orientation != 'vertical' && date) {
+      } else if (orientation != 'vertical' && date_chart) {
         return new Error('Timescale is only for horizontal graphs.')
       } else if (orientation == 'vertical') {
         return d3.scale.ordinal;
@@ -433,27 +435,28 @@ define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
 
 define('mixins/line_mixins',["d3", "utils/utils"], function(d3, utils) {
 
-      //parse = d3.time.format("%Y-%m-%d").parse
-      //format = d3.time.format("%Y-%m-%d")
-      //format(new Date(2011, 0, 1))
-
+  
   function normalizeData (data, __) {
-    var parsed_data = [];
+    var parsed_data = [],
+        date_chart = __.date_chart,
+        date_format = __.date_format,
+        date_type = __.date_type,
+        categoricalValue = __.categoricalValue;
     data.forEach( function (dataset, index) {
       parsed_data.push(dataset.map(function(d, i) {
         var x;
-        if (__.date && __.date_type == 'string') {
-          x = d3.time.format(__.date_format)
-            .parse(__.categoricalValue.call(dataset, d));
-        } else if (__.date && __.date_type == 'epoch') {
-          x = d3.time.format(__.date_format)(new Date(__.categoricalValue.call(dataset, d) * 1000));
+        // The time data is encoded in a string:
+        if (date_chart && date_type == 'string') {
+          x = d3.time.format(date_format)
+            .parse(categoricalValue.call(dataset, d));
+        // The time data is encoded in an epoch number:
+        } else if (date_chart && __.date_type == 'epoch') {
+          x = new Date(categoricalValue.call(dataset, d) * 1000);
+        // Real categorical value:
         } else {
           x = __.categoricalValue.call(dataset, d);
         }
-        return [
-          x, 
-          __.quantativeValue.call(dataset, d)
-        ];
+        return [x, __.quantativeValue.call(dataset, d)];
       }));
     });
     if (__.invert_data) {
@@ -480,7 +483,7 @@ define('mixins/line_mixins',["d3", "utils/utils"], function(d3, utils) {
     
   }
 
-  return function (orientation, params) {
+  return function () {
     this.createLines = createLines;
     this.transitionLines = transitionLines;
     this.normalizeData = normalizeData;
@@ -544,7 +547,7 @@ define('bar/bar',[
   
       // Scales are functions that map from an input domain to an output range.
       // Presently no assumption is made about the chart orientation.
-      xScale = self.setXScale(__.orientation, __.parseDate)();
+      xScale = self.setXScale(__.orientation, __.date_chart)();
       yScale = self.setYScale(__.orientation)();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
@@ -569,8 +572,8 @@ define('bar/bar',[
         // 1: value
         data = dat.map(function(d, i) {
           var x;
-          if (__.parseDate) {
-            x = __.parseDate(__.categoricalValue.call(dat, d));
+          if (__.date_chart) {
+            x = __.date_chart(__.categoricalValue.call(dat, d));
           } else {
             x = __.categoricalValue.call(dat, d);
           }
@@ -601,7 +604,7 @@ define('bar/bar',[
           date_adjust: (w()/data.length)/2
         }
 
-        if (__.parseDate) {
+        if (__.date_chart) {
           params.bar_width = (w() / data.length) - .5;
         }
 
@@ -620,7 +623,7 @@ define('bar/bar',[
         }
         gEnter.append("g").attr("class", "bars");
         gEnter.append("g").attr("class", "x axis");
-        if (__.parseDate) {
+        if (__.date_chart) {
           gEnter.append("g").attr("class", "y axis")
            .attr("transform", "translate(-" + (params.date_adjust + 5) + ",0)");
         } else {
@@ -745,6 +748,8 @@ define('line/line',[
           transition,
           params;
 
+      self.__ = __;
+
       function delay (d, i) { 
         return i / data[0].length * __.duration; 
       };
@@ -753,25 +758,28 @@ define('line/line',[
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
 
       // Scales are functions that map from an input domain to an output range.
-      xScale = self.setXScale('vertical', __.date)();
+      xScale = self.setXScale('vertical', __.date_chart)();
       yScale = self.setYScale('vertical')();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes).
       xAxis = self.setXAxis(__.x_axis, xScale);
       yAxis = self.setYAxis(__.y_axis, yScale);
 
-      params = {
-        data: data,
-        x_axis_data: data[0], // FIXME this hack!
-        __: __,
-        h: h,
-        w: w,
-        yScale: yScale,
-        xScale: xScale,
-        xAxis: xAxis,
-        yAxis: yAxis,
-        delay: delay,
-      }
+      utils.extend(
+        self.__, 
+        {
+          data: data,
+          x_axis_data: data[0], // FIXME this hack!
+          h: h,
+          w: w,
+          yScale: yScale,
+          xScale: xScale,
+          xAxis: xAxis,
+          yAxis: yAxis,
+          delay: delay,
+        }, 
+        false
+      );
 
       self.applyXScale.call(xScale, 'vertical', params);
       self.applyYScale.call(yScale, 'vertical', params);
@@ -788,7 +796,7 @@ define('line/line',[
 
       gEnter.append("g").attr("class", "lines");
       gEnter.append("g").attr("class", "x axis");
-      if (__.date) {
+      if (__.date_chart) {
         gEnter.append("g").attr("class", "y axis")
          .attr("transform", "translate(-" + (__.date_adjust) + ",0)");
       } else {
@@ -827,21 +835,18 @@ define('line/line',[
       lines = self.createLines.call(lines.enter(), params)
         .on('click', __.handleClick);
       
+      //TODO: FIXME
       if (tooltip) {
         lines
          .on('mouseover', tip.show)
          .on('mouseout', tip.hide);
       }
-//          
-//        // TODO
-//        //// And transition them.
-//        //self.transitionLines
-//        //  .call(transition.selectAll('.line'), 'vertical', params)
-//        //  .call(utils.endall, data, __.handleTransitionEnd);
-//
-//        return selection;
-//
-//      });
+        
+      //TODO
+      //And transition them.
+      //self.transitionLines
+      //  .call(transition.selectAll('.line'), 'vertical', params)
+      //  .call(utils.endall, data, __.handleTransitionEnd);
 
       return selection;
 

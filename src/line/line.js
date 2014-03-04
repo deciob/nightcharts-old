@@ -4,9 +4,10 @@ define('line/line',[
     "d3", 
     "utils/utils",
     "line/config", 
+    "data_variables/mixins",
     "mixins/common_mixins",
     "mixins/line_mixins",
-  ], function(d3, utils, default_config, common_mixins, line_mixins) {
+  ], function(d3, utils, default_config, data_variables, common_mixins, line_mixins) {
   
   return function (user_config) {
 
@@ -39,6 +40,8 @@ define('line/line',[
           transition,
           params;
 
+      self.__ = __;
+
       function delay (d, i) { 
         return i / data[0].length * __.duration; 
       };
@@ -47,25 +50,28 @@ define('line/line',[
       h = function () { return __.height - __.margin.top - __.margin.bottom; };
 
       // Scales are functions that map from an input domain to an output range.
-      xScale = self.setXScale('vertical', __.date_chart)();
+      xScale = self.setXScale(__.data_value)();
       yScale = self.setYScale('vertical')();
   
       // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes).
       xAxis = self.setXAxis(__.x_axis, xScale);
       yAxis = self.setYAxis(__.y_axis, yScale);
 
-      params = {
-        data: data,
-        x_axis_data: data[0], // FIXME this hack!
-        __: __,
-        h: h,
-        w: w,
-        yScale: yScale,
-        xScale: xScale,
-        xAxis: xAxis,
-        yAxis: yAxis,
-        delay: delay,
-      }
+      utils.extend(
+        self.__, 
+        {
+          data: data,
+          x_axis_data: data[0], // FIXME this hack!
+          h: h,
+          w: w,
+          yScale: yScale,
+          xScale: xScale,
+          xAxis: xAxis,
+          yAxis: yAxis,
+          delay: delay,
+        }, 
+        false
+      );
 
       self.applyXScale.call(xScale, 'vertical', params);
       self.applyYScale.call(yScale, 'vertical', params);
@@ -133,10 +139,6 @@ define('line/line',[
       //self.transitionLines
       //  .call(transition.selectAll('.line'), 'vertical', params)
       //  .call(utils.endall, data, __.handleTransitionEnd);
-
-      return selection;
-
-    });
 
       return selection;
 
