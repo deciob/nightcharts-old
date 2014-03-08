@@ -11,6 +11,8 @@ define([
   //"bar/bar",
   "line/config",
   "line/line",
+  "circle/config",
+  "circle/circle",
   //"frame/states",
   //"frame/state_machine",
   //"frame/frame"
@@ -26,7 +28,9 @@ define([
   //bar_config, 
   //Bar, 
   line_config, 
-  Line
+  Line,
+  circle_config,
+  Circle
   //states, 
   //StateMachine, 
   //Frame
@@ -45,6 +49,8 @@ define([
     //Bar: Bar,
     line_config: line_config,
     Line: Line,
+    circle_config: circle_config,
+    Circle: Circle,
     //Frame: Frame,
     //states: states, 
     //StateMachine: StateMachine,

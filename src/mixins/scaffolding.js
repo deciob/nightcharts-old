@@ -3,12 +3,46 @@ define('mixins/scaffolding', [
   "utils/utils"
 ], function (d3, utils) {
 
+  function axisScaffolding (data, __) {
+    // Scales are functions that map from an input domain to an output range.
+    this.xScale = this.setScale(__.x_scale)();
+    this.yScale = this.setScale(__.y_scale)();
+
+    // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes).
+    this.xAxis = this.setAxisProps(__.x_axis, this.xScale);
+    this.yAxis = this.setAxisProps(__.y_axis, this.yScale);
+
+    utils.extend(
+      this.__, 
+      {
+        data: data,
+        //x_axis_data: data[0], // FIXME this hack!
+        yScale: this.yScale,
+        xScale: this.xScale,
+        xAxis: this.xAxis,
+        yAxis: this.yAxis,
+        delay: this.delay,
+        w: this.w(),
+        h: this.h(),
+      }, 
+      false
+    );
+
+    this.applyScale.call( this.xScale, 'x', __.x_scale, __ );
+    this.applyScale.call( this.yScale, 'y', __.y_scale, __ );
+
+    return this;
+  }
+
   function chartScaffolding (selection, __, chart_class) {
 
     // Select the svg element, if it exists.
+    //this.gWrapper = selection.selectAll("g." + chart_class + '_wrapper')
     this.svg = selection.selectAll("svg").data([this.data]);
     // Otherwise, create the skeletal chart.
-    this.gEnter = this.svg.enter().append("svg").append("g");
+    this.gEnter = this.svg.enter().append("svg")
+      //.attr('class', chart_class + '_wrapper')
+      .append("g");
     // Initializing the tooltip.
     if ( __.tooltip ) {
       this.tip = utils.tip( __.tooltip );
@@ -44,8 +78,10 @@ define('mixins/scaffolding', [
   };
       
   return function () {
+    this.axisScaffolding = axisScaffolding;
     this.chartScaffolding = chartScaffolding;
     return this;
   };
 
 });
+

@@ -21,42 +21,13 @@ define('line/line',[
       var self = this instanceof Line
                ? this
                : new Line(selection),
-          xScale,
-          yScale,
-          xAxis,
-          yAxis,
           data = self.normalizeData(selection.datum(), __),
           lines;
 
       self.__ = __;
+      __.x_axis_data = data[0]; //FIXME
 
-      // Scales are functions that map from an input domain to an output range.
-      xScale = self.setScale(__.x_scale)();
-      yScale = self.setScale(__.y_scale)();
-
-      // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes).
-      xAxis = self.setAxisProps(__.x_axis, xScale);
-      yAxis = self.setAxisProps(__.y_axis, yScale);
-
-      utils.extend(
-        self.__, 
-        {
-          data: data,
-          x_axis_data: data[0], // FIXME this hack!
-          yScale: yScale,
-          xScale: xScale,
-          xAxis: xAxis,
-          yAxis: yAxis,
-          delay: self.delay,
-          w: self.w(),
-          h: self.h(),
-        }, 
-        false
-      );
-
-      self.applyScale.call(xScale, 'x', __.x_scale, __);
-      self.applyScale.call(yScale, 'y', __.y_scale, __);
-
+      self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'lines');
 
       // Select the line elements, if they exists.
@@ -74,7 +45,7 @@ define('line/line',[
         .on('click', __.handleClick);
     
       //TODO: FIXME
-      if (tooltip) {
+      if (__.tooltip) {
         lines
          .on('mouseover', self.tip.show)
          .on('mouseout', self.tip.hide);

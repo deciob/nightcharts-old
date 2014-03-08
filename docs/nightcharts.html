@@ -633,22 +633,9 @@ define(<span class="string">'mixins/scale_methods'</span>, [
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">_applyOrdinalScale</span> <span class="params">(range, __)</span> {</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-23">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
-              </div>
-              <p>var data = <strong>.x_axis_data || </strong>.data;  // FIXME this hack!</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">return</span> <span class="keyword">this</span>
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">_applyOrdinalScale</span> <span class="params">(range, __)</span> {</span>
+    <span class="keyword">var</span> data = __.x_axis_data || __.data;  <span class="comment">// FIXME this hack!</span>
+    <span class="keyword">return</span> <span class="keyword">this</span>
       .rangeRoundBands(range, __.padding)
       .domain( __.data[<span class="number">0</span>].map( <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> d[<span class="number">0</span>]; } ) );
   }
@@ -744,12 +731,30 @@ define(<span class="string">'mixins/axis_methods'</span>, [
   };
 
 });
+
+
 define(<span class="string">'mixins/scaffolding'</span>, [
   <span class="string">"d3"</span>, 
   <span class="string">"utils/utils"</span>
 ], <span class="function"><span class="keyword">function</span> <span class="params">(d3, utils)</span> {</span>
 
-  <span class="function"><span class="keyword">function</span> <span class="title">chartScaffolding</span> <span class="params">(selection, __, chart_class)</span> {</span></pre></div></div>
+  <span class="function"><span class="keyword">function</span> <span class="title">axisScaffolding</span> <span class="params">(data, __)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Scales are functions that map from an input domain to an output range.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.xScale = <span class="keyword">this</span>.setScale(__.x_scale)();
+    <span class="keyword">this</span>.yScale = <span class="keyword">this</span>.setScale(__.y_scale)();</pre></div></div>
             
         </li>
         
@@ -760,11 +765,17 @@ define(<span class="string">'mixins/scaffolding'</span>, [
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
-              <p>Select the svg element, if it exists.</p>
+              <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">SVG-Axes</a>.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.svg = selection.selectAll(<span class="string">"svg"</span>).data([<span class="keyword">this</span>.data]);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.xAxis = <span class="keyword">this</span>.setAxisProps(__.x_axis, <span class="keyword">this</span>.xScale);
+    <span class="keyword">this</span>.yAxis = <span class="keyword">this</span>.setAxisProps(__.y_axis, <span class="keyword">this</span>.yScale);
+
+    utils.extend(
+      <span class="keyword">this</span>.__, 
+      {
+        data: data,</pre></div></div>
             
         </li>
         
@@ -775,11 +786,28 @@ define(<span class="string">'mixins/scaffolding'</span>, [
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
-              <p>Otherwise, create the skeletal chart.</p>
+              <p>x_axis_data: data[0], // FIXME this hack!</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.gEnter = <span class="keyword">this</span>.svg.enter().append(<span class="string">"svg"</span>).append(<span class="string">"g"</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        yScale: <span class="keyword">this</span>.yScale,
+        xScale: <span class="keyword">this</span>.xScale,
+        xAxis: <span class="keyword">this</span>.xAxis,
+        yAxis: <span class="keyword">this</span>.yAxis,
+        delay: <span class="keyword">this</span>.delay,
+        w: <span class="keyword">this</span>.w(),
+        h: <span class="keyword">this</span>.h(),
+      }, 
+      <span class="literal">false</span>
+    );
+
+    <span class="keyword">this</span>.applyScale.call( <span class="keyword">this</span>.xScale, <span class="string">'x'</span>, __.x_scale, __ );
+    <span class="keyword">this</span>.applyScale.call( <span class="keyword">this</span>.yScale, <span class="string">'y'</span>, __.y_scale, __ );
+
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }
+
+  <span class="function"><span class="keyword">function</span> <span class="title">chartScaffolding</span> <span class="params">(selection, __, chart_class)</span> {</span></pre></div></div>
             
         </li>
         
@@ -789,6 +817,52 @@ define(<span class="string">'mixins/scaffolding'</span>, [
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>Select the svg element, if it exists.
+this.gWrapper = selection.selectAll(&quot;g.&quot; + chart_class + &#39;_wrapper&#39;)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.svg = selection.selectAll(<span class="string">"svg"</span>).data([<span class="keyword">this</span>.data]);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>Otherwise, create the skeletal chart.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.gEnter = <span class="keyword">this</span>.svg.enter().append(<span class="string">"svg"</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>.attr(&#39;class&#39;, chart_class + &#39;_wrapper&#39;)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      .append(<span class="string">"g"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Initializing the tooltip.</p>
 
@@ -807,11 +881,11 @@ define(<span class="string">'mixins/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-27">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Update the outer dimensions.</p>
 
@@ -823,11 +897,11 @@ define(<span class="string">'mixins/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-28">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Update the inner dimensions.</p>
 
@@ -840,11 +914,11 @@ define(<span class="string">'mixins/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-29">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>Transitions root.</p>
 
@@ -855,11 +929,11 @@ define(<span class="string">'mixins/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-30">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Update the y axis.</p>
 
@@ -871,11 +945,11 @@ define(<span class="string">'mixins/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-31">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>Update the x axis.</p>
 
@@ -888,6 +962,7 @@ define(<span class="string">'mixins/scaffolding'</span>, [
   };
       
   <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">this</span>.axisScaffolding = axisScaffolding;
     <span class="keyword">this</span>.chartScaffolding = chartScaffolding;
     <span class="keyword">return</span> <span class="keyword">this</span>;
   };
@@ -897,11 +972,11 @@ define(<span class="string">'mixins/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-32">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p><strong>The default configuration module for the line.line module</strong></p>
 
@@ -919,11 +994,11 @@ define(<span class="string">'mixins/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-33">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>TODO this is an yAxis offset....
 date_adjust: 5</p>
@@ -939,11 +1014,11 @@ date_adjust: 5</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p><strong>The line.line module</strong></p>
 
@@ -970,76 +1045,23 @@ date_adjust: 5</p>
       <span class="keyword">var</span> self = <span class="keyword">this</span> <span class="keyword">instanceof</span> Line
                ? <span class="keyword">this</span>
                : <span class="keyword">new</span> Line(selection),
-          xScale,
-          yScale,
-          xAxis,
-          yAxis,
           data = self.normalizeData(selection.datum(), __),
           lines;
 
-      self.__ = __;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-35">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
-              </div>
-              <p>Scales are functions that map from an input domain to an output range.</p>
+      self.__ = __;
+      __.x_axis_data = data[<span class="number">0</span>]; <span class="comment">//FIXME</span>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      xScale = self.setScale(__.x_scale)();
-      yScale = self.setScale(__.y_scale)();</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-36">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
-              </div>
-              <p>Axes, see: <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">SVG-Axes</a>.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      xAxis = self.setAxisProps(__.x_axis, xScale);
-      yAxis = self.setAxisProps(__.y_axis, yScale);
-
-      utils.extend(
-        self.__, 
-        {
-          data: data,
-          x_axis_data: data[<span class="number">0</span>], <span class="comment">// FIXME this hack!</span>
-          yScale: yScale,
-          xScale: xScale,
-          xAxis: xAxis,
-          yAxis: yAxis,
-          delay: self.delay,
-          w: self.w(),
-          h: self.h(),
-        }, 
-        <span class="literal">false</span>
-      );
-
-      self.applyScale.call(xScale, <span class="string">'x'</span>, __.x_scale, __);
-      self.applyScale.call(yScale, <span class="string">'y'</span>, __.y_scale, __);
-
+      self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, <span class="string">'lines'</span>);</pre></div></div>
             
         </li>
         
         
-        <li id="section-37">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>Select the line elements, if they exists.</p>
 
@@ -1051,11 +1073,11 @@ date_adjust: 5</p>
         </li>
         
         
-        <li id="section-38">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>Exit phase (let us push out old lines before the new ones come in).</p>
 
@@ -1067,11 +1089,11 @@ date_adjust: 5</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>Otherwise, create them.</p>
 
@@ -1085,29 +1107,30 @@ date_adjust: 5</p>
         </li>
         
         
-        <li id="section-40">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
-              </div>
-              <pre><code> //TODO: FIXME
- if (tooltip) {
-   lines
-    .on(&#39;mouseover&#39;, tip.show)
-    .on(&#39;mouseout&#39;, tip.hide);
- }</code></pre>
-
-            </div>
-            
-        </li>
-        
-        
         <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <p>TODO: FIXME</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (__.tooltip) {
+        lines
+         .on(<span class="string">'mouseover'</span>, self.tip.show)
+         .on(<span class="string">'mouseout'</span>, self.tip.hide);
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p>TODO
 And transition them.
@@ -1140,6 +1163,198 @@ self.transitionLines
 
   }
 
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p><strong>The default configuration module for the point.point module</strong></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'circle/config'</span>, [
+  <span class="string">"d3"</span>, 
+  <span class="string">"base_config"</span>,
+  <span class="string">"utils/utils"</span>,
+], <span class="function"><span class="keyword">function</span><span class="params">(d3, base_config, utils)</span> {</span>
+    
+  <span class="keyword">var</span> config = {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>x_scale: &#39;time&#39;,
+TODO this is an yAxis offset....
+date_adjust: 5</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  };
+
+  <span class="keyword">return</span> utils.extend(base_config, config);
+  
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p><strong>The circle.circle module</strong></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'circle/circle'</span>,[
+    <span class="string">"d3"</span>, 
+    <span class="string">"utils/utils"</span>,
+    <span class="string">"circle/config"</span>, 
+    <span class="string">"mixins/data_methods"</span>,
+    <span class="string">"mixins/layout_methods"</span>,
+    <span class="string">"mixins/scale_methods"</span>,
+    <span class="string">"mixins/axis_methods"</span>,
+    <span class="string">"mixins/scaffolding"</span>,
+  ], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils, default_config, data_methods, layout_methods, scale_methods, axis_methods, scaffolding)</span> {</span>
+  
+  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(user_config)</span> {</span>
+
+    <span class="keyword">var</span> config = user_config || {},
+        __ = utils.extend(default_config, config);
+
+    <span class="function"><span class="keyword">function</span> <span class="title">Circle</span> <span class="params">(selection)</span> {</span>
+
+      <span class="keyword">var</span> self = <span class="keyword">this</span> <span class="keyword">instanceof</span> Circle
+               ? <span class="keyword">this</span>
+               : <span class="keyword">new</span> Circle(selection),
+          data = self.normalizeData(selection.datum(), __),  <span class="comment">//TODO</span>
+          circles;
+
+      self.__ = __;
+
+      self.axisScaffolding.call(self, data, __);
+      self.chartScaffolding.call(self, selection, __, <span class="string">'circles'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>Select the circle elements, if they exists.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      circles = self.g.selectAll(<span class="string">".circle"</span>)
+        .data(data[<span class="number">0</span>], self.dataIdentifier);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>Exit phase (let us push out old circles before the new ones come in).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      circles.exit()
+        .transition().duration(__.duration).style(<span class="string">'opacity'</span>, <span class="number">0</span>).remove();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>Otherwise, create them.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      circles.enter().append(<span class="string">"circle"</span>)
+        .attr(<span class="string">"class"</span>, <span class="string">"dot"</span>)
+        .attr(<span class="string">"r"</span>, <span class="number">3.5</span>)
+        .attr(<span class="string">"cx"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> 
+          console.log(d);
+          __.xScale(d[<span class="number">0</span>]); })
+        .attr(<span class="string">"cy"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> __.yScale(d[<span class="number">1</span>]); })
+        .style(<span class="string">"fill"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> <span class="string">'#1D2948'</span>; })
+        .on(<span class="string">'click'</span>, __.handleClick);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>TODO: FIXME</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (__.tooltip) {
+        circles
+         .on(<span class="string">'mouseover'</span>, self.tip.show)
+         .on(<span class="string">'mouseout'</span>, self.tip.hide);
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>TODO
+And transition them.
+self.transitionCircles
+ .call(transition.selectAll(&#39;.circle&#39;), &#39;vertical&#39;, params)
+ .call(utils.endall, data, __.handleTransitionEnd);</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">return</span> selection;
+
+    }
+
+    utils.getset(Circle, __);
+    data_methods.call(Circle.prototype);
+    layout_methods.call(Circle.prototype);
+    scale_methods.call(Circle.prototype);
+    axis_methods.call(Circle.prototype);
+    scaffolding.call(Circle.prototype);
+
+    <span class="keyword">return</span> Circle;
+
+  }
+
 });
 
 
@@ -1156,11 +1371,11 @@ define(<span class="string">'chart'</span>,[
         </li>
         
         
-        <li id="section-42">
+        <li id="section-51">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
               <p>&quot;bar/config&quot;, 
 &quot;bar/bar&quot;,</p>
@@ -1168,16 +1383,18 @@ define(<span class="string">'chart'</span>,[
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="string">"line/config"</span>,
-  <span class="string">"line/line"</span>,</pre></div></div>
+  <span class="string">"line/line"</span>,
+  <span class="string">"circle/config"</span>,
+  <span class="string">"circle/circle"</span>,</pre></div></div>
             
         </li>
         
         
-        <li id="section-43">
+        <li id="section-52">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
               <p>&quot;frame/states&quot;,
 &quot;frame/state_machine&quot;,
@@ -1198,11 +1415,11 @@ define(<span class="string">'chart'</span>,[
         </li>
         
         
-        <li id="section-44">
+        <li id="section-53">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               <p>bar_config, 
 Bar, </p>
@@ -1210,16 +1427,18 @@ Bar, </p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  line_config, 
-  Line</pre></div></div>
+  Line,
+  circle_config,
+  Circle</pre></div></div>
             
         </li>
         
         
-        <li id="section-45">
+        <li id="section-54">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <p>states, 
 StateMachine, 
@@ -1242,11 +1461,11 @@ Frame</p>
         </li>
         
         
-        <li id="section-46">
+        <li id="section-55">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
               <p>bar_config: bar_config,
 Bar: Bar,</p>
@@ -1254,16 +1473,18 @@ Bar: Bar,</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    line_config: line_config,
-    Line: Line,</pre></div></div>
+    Line: Line,
+    circle_config: circle_config,
+    Circle: Circle,</pre></div></div>
             
         </li>
         
         
-        <li id="section-47">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <p>Frame: Frame,
 states: states, 

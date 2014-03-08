@@ -65,7 +65,7 @@ define('mixins/scale_methods', [
 
   // Sets the range and domain for the ordinal scale.
   function _applyOrdinalScale (range, __) {
-    //var data = __.x_axis_data || __.data;  // FIXME this hack!
+    var data = __.x_axis_data || __.data;  // FIXME this hack!
     return this
       .rangeRoundBands(range, __.padding)
       .domain( __.data[0].map( function(d) { return d[0]; } ) );

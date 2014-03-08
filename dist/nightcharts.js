@@ -342,7 +342,7 @@ define('mixins/scale_methods', [
 
   // Sets the range and domain for the ordinal scale.
   function _applyOrdinalScale (range, __) {
-    //var data = __.x_axis_data || __.data;  // FIXME this hack!
+    var data = __.x_axis_data || __.data;  // FIXME this hack!
     return this
       .rangeRoundBands(range, __.padding)
       .domain( __.data[0].map( function(d) { return d[0]; } ) );
@@ -439,17 +439,53 @@ define('mixins/axis_methods', [
   };
 
 });
+
+
 define('mixins/scaffolding', [
   "d3", 
   "utils/utils"
 ], function (d3, utils) {
 
+  function axisScaffolding (data, __) {
+    // Scales are functions that map from an input domain to an output range.
+    this.xScale = this.setScale(__.x_scale)();
+    this.yScale = this.setScale(__.y_scale)();
+
+    // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes).
+    this.xAxis = this.setAxisProps(__.x_axis, this.xScale);
+    this.yAxis = this.setAxisProps(__.y_axis, this.yScale);
+
+    utils.extend(
+      this.__, 
+      {
+        data: data,
+        //x_axis_data: data[0], // FIXME this hack!
+        yScale: this.yScale,
+        xScale: this.xScale,
+        xAxis: this.xAxis,
+        yAxis: this.yAxis,
+        delay: this.delay,
+        w: this.w(),
+        h: this.h(),
+      }, 
+      false
+    );
+
+    this.applyScale.call( this.xScale, 'x', __.x_scale, __ );
+    this.applyScale.call( this.yScale, 'y', __.y_scale, __ );
+
+    return this;
+  }
+
   function chartScaffolding (selection, __, chart_class) {
 
     // Select the svg element, if it exists.
+    //this.gWrapper = selection.selectAll("g." + chart_class + '_wrapper')
     this.svg = selection.selectAll("svg").data([this.data]);
     // Otherwise, create the skeletal chart.
-    this.gEnter = this.svg.enter().append("svg").append("g");
+    this.gEnter = this.svg.enter().append("svg")
+      //.attr('class', chart_class + '_wrapper')
+      .append("g");
     // Initializing the tooltip.
     if ( __.tooltip ) {
       this.tip = utils.tip( __.tooltip );
@@ -485,11 +521,14 @@ define('mixins/scaffolding', [
   };
       
   return function () {
+    this.axisScaffolding = axisScaffolding;
     this.chartScaffolding = chartScaffolding;
     return this;
   };
 
 });
+
+
 // **The default configuration module for the line.line module**
 
 define('line/config',[
@@ -532,42 +571,13 @@ define('line/line',[
       var self = this instanceof Line
                ? this
                : new Line(selection),
-          xScale,
-          yScale,
-          xAxis,
-          yAxis,
           data = self.normalizeData(selection.datum(), __),
           lines;
 
       self.__ = __;
+      __.x_axis_data = data[0]; //FIXME
 
-      // Scales are functions that map from an input domain to an output range.
-      xScale = self.setScale(__.x_scale)();
-      yScale = self.setScale(__.y_scale)();
-
-      // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes).
-      xAxis = self.setAxisProps(__.x_axis, xScale);
-      yAxis = self.setAxisProps(__.y_axis, yScale);
-
-      utils.extend(
-        self.__, 
-        {
-          data: data,
-          x_axis_data: data[0], // FIXME this hack!
-          yScale: yScale,
-          xScale: xScale,
-          xAxis: xAxis,
-          yAxis: yAxis,
-          delay: self.delay,
-          w: self.w(),
-          h: self.h(),
-        }, 
-        false
-      );
-
-      self.applyScale.call(xScale, 'x', __.x_scale, __);
-      self.applyScale.call(yScale, 'y', __.y_scale, __);
-
+      self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'lines');
 
       // Select the line elements, if they exists.
@@ -584,12 +594,12 @@ define('line/line',[
         .attr("d", self.line(__) )
         .on('click', __.handleClick);
     
-//      //TODO: FIXME
-//      if (tooltip) {
-//        lines
-//         .on('mouseover', tip.show)
-//         .on('mouseout', tip.hide);
-//      }
+      //TODO: FIXME
+      if (__.tooltip) {
+        lines
+         .on('mouseover', self.tip.show)
+         .on('mouseout', self.tip.hide);
+      }
         
       //TODO
       //And transition them.
@@ -623,6 +633,106 @@ define('line/line',[
 });
 
 
+// **The default configuration module for the point.point module**
+
+define('circle/config', [
+  "d3", 
+  "base_config",
+  "utils/utils",
+], function(d3, base_config, utils) {
+    
+  var config = {
+    //x_scale: 'time',
+    // TODO this is an yAxis offset....
+    //date_adjust: 5
+  };
+
+  return utils.extend(base_config, config);
+  
+});
+
+
+// **The circle.circle module**
+
+define('circle/circle',[
+    "d3", 
+    "utils/utils",
+    "circle/config", 
+    "mixins/data_methods",
+    "mixins/layout_methods",
+    "mixins/scale_methods",
+    "mixins/axis_methods",
+    "mixins/scaffolding",
+  ], function(d3, utils, default_config, data_methods, layout_methods, scale_methods, axis_methods, scaffolding) {
+  
+  return function (user_config) {
+
+    var config = user_config || {},
+        __ = utils.extend(default_config, config);
+
+    function Circle (selection) {
+
+      var self = this instanceof Circle
+               ? this
+               : new Circle(selection),
+          data = self.normalizeData(selection.datum(), __),  //TODO
+          circles;
+
+      self.__ = __;
+
+      self.axisScaffolding.call(self, data, __);
+      self.chartScaffolding.call(self, selection, __, 'circles');
+
+      // Select the circle elements, if they exists.
+      circles = self.g.selectAll(".circle")
+        .data(data[0], self.dataIdentifier);
+
+      // Exit phase (let us push out old circles before the new ones come in).
+      circles.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();
+
+      // Otherwise, create them.
+      circles.enter().append("circle")
+        .attr("class", "dot")
+        .attr("r", 3.5)
+        .attr("cx", function(d) { return 
+          console.log(d);
+          __.xScale(d[0]); })
+        .attr("cy", function(d) { return __.yScale(d[1]); })
+        .style("fill", function(d) { return '#1D2948'; })
+        .on('click', __.handleClick);
+    
+      //TODO: FIXME
+      if (__.tooltip) {
+        circles
+         .on('mouseover', self.tip.show)
+         .on('mouseout', self.tip.hide);
+      }
+        
+      //TODO
+      //And transition them.
+      //self.transitionCircles
+      //  .call(transition.selectAll('.circle'), 'vertical', params)
+      //  .call(utils.endall, data, __.handleTransitionEnd);
+
+      return selection;
+
+    }
+
+    utils.getset(Circle, __);
+    data_methods.call(Circle.prototype);
+    layout_methods.call(Circle.prototype);
+    scale_methods.call(Circle.prototype);
+    axis_methods.call(Circle.prototype);
+    scaffolding.call(Circle.prototype);
+
+    return Circle;
+
+  }
+
+});
+
+
 define('chart',[
   "draw",
   "base_config",
@@ -636,6 +746,8 @@ define('chart',[
   //"bar/bar",
   "line/config",
   "line/line",
+  "circle/config",
+  "circle/circle",
   //"frame/states",
   //"frame/state_machine",
   //"frame/frame"
@@ -651,7 +763,9 @@ define('chart',[
   //bar_config, 
   //Bar, 
   line_config, 
-  Line
+  Line,
+  circle_config,
+  Circle
   //states, 
   //StateMachine, 
   //Frame
@@ -670,6 +784,8 @@ define('chart',[
     //Bar: Bar,
     line_config: line_config,
     Line: Line,
+    circle_config: circle_config,
+    Circle: Circle,
     //Frame: Frame,
     //states: states, 
     //StateMachine: StateMachine,
