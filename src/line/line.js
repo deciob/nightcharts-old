@@ -45,7 +45,7 @@ define('line/line',[
       self.chartScaffolding.call(self, selection, __, 'lines');
       self.lineScaffolding.call(self, __);
 
-      __.overlapping_charts.forEach( function (chart_name) {
+      __.overlapping_charts.names.forEach( function (chart_name) {
         utils.getScaffoldingMethod.call(self, chart_name).call(self, __);
         //self.gEnter.append("g").attr("class", chart_name);
         //self.circleScaffolding.call(self, __);

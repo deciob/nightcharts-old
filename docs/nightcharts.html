@@ -902,10 +902,10 @@ this.gWrapper = selection.selectAll(&quot;g.&quot; + chart_class + &#39;_wrapper
       <span class="keyword">this</span>.tip = utils.tip( __.tooltip );
       <span class="keyword">this</span>.gEnter.call(<span class="keyword">this</span>.tip);
     }
-
+   
     <span class="keyword">this</span>.gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, chart_class);
 
-    __.overlapping_charts.forEach( <span class="function"><span class="keyword">function</span> <span class="params">(chart_name)</span> {</span>
+    __.overlapping_charts.names.forEach( <span class="function"><span class="keyword">function</span> <span class="params">(chart_name)</span> {</span>
       self.gEnter.append(<span class="string">"g"</span>).attr(<span class="string">"class"</span>, chart_name);
     });
 
@@ -1208,7 +1208,9 @@ define(<span class="string">'circle/scaffolding'</span>, [
             
             <div class="content"><div class='highlight'><pre>    self.circles_g.enter().append(<span class="string">"g"</span>).each( <span class="function"><span class="keyword">function</span> <span class="params">(data, i)</span> {</span>
       <span class="keyword">var</span> circles = d3.select(<span class="keyword">this</span>).selectAll(<span class="string">".circle"</span>)
-        .data(data, self.dataIdentifier);</pre></div></div>
+            .data(data, self.dataIdentifier),
+          ov_options = __.overlapping_charts.options,
+          ov_circle_options = ov_options ? ov_options.circles : <span class="keyword">void</span> <span class="number">0</span>;</pre></div></div>
             
         </li>
         
@@ -1241,13 +1243,9 @@ define(<span class="string">'circle/scaffolding'</span>, [
             
             <div class="content"><div class='highlight'><pre>      circles.enter().append(<span class="string">"circle"</span>)
         .attr(<span class="string">"class"</span>, <span class="string">"dot"</span>)
-        .attr(<span class="string">"r"</span>, <span class="number">3.5</span>)
-        .attr(<span class="string">"cx"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> 
-          <span class="keyword">return</span> __.xScale(d[<span class="number">0</span>]); })
-        .attr(<span class="string">"cy"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> 
-          <span class="keyword">return</span> __.yScale(d[<span class="number">1</span>]); })
-        .style(<span class="string">"fill"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> <span class="string">'#1D2948'</span>; })
-        .on(<span class="string">'click'</span>, __.handleClick);</pre></div></div>
+        .attr(<span class="string">"r"</span>, <span class="number">4</span>) <span class="comment">// TODO: pass as an option</span>
+        .attr(<span class="string">"cx"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> __.xScale(d[<span class="number">0</span>]); })
+        .attr(<span class="string">"cy"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> __.yScale(d[<span class="number">1</span>]); })</pre></div></div>
             
         </li>
         
@@ -1258,11 +1256,30 @@ define(<span class="string">'circle/scaffolding'</span>, [
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
-              <p>TODO: FIXME</p>
+              <p>TODO: this will need a fix if is an overlapping chart!</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (__.tooltip) {
+            <div class="content"><div class='highlight'><pre>        .on(<span class="string">'click'</span>, __.handleClick);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>Tooltips.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (ov_circle_options &amp;&amp; ov_circle_options.tooltip) {
+        self.tip = utils.tip( ov_circle_options.tooltip );
+        self.gEnter.call(self.tip);
+      }
+      <span class="keyword">if</span> (__.tooltip || ov_circle_options &amp;&amp; ov_circle_options.tooltip) {
         circles
          .on(<span class="string">'mouseover'</span>, self.tip.show)
          .on(<span class="string">'mouseout'</span>, self.tip.hide);
@@ -1273,11 +1290,11 @@ define(<span class="string">'circle/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-49">
+        <li id="section-50">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
+                <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
               <p>TODO
 And transition them.
@@ -1301,11 +1318,11 @@ self.transitionCircles
         </li>
         
         
-        <li id="section-50">
+        <li id="section-51">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-50">&#182;</a>
+                <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
               <p><strong>The line.line module</strong></p>
 
@@ -1353,11 +1370,11 @@ self.transitionCircles
         </li>
         
         
-        <li id="section-51">
+        <li id="section-52">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-51">&#182;</a>
+                <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
               <p>apparently this is only used with the axis, so the first one for now works...</p>
 
@@ -1369,17 +1386,17 @@ self.transitionCircles
       self.chartScaffolding.call(self, selection, __, <span class="string">'lines'</span>);
       self.lineScaffolding.call(self, __);
 
-      __.overlapping_charts.forEach( <span class="function"><span class="keyword">function</span> <span class="params">(chart_name)</span> {</span>
+      __.overlapping_charts.names.forEach( <span class="function"><span class="keyword">function</span> <span class="params">(chart_name)</span> {</span>
         utils.getScaffoldingMethod.call(self, chart_name).call(self, __);</pre></div></div>
             
         </li>
         
         
-        <li id="section-52">
+        <li id="section-53">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-52">&#182;</a>
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               <p>self.gEnter.append(&quot;g&quot;).attr(&quot;class&quot;, chart<em>name);
 self.circleScaffolding.call(self, _</em>);</p>
@@ -1418,11 +1435,11 @@ self.circleScaffolding.call(self, _</em>);</p>
         </li>
         
         
-        <li id="section-53">
+        <li id="section-54">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
+                <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <p><strong>The default configuration module for the point.point module</strong></p>
 
@@ -1439,11 +1456,11 @@ self.circleScaffolding.call(self, _</em>);</p>
         </li>
         
         
-        <li id="section-54">
+        <li id="section-55">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
+                <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
               <p>x_scale: &#39;time&#39;,
 TODO this is an yAxis offset....
@@ -1460,11 +1477,11 @@ date_adjust: 5</p>
         </li>
         
         
-        <li id="section-55">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-55">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <p><strong>The circle.circle module</strong></p>
 
@@ -1510,11 +1527,11 @@ date_adjust: 5</p>
         </li>
         
         
-        <li id="section-56">
+        <li id="section-57">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-57">&#182;</a>
               </div>
               <p>__.x_axis_data = data[0]; //FIXME</p>
 
@@ -1523,7 +1540,6 @@ date_adjust: 5</p>
             <div class="content"><div class='highlight'><pre>      self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, <span class="string">'circles'</span>);
       self.circleScaffolding.call(self, __);
-
 
       <span class="keyword">return</span> selection;
 
@@ -1557,11 +1573,11 @@ define(<span class="string">'chart'</span>,[
         </li>
         
         
-        <li id="section-57">
+        <li id="section-58">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-58">&#182;</a>
               </div>
               <p>&quot;bar/config&quot;, 
 &quot;bar/bar&quot;,</p>
@@ -1578,11 +1594,11 @@ define(<span class="string">'chart'</span>,[
         </li>
         
         
-        <li id="section-58">
+        <li id="section-59">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-59">&#182;</a>
               </div>
               <p>&quot;frame/states&quot;,
 &quot;frame/state_machine&quot;,
@@ -1603,11 +1619,11 @@ define(<span class="string">'chart'</span>,[
         </li>
         
         
-        <li id="section-59">
+        <li id="section-60">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-60">&#182;</a>
               </div>
               <p>bar_config, 
 Bar, </p>
@@ -1624,11 +1640,11 @@ Bar, </p>
         </li>
         
         
-        <li id="section-60">
+        <li id="section-61">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
+                <a class="pilcrow" href="#section-61">&#182;</a>
               </div>
               <p>states, 
 StateMachine, 
@@ -1651,11 +1667,11 @@ Frame</p>
         </li>
         
         
-        <li id="section-61">
+        <li id="section-62">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-61">&#182;</a>
+                <a class="pilcrow" href="#section-62">&#182;</a>
               </div>
               <p>bar_config: bar_config,
 Bar: Bar,</p>
@@ -1672,11 +1688,11 @@ Bar: Bar,</p>
         </li>
         
         
-        <li id="section-62">
+        <li id="section-63">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
+                <a class="pilcrow" href="#section-63">&#182;</a>
               </div>
               <p>Frame: Frame,
 states: states, 

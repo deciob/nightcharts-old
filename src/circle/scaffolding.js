@@ -18,23 +18,29 @@ define('circle/scaffolding', [
     // Otherwise, create them.
     self.circles_g.enter().append("g").each( function (data, i) {
       var circles = d3.select(this).selectAll(".circle")
-        .data(data, self.dataIdentifier);
+            .data(data, self.dataIdentifier),
+          ov_options = __.overlapping_charts.options,
+          ov_circle_options = ov_options ? ov_options.circles : void 0;
+
       // Exit phase (let us push out old circles before the new ones come in).
       circles.exit()
         .transition().duration(__.duration).style('opacity', 0).remove();
+
       // Otherwise, create them.
       circles.enter().append("circle")
         .attr("class", "dot")
-        .attr("r", 3.5)
-        .attr("cx", function(d) { 
-          return __.xScale(d[0]); })
-        .attr("cy", function(d) { 
-          return __.yScale(d[1]); })
-        .style("fill", function(d) { return '#1D2948'; })
-        .on('click', __.handleClick);
+        .attr("r", 4) // TODO: pass as an option
+        .attr("cx", function(d) { return __.xScale(d[0]); })
+        .attr("cy", function(d) { return __.yScale(d[1]); })
+        // TODO: this will need a fix if is an overlapping chart!
+        .on('click', __.handleClick); 
 
-      //TODO: FIXME
-      if (__.tooltip) {
+      // Tooltips.
+      if (ov_circle_options && ov_circle_options.tooltip) {
+        self.tip = utils.tip( ov_circle_options.tooltip );
+        self.gEnter.call(self.tip);
+      }
+      if (__.tooltip || ov_circle_options && ov_circle_options.tooltip) {
         circles
          .on('mouseover', self.tip.show)
          .on('mouseout', self.tip.hide);

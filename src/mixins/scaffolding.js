@@ -51,10 +51,10 @@ define('mixins/scaffolding', [
       this.tip = utils.tip( __.tooltip );
       this.gEnter.call(this.tip);
     }
-
+   
     this.gEnter.append("g").attr("class", chart_class);
 
-    __.overlapping_charts.forEach( function (chart_name) {
+    __.overlapping_charts.names.forEach( function (chart_name) {
       self.gEnter.append("g").attr("class", chart_name);
     });
 
