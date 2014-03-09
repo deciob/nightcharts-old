@@ -47,12 +47,9 @@ define('line/line',[
 
       __.overlapping_charts.names.forEach( function (chart_name) {
         utils.getScaffoldingMethod.call(self, chart_name).call(self, __);
-        //self.gEnter.append("g").attr("class", chart_name);
-        //self.circleScaffolding.call(self, __);
       });
 
       return selection;
-
     }
 
     utils.getset(Line, __);
@@ -73,7 +70,6 @@ define('line/line',[
     }
 
     return Line;
-
   }
 
 });

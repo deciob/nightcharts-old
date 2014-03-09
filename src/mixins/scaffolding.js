@@ -4,6 +4,7 @@ define('mixins/scaffolding', [
 ], function (d3, utils) {
 
   function axisScaffolding (data, __) {
+    
     // Scales are functions that map from an input domain to an output range.
     this.xScale = this.setScale(__.x_scale)();
     this.yScale = this.setScale(__.y_scale)();
@@ -16,7 +17,6 @@ define('mixins/scaffolding', [
       this.__, 
       {
         data: data,
-        //x_axis_data: data[0], // FIXME this hack!
         yScale: this.yScale,
         xScale: this.xScale,
         xAxis: this.xAxis,
@@ -40,11 +40,9 @@ define('mixins/scaffolding', [
     var self = this;
 
     // Select the svg element, if it exists.
-    //this.gWrapper = selection.selectAll("g." + chart_class + '_wrapper')
     this.svg = selection.selectAll("svg").data([this.__.data]);
     // Otherwise, create the skeletal chart.
     this.gEnter = this.svg.enter().append("svg")
-      //.attr('class', chart_class + '_wrapper')
       .append("g");
     // Initializing the tooltip.
     if ( __.tooltip ) {

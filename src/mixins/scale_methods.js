@@ -37,6 +37,9 @@ define('mixins/scale_methods', [
     if (__.max) {
       max = __.max;
     } else {
+      // TODO: this is fundamentally broken!!!
+      // It does not handle array of arrays...
+      // Relying for now on passing __.max
       max = d3.max( __.data, function(d) { return parseFloat(d[1]); } );
     }
     return this.range(range).domain([0, max]);

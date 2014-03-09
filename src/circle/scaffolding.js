@@ -55,7 +55,6 @@ define('circle/scaffolding', [
     //  .call(utils.endall, data, __.handleTransitionEnd);
 
     return this;
-
   }
 
   return function () {

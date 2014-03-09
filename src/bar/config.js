@@ -7,6 +7,8 @@ define('bar/config',[
     
   var config = {
     orientation: 'vertical',
+    padding: .1,    
+    barOffSet: 4,
   };
 
   return utils.extend(base_config, config);

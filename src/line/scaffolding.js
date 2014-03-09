@@ -21,7 +21,6 @@ define('line/scaffolding', [
       .attr("d", self.line(__) )
       .on('click', __.handleClick);
     
-    //TODO: FIXME
     if (__.tooltip) {
       self.lines
        .on('mouseover', self.tip.show)
@@ -35,7 +34,6 @@ define('line/scaffolding', [
     //  .call(utils.endall, data, __.handleTransitionEnd);
 
     return this;
-
   }
 
   return function () {

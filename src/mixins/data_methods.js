@@ -39,22 +39,15 @@ define('mixins/data_methods', [
       }));
     });
     if (__.invert_data) {
-      //parsed_data = data.reverse();  // TODO
+      //parsed_data = data.reverse();  // TODO!!!
     }
     return parsed_data;
   }
-
 
   return function () {
     this.dataIdentifier = dataIdentifier;
     this.delay = delay;
     this.normalizeData = normalizeData;
-    //this.transitionXAxis = transitionXAxis;
-    //this.transitionYAxis = transitionYAxis;
-    //this.setYScale = setYScale;
-    //this.setXScale = setXScale;
-    //this.setXAxis = setXAxis;
-    //this.setYAxis = setYAxis;
     return this;
   };
 

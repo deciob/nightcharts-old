@@ -32,18 +32,16 @@ define('circle/circle',[
       var self = this instanceof Circle
                ? this
                : new Circle(selection),
-          data = self.normalizeData(selection.datum(), __),  //TODO
+          data = self.normalizeData(selection.datum(), __),
           circles;
 
       self.__ = __;
-      //__.x_axis_data = data[0]; //FIXME
 
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'circles');
       self.circleScaffolding.call(self, __);
 
       return selection;
-
     }
 
     utils.getset(Circle, __);
@@ -55,7 +53,6 @@ define('circle/circle',[
     circle_scaffolding.call(Circle.prototype);
 
     return Circle;
-
   }
 
 });
