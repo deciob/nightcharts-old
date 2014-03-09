@@ -1,5 +1,18 @@
 // **The default base configuration module**
 
+
+// Data structures:
+//
+// bar:
+// data = [ [ [], [], [], ... [] ], ... ]
+// svg.data( [data] )
+//
+// line:
+// data = [ [ [], [], [], ... [] ], ... ]
+// svg.data( [data] )
+// __.x_axis_data = data[0]  #FIXME
+
+
 define('base_config', [
   "d3", 
 ], function(d3) {
@@ -65,6 +78,7 @@ define('base_config', [
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
+      overlapping_charts: []
     };
   
 });

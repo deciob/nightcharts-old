@@ -36,9 +36,12 @@ define('mixins/scaffolding', [
 
   function chartScaffolding (selection, __, chart_class) {
 
+    //console.log(selection[0].tagName.toLowerCase())
+    var self = this;
+
     // Select the svg element, if it exists.
     //this.gWrapper = selection.selectAll("g." + chart_class + '_wrapper')
-    this.svg = selection.selectAll("svg").data([this.data]);
+    this.svg = selection.selectAll("svg").data([this.__.data]);
     // Otherwise, create the skeletal chart.
     this.gEnter = this.svg.enter().append("svg")
       //.attr('class', chart_class + '_wrapper')
@@ -50,6 +53,11 @@ define('mixins/scaffolding', [
     }
 
     this.gEnter.append("g").attr("class", chart_class);
+
+    __.overlapping_charts.forEach( function (chart_name) {
+      self.gEnter.append("g").attr("class", chart_name);
+    });
+
     this.gEnter.append("g").attr("class", "x axis");
     this.gEnter.append("g").attr("class", "y axis")
      .attr("transform", "translate(-" + (__.y_axis_offset) + ",0)");
@@ -74,7 +82,7 @@ define('mixins/scaffolding', [
     this.transitionAxis.call(
       this.transition.selectAll('.x.axis'), 'x', __);
 
-    return this
+    return this;
   };
       
   return function () {

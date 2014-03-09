@@ -1,15 +1,28 @@
 // **The line.line module**
 
 define('line/line',[
-    "d3", 
-    "utils/utils",
-    "line/config", 
-    "mixins/data_methods",
-    "mixins/layout_methods",
-    "mixins/scale_methods",
-    "mixins/axis_methods",
-    "mixins/scaffolding",
-  ], function(d3, utils, default_config, data_methods, layout_methods, scale_methods, axis_methods, scaffolding) {
+  "d3", 
+  "utils/utils",
+  "line/config", 
+  "mixins/data_methods",
+  "mixins/layout_methods",
+  "mixins/scale_methods",
+  "mixins/axis_methods",
+  "mixins/scaffolding",
+  "line/scaffolding",
+  "circle/scaffolding",
+], function(
+  d3, 
+  utils, 
+  default_config, 
+  data_methods, 
+  layout_methods, 
+  scale_methods, 
+  axis_methods, 
+  scaffolding,
+  line_scaffolding,
+  circle_scaffolding
+) {
   
   return function (user_config) {
 
@@ -25,37 +38,18 @@ define('line/line',[
           lines;
 
       self.__ = __;
+      // apparently this is only used with the axis, so the first one for now works...
       __.x_axis_data = data[0]; //FIXME
 
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'lines');
+      self.lineScaffolding.call(self, __);
 
-      // Select the line elements, if they exists.
-      lines = self.g.selectAll(".line")
-        .data(data, self.dataIdentifier);
-
-      // Exit phase (let us push out old lines before the new ones come in).
-      lines.exit()
-        .transition().duration(__.duration).style('opacity', 0).remove();
-
-      // Otherwise, create them.
-      lines.enter().append("path")
-        .attr("class", "line")
-        .attr("d", self.line(__) )
-        .on('click', __.handleClick);
-    
-      //TODO: FIXME
-      if (__.tooltip) {
-        lines
-         .on('mouseover', self.tip.show)
-         .on('mouseout', self.tip.hide);
-      }
-        
-      //TODO
-      //And transition them.
-      //self.transitionLines
-      //  .call(transition.selectAll('.line'), 'vertical', params)
-      //  .call(utils.endall, data, __.handleTransitionEnd);
+      __.overlapping_charts.forEach( function (chart_name) {
+        utils.getScaffoldingMethod.call(self, chart_name).call(self, __);
+        //self.gEnter.append("g").attr("class", chart_name);
+        //self.circleScaffolding.call(self, __);
+      });
 
       return selection;
 
@@ -67,6 +61,8 @@ define('line/line',[
     scale_methods.call(Line.prototype);
     axis_methods.call(Line.prototype);
     scaffolding.call(Line.prototype);
+    line_scaffolding.call(Line.prototype);
+    circle_scaffolding.call(Line.prototype);
 
     Line.prototype.line = function (__) {
       return d3.svg.line().x(function(d, i) {

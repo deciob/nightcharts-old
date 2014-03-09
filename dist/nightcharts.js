@@ -16,6 +16,19 @@ define('draw',['require'],function(require) {
 
 // **The default base configuration module**
 
+
+// Data structures:
+//
+// bar:
+// data = [ [ [], [], [], ... [] ], ... ]
+// svg.data( [data] )
+//
+// line:
+// data = [ [ [], [], [], ... [] ], ... ]
+// svg.data( [data] )
+// __.x_axis_data = data[0]  #FIXME
+
+
 define('base_config', [
   "d3", 
 ], function(d3) {
@@ -81,6 +94,7 @@ define('base_config', [
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
+      overlapping_charts: []
     };
   
 });
@@ -180,6 +194,11 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     return tip;
   }
 
+  function getScaffoldingMethod (chart_name) {
+    var name = chart_name.substring(0, chart_name.length - 1);
+    return this[name+'Scaffolding'];
+  }
+
   return {
     extend: extend,
     getset: getset,
@@ -187,6 +206,7 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     schonfinkelize: schonfinkelize,
     endall: endall,
     tip: tip,
+    getScaffoldingMethod: getScaffoldingMethod,
   };
 
 });
@@ -479,9 +499,12 @@ define('mixins/scaffolding', [
 
   function chartScaffolding (selection, __, chart_class) {
 
+    //console.log(selection[0].tagName.toLowerCase())
+    var self = this;
+
     // Select the svg element, if it exists.
     //this.gWrapper = selection.selectAll("g." + chart_class + '_wrapper')
-    this.svg = selection.selectAll("svg").data([this.data]);
+    this.svg = selection.selectAll("svg").data([this.__.data]);
     // Otherwise, create the skeletal chart.
     this.gEnter = this.svg.enter().append("svg")
       //.attr('class', chart_class + '_wrapper')
@@ -493,6 +516,11 @@ define('mixins/scaffolding', [
     }
 
     this.gEnter.append("g").attr("class", chart_class);
+
+    __.overlapping_charts.forEach( function (chart_name) {
+      self.gEnter.append("g").attr("class", chart_name);
+    });
+
     this.gEnter.append("g").attr("class", "x axis");
     this.gEnter.append("g").attr("class", "y axis")
      .attr("transform", "translate(-" + (__.y_axis_offset) + ",0)");
@@ -517,7 +545,7 @@ define('mixins/scaffolding', [
     this.transitionAxis.call(
       this.transition.selectAll('.x.axis'), 'x', __);
 
-    return this
+    return this;
   };
       
   return function () {
@@ -548,18 +576,137 @@ define('line/config',[
 });
 
 
+define('line/scaffolding', [
+  "d3", 
+  "utils/utils"
+], function (d3, utils) {
+
+  function lineScaffolding ( __ ) {
+    var self = this,
+        data = __.data;
+
+    // Select the line elements, if they exists.
+    self.lines = d3.select('g.lines').selectAll(".line")
+      .data(data, self.dataIdentifier);
+
+    // Exit phase (let us push out old lines before the new ones come in).
+    self.lines.exit()
+      .transition().duration(__.duration).style('opacity', 0).remove();
+
+    // Otherwise, create them.
+    self.lines.enter().append("path")
+      .attr("class", "line")
+      .attr("d", self.line(__) )
+      .on('click', __.handleClick);
+    
+    //TODO: FIXME
+    if (__.tooltip) {
+      self.lines
+       .on('mouseover', self.tip.show)
+       .on('mouseout', self.tip.hide);
+    }
+      
+    //TODO
+    //And transition them.
+    //self.transitionLines
+    //  .call(transition.selectAll('.line'), 'vertical', params)
+    //  .call(utils.endall, data, __.handleTransitionEnd);
+
+    return this;
+
+  }
+
+  return function () {
+    this.lineScaffolding = lineScaffolding;
+    return this;
+  };
+
+});
+define('circle/scaffolding', [
+  "d3", 
+  "utils/utils"
+], function (d3, utils) {
+
+  function circleScaffolding ( __ ) {
+    var self = this,
+        data = __.data;
+
+    // Select the circle elements, if they exists.
+    self.circles_g = d3.select('g.circles').selectAll(".circles")
+      .data(data, self.dataIdentifier);
+
+    // Exit phase (let us push out old circles before the new ones come in).
+    self.circles_g.exit()
+      .transition().duration(__.duration).style('opacity', 0).remove();
+
+    // Otherwise, create them.
+    self.circles_g.enter().append("g").each( function (data, i) {
+      var circles = d3.select(this).selectAll(".circle")
+        .data(data, self.dataIdentifier);
+      // Exit phase (let us push out old circles before the new ones come in).
+      circles.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();
+      // Otherwise, create them.
+      circles.enter().append("circle")
+        .attr("class", "dot")
+        .attr("r", 3.5)
+        .attr("cx", function(d) { 
+          return __.xScale(d[0]); })
+        .attr("cy", function(d) { 
+          return __.yScale(d[1]); })
+        .style("fill", function(d) { return '#1D2948'; })
+        .on('click', __.handleClick);
+
+      //TODO: FIXME
+      if (__.tooltip) {
+        circles
+         .on('mouseover', self.tip.show)
+         .on('mouseout', self.tip.hide);
+      }
+
+    });
+    
+    //TODO
+    //And transition them.
+    //self.transitionCircles
+    //  .call(transition.selectAll('.circle'), 'vertical', params)
+    //  .call(utils.endall, data, __.handleTransitionEnd);
+
+    return this;
+
+  }
+
+  return function () {
+    this.circleScaffolding = circleScaffolding;
+    return this;
+  };
+
+});
 // **The line.line module**
 
 define('line/line',[
-    "d3", 
-    "utils/utils",
-    "line/config", 
-    "mixins/data_methods",
-    "mixins/layout_methods",
-    "mixins/scale_methods",
-    "mixins/axis_methods",
-    "mixins/scaffolding",
-  ], function(d3, utils, default_config, data_methods, layout_methods, scale_methods, axis_methods, scaffolding) {
+  "d3", 
+  "utils/utils",
+  "line/config", 
+  "mixins/data_methods",
+  "mixins/layout_methods",
+  "mixins/scale_methods",
+  "mixins/axis_methods",
+  "mixins/scaffolding",
+  "line/scaffolding",
+  "circle/scaffolding",
+], function(
+  d3, 
+  utils, 
+  default_config, 
+  data_methods, 
+  layout_methods, 
+  scale_methods, 
+  axis_methods, 
+  scaffolding,
+  line_scaffolding,
+  circle_scaffolding
+) {
   
   return function (user_config) {
 
@@ -575,37 +722,18 @@ define('line/line',[
           lines;
 
       self.__ = __;
+      // apparently this is only used with the axis, so the first one for now works...
       __.x_axis_data = data[0]; //FIXME
 
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'lines');
+      self.lineScaffolding.call(self, __);
 
-      // Select the line elements, if they exists.
-      lines = self.g.selectAll(".line")
-        .data(data, self.dataIdentifier);
-
-      // Exit phase (let us push out old lines before the new ones come in).
-      lines.exit()
-        .transition().duration(__.duration).style('opacity', 0).remove();
-
-      // Otherwise, create them.
-      lines.enter().append("path")
-        .attr("class", "line")
-        .attr("d", self.line(__) )
-        .on('click', __.handleClick);
-    
-      //TODO: FIXME
-      if (__.tooltip) {
-        lines
-         .on('mouseover', self.tip.show)
-         .on('mouseout', self.tip.hide);
-      }
-        
-      //TODO
-      //And transition them.
-      //self.transitionLines
-      //  .call(transition.selectAll('.line'), 'vertical', params)
-      //  .call(utils.endall, data, __.handleTransitionEnd);
+      __.overlapping_charts.forEach( function (chart_name) {
+        utils.getScaffoldingMethod.call(self, chart_name).call(self, __);
+        //self.gEnter.append("g").attr("class", chart_name);
+        //self.circleScaffolding.call(self, __);
+      });
 
       return selection;
 
@@ -617,6 +745,8 @@ define('line/line',[
     scale_methods.call(Line.prototype);
     axis_methods.call(Line.prototype);
     scaffolding.call(Line.prototype);
+    line_scaffolding.call(Line.prototype);
+    circle_scaffolding.call(Line.prototype);
 
     Line.prototype.line = function (__) {
       return d3.svg.line().x(function(d, i) {
@@ -655,15 +785,26 @@ define('circle/config', [
 // **The circle.circle module**
 
 define('circle/circle',[
-    "d3", 
-    "utils/utils",
-    "circle/config", 
-    "mixins/data_methods",
-    "mixins/layout_methods",
-    "mixins/scale_methods",
-    "mixins/axis_methods",
-    "mixins/scaffolding",
-  ], function(d3, utils, default_config, data_methods, layout_methods, scale_methods, axis_methods, scaffolding) {
+  "d3", 
+  "utils/utils",
+  "circle/config", 
+  "mixins/data_methods",
+  "mixins/layout_methods",
+  "mixins/scale_methods",
+  "mixins/axis_methods",
+  "mixins/scaffolding",
+  "circle/scaffolding",
+], function(
+  d3, 
+  utils, 
+  default_config, 
+  data_methods, 
+  layout_methods, 
+  scale_methods, 
+  axis_methods, 
+  scaffolding, 
+  circle_scaffolding
+) {
   
   return function (user_config) {
 
@@ -679,41 +820,12 @@ define('circle/circle',[
           circles;
 
       self.__ = __;
+      //__.x_axis_data = data[0]; //FIXME
 
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'circles');
+      self.circleScaffolding.call(self, __);
 
-      // Select the circle elements, if they exists.
-      circles = self.g.selectAll(".circle")
-        .data(data[0], self.dataIdentifier);
-
-      // Exit phase (let us push out old circles before the new ones come in).
-      circles.exit()
-        .transition().duration(__.duration).style('opacity', 0).remove();
-
-      // Otherwise, create them.
-      circles.enter().append("circle")
-        .attr("class", "dot")
-        .attr("r", 3.5)
-        .attr("cx", function(d) { return 
-          console.log(d);
-          __.xScale(d[0]); })
-        .attr("cy", function(d) { return __.yScale(d[1]); })
-        .style("fill", function(d) { return '#1D2948'; })
-        .on('click', __.handleClick);
-    
-      //TODO: FIXME
-      if (__.tooltip) {
-        circles
-         .on('mouseover', self.tip.show)
-         .on('mouseout', self.tip.hide);
-      }
-        
-      //TODO
-      //And transition them.
-      //self.transitionCircles
-      //  .call(transition.selectAll('.circle'), 'vertical', params)
-      //  .call(utils.endall, data, __.handleTransitionEnd);
 
       return selection;
 
@@ -725,6 +837,7 @@ define('circle/circle',[
     scale_methods.call(Circle.prototype);
     axis_methods.call(Circle.prototype);
     scaffolding.call(Circle.prototype);
+    circle_scaffolding.call(Circle.prototype);
 
     return Circle;
 
@@ -745,8 +858,10 @@ define('chart',[
   //"bar/config", 
   //"bar/bar",
   "line/config",
+  "line/scaffolding",
   "line/line",
   "circle/config",
+  "circle/scaffolding",
   "circle/circle",
   //"frame/states",
   //"frame/state_machine",
@@ -762,9 +877,11 @@ define('chart',[
   scaffolding,
   //bar_config, 
   //Bar, 
-  line_config, 
+  line_config,
+  line_scaffolding,
   Line,
   circle_config,
+  circle_scaffolding,
   Circle
   //states, 
   //StateMachine, 
@@ -783,8 +900,10 @@ define('chart',[
     //bar_config: bar_config,
     //Bar: Bar,
     line_config: line_config,
+    line_scaffolding: line_scaffolding,
     Line: Line,
     circle_config: circle_config,
+    circle_scaffolding: circle_scaffolding,
     Circle: Circle,
     //Frame: Frame,
     //states: states, 

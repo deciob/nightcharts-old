@@ -92,6 +92,11 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return tip;
   }
 
+  function getScaffoldingMethod (chart_name) {
+    var name = chart_name.substring(0, chart_name.length - 1);
+    return this[name+'Scaffolding'];
+  }
+
   return {
     extend: extend,
     getset: getset,
@@ -99,6 +104,7 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     schonfinkelize: schonfinkelize,
     endall: endall,
     tip: tip,
+    getScaffoldingMethod: getScaffoldingMethod,
   };
 
 });
