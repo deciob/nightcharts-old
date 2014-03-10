@@ -29,7 +29,7 @@ define('circle/scaffolding', [
       // Otherwise, create them.
       circles.enter().append("circle")
         .attr("class", "dot")
-        .attr("r", 4) // TODO: pass as an option
+        .attr("r", ov_circle_options && ov_circle_options.r ? ov_circle_options.r : 4)
         .attr("cx", function(d) { return __.xScale(d[0]); })
         .attr("cy", function(d) { return __.yScale(d[1]); })
         // TODO: this will need a fix if is an overlapping chart!
