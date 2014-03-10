@@ -13,10 +13,11 @@ define('bar/bar_methods',["d3", "utils/utils"], function(d3, utils) {
       return this.append("rect")
         .attr("class", "bar")
         .attr("x", function(d) { 
-          return __.xScale(d[0]) - __.date_adjust; 
+          return __.xScale(d[0]) - __.y_axis_offset; 
         })
         .attr("width", __.bar_width)
-        .attr("y", __.h + __.barOffSet)
+        //attention TODO: this get then overridden by the transition
+        .attr("y", __.h + __.barOffSet) 
         .attr("height", 0);
     }
 
@@ -30,9 +31,9 @@ define('bar/bar_methods',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function createBars (orientation, __) {
-      if (orientation == 'vertical' && !__.parseDate) {
+      if (orientation == 'vertical' && __.x_scale !== 'time') {
         return createBarsV.call(this, __);
-      } else if (orientation == 'vertical' && __.parseDate) {
+      } else if (orientation == 'vertical' && __.x_scale == 'time') {
         return createTimeBarsV.call(this, __);
       } else {
         return createBarsH.call(this, __);
@@ -41,22 +42,15 @@ define('bar/bar_methods',["d3", "utils/utils"], function(d3, utils) {
 
     function transitionBarsV (__) {
       return this.delay(__.delay)
-        .attr("x", function(d) { 
-          //console.log(__.xScale(d[0]))
-          return __.xScale(d[0]); })
-        .attr("y", function(d) { 
-          //console.log(__.yScale(d[1]))
-          return __.yScale(d[1]); })
-        //.attr("height", function(d) {
-        //  console.log(d, __.h - __.yScale(d[1]))
-        //  return __.h - __.yScale(d[1]); });
-        .attr("height", 200)
+        .attr("x", function(d) { return __.xScale(d[0]); })
+        .attr("y", function(d) { return __.yScale(d[1]); })
+        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
     }
 
     function transitionTimeBarsV (__) {
       return this.delay(__.delay)
         .attr("x", function(d) { 
-          return __.xScale(d[0]) - __.date_adjust; 
+          return __.xScale(d[0]) - __.y_axis_offset; 
         })
         .attr("y", function(d) { return __.yScale(d[1]); })
         .attr("height", function(d) { return __.h - __.yScale(d[1]); });
@@ -72,10 +66,9 @@ define('bar/bar_methods',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function transitionBars (orientation, __) {
-      console.log(this)
-      if (orientation == 'vertical' && !__.parseDate) {
+      if (orientation == 'vertical' && __.x_scale !== 'time') {
         return transitionBarsV.call(this, __);
-      } else if (orientation == 'vertical' && __.parseDate) {
+      } else if (orientation == 'vertical' && __.x_scale == 'time') {
         return transitionTimeBarsV.call(this, __);
       } else {
         return transitionBarsH.call(this, __);

@@ -11,6 +11,7 @@ define('mixins/data_methods', [
     var duration = __.duration,
         data = __.data;
     return function (d, i) {
+      //debugger;
       return i / data[0].length * duration;
     }
   };
@@ -46,7 +47,7 @@ define('mixins/data_methods', [
 
   return function () {
     this.dataIdentifier = dataIdentifier;
-    this.delay = delay;
+    //this.delay = delay;
     this.normalizeData = normalizeData;
     return this;
   };

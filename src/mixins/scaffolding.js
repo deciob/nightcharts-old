@@ -13,15 +13,20 @@ define('mixins/scaffolding', [
     this.xAxis = this.setAxisProps(__.x_axis, this.xScale);
     this.yAxis = this.setAxisProps(__.y_axis, this.yScale);
 
+    var delay = function (d, i) {
+      // Attention, delay can not be longer of transition time! Test!
+      return i / data.length * __.duration;
+    }
+
     utils.extend(
       this.__, 
       {
         data: data,
+        delay: delay,
         yScale: this.yScale,
         xScale: this.xScale,
         xAxis: this.xAxis,
         yAxis: this.yAxis,
-        delay: this.delay,
         w: this.w(),
         h: this.h(),
       }, 
@@ -51,6 +56,7 @@ define('mixins/scaffolding', [
     }
    
     this.gEnter.append("g").attr("class", chart_class);
+    //TODO: we need to handle bar offsets and others?
 
     __.overlapping_charts.names.forEach( function (chart_name) {
       self.gEnter.append("g").attr("class", chart_name);

@@ -1,4 +1,6 @@
 define([
+  "d3", 
+  "d3_tip",
   "draw",
   "base_config",
   "utils/utils",
@@ -21,6 +23,8 @@ define([
   //"frame/state_machine",
   //"frame/frame"
 ], function(
+  d3, 
+  d3_tip,
   draw, 
   base_config, 
   utils, 
@@ -44,7 +48,10 @@ define([
   //Frame
 ) {
 
+  d3.d3_tip = d3_tip;
+
   return {
+    d3: d3,
     draw: draw,
     base_config: base_config,
     utils: utils,

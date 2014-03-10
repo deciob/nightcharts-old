@@ -39,7 +39,7 @@ define('mixins/axis_methods', [
     if ( !__.y_axis.show ) { return; }
     return this.call(__.yAxis)
       .selectAll("g")
-      .delay( __.delay(__) );
+      .delay( __.delay );
   }
 
   function transitionAxis (axis, __) {

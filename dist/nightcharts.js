@@ -207,6 +207,7 @@ define('mixins/data_methods', [
     var duration = __.duration,
         data = __.data;
     return function (d, i) {
+      //debugger;
       return i / data[0].length * duration;
     }
   };
@@ -242,7 +243,7 @@ define('mixins/data_methods', [
 
   return function () {
     this.dataIdentifier = dataIdentifier;
-    this.delay = delay;
+    //this.delay = delay;
     this.normalizeData = normalizeData;
     return this;
   };
@@ -416,7 +417,7 @@ define('mixins/axis_methods', [
     if ( !__.y_axis.show ) { return; }
     return this.call(__.yAxis)
       .selectAll("g")
-      .delay( __.delay(__) );
+      .delay( __.delay );
   }
 
   function transitionAxis (axis, __) {
@@ -454,15 +455,20 @@ define('mixins/scaffolding', [
     this.xAxis = this.setAxisProps(__.x_axis, this.xScale);
     this.yAxis = this.setAxisProps(__.y_axis, this.yScale);
 
+    var delay = function (d, i) {
+      // Attention, delay can not be longer of transition time! Test!
+      return i / data.length * __.duration;
+    }
+
     utils.extend(
       this.__, 
       {
         data: data,
+        delay: delay,
         yScale: this.yScale,
         xScale: this.xScale,
         xAxis: this.xAxis,
         yAxis: this.yAxis,
-        delay: this.delay,
         w: this.w(),
         h: this.h(),
       }, 
@@ -492,6 +498,7 @@ define('mixins/scaffolding', [
     }
    
     this.gEnter.append("g").attr("class", chart_class);
+    //TODO: we need to handle bar offsets and others?
 
     __.overlapping_charts.names.forEach( function (chart_name) {
       self.gEnter.append("g").attr("class", chart_name);
@@ -566,10 +573,11 @@ define('bar/bar_methods',["d3", "utils/utils"], function(d3, utils) {
       return this.append("rect")
         .attr("class", "bar")
         .attr("x", function(d) { 
-          return __.xScale(d[0]) - __.date_adjust; 
+          return __.xScale(d[0]) - __.y_axis_offset; 
         })
         .attr("width", __.bar_width)
-        .attr("y", __.h + __.barOffSet)
+        //attention TODO: this get then overridden by the transition
+        .attr("y", __.h + __.barOffSet) 
         .attr("height", 0);
     }
 
@@ -583,9 +591,9 @@ define('bar/bar_methods',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function createBars (orientation, __) {
-      if (orientation == 'vertical' && !__.parseDate) {
+      if (orientation == 'vertical' && __.x_scale !== 'time') {
         return createBarsV.call(this, __);
-      } else if (orientation == 'vertical' && __.parseDate) {
+      } else if (orientation == 'vertical' && __.x_scale == 'time') {
         return createTimeBarsV.call(this, __);
       } else {
         return createBarsH.call(this, __);
@@ -594,22 +602,15 @@ define('bar/bar_methods',["d3", "utils/utils"], function(d3, utils) {
 
     function transitionBarsV (__) {
       return this.delay(__.delay)
-        .attr("x", function(d) { 
-          //console.log(__.xScale(d[0]))
-          return __.xScale(d[0]); })
-        .attr("y", function(d) { 
-          //console.log(__.yScale(d[1]))
-          return __.yScale(d[1]); })
-        //.attr("height", function(d) {
-        //  console.log(d, __.h - __.yScale(d[1]))
-        //  return __.h - __.yScale(d[1]); });
-        .attr("height", 200)
+        .attr("x", function(d) { return __.xScale(d[0]); })
+        .attr("y", function(d) { return __.yScale(d[1]); })
+        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
     }
 
     function transitionTimeBarsV (__) {
       return this.delay(__.delay)
         .attr("x", function(d) { 
-          return __.xScale(d[0]) - __.date_adjust; 
+          return __.xScale(d[0]) - __.y_axis_offset; 
         })
         .attr("y", function(d) { return __.yScale(d[1]); })
         .attr("height", function(d) { return __.h - __.yScale(d[1]); });
@@ -625,10 +626,9 @@ define('bar/bar_methods',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function transitionBars (orientation, __) {
-      console.log(this)
-      if (orientation == 'vertical' && !__.parseDate) {
+      if (orientation == 'vertical' && __.x_scale !== 'time') {
         return transitionBarsV.call(this, __);
-      } else if (orientation == 'vertical' && __.parseDate) {
+      } else if (orientation == 'vertical' && __.x_scale == 'time') {
         return transitionTimeBarsV.call(this, __);
       } else {
         return transitionBarsH.call(this, __);
@@ -656,8 +656,8 @@ define('bar/scaffolding', [
 
     // Select the bar elements, if they exists.
     // TODO: only handles first nested array!
-    //self.bars = self.g.select('g.bars').selectAll(".bar")
-    self.bars = self.g.select(".bars").selectAll(".bar")
+    // This must look like circles!!!!
+    self.bars = self.g.select("g.bars").selectAll(".bar")
       .data(data[0], self.dataIdentifier);
   
     // Exit phase (let us push out old bars before the new ones come in).
@@ -669,11 +669,11 @@ define('bar/scaffolding', [
       .on('click', __.handleClick);
 
     // And transition them.
-    self.bars = self.transitionBars
-      .call(self.transition.selectAll('.bar'), __.orientation, __);
-      //.call(utils.endall, data, __.handleTransitionEnd);
+    self.transitionBars
+      .call(self.transition.selectAll('.bar'), __.orientation, __)
+      .call(utils.endall, data, __.handleTransitionEnd);
 
-    if (self.tooltip) {
+    if (__.tooltip) {
       self.bars
        .on('mouseover', self.tip.show)
        .on('mouseout', self.tip.hide);
@@ -783,9 +783,14 @@ define('bar/bar',[
 
       self.__ = __;
       // apparently this is only used with the axis, so the first one for now works...
-      //__.x_axis_data = data[0]; //FIXME
+      __.x_axis_data = data[0]; //FIXME
 
       self.axisScaffolding.call(self, data, __);
+
+      if (__.x_scale == 'time') {
+        __.bar_width = (__.w / data[0].length) - .5;
+      }
+
       self.chartScaffolding.call(self, selection, __, 'bars');
       self.barScaffolding.call(self, __);
 
@@ -794,149 +799,6 @@ define('bar/bar',[
       });
 
       return selection;
-
-
-//    function Bar (selection) {
-//
-//      var self = this instanceof Bar
-//               ? this
-//               : new Bar(selection);
-//
-//      w = function () { return __.width - __.margin.right - __.margin.left; };
-//      h = function () { return __.height - __.margin.top - __.margin.bottom; };
-//  
-//      // Scales are functions that map from an input domain to an output range.
-//      // Presently no assumption is made about the chart orientation.
-//      xScale = self.setXScale(__.orientation, __.date_chart)();
-//      yScale = self.setYScale(__.orientation)();
-//  
-//      // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
-//      // Presently no assumption is made about the chart orientation.
-//      xAxis = self.setXAxis(__.x_axis, xScale);
-//      yAxis = self.setYAxis(__.y_axis, yScale);
-//      
-//      selection.each( function (dat) {
-//
-//        var data
-//          , tooltip = __.tooltip
-//          , tip
-//          , svg
-//          , gEnter
-//          , g
-//          , bars
-//          , transition
-//          , params;
-//
-//        // data structure:
-//        // 0: name
-//        // 1: value
-//        data = dat.map(function(d, i) {
-//          var x;
-//          if (__.date_chart) {
-//            x = __.date_chart(__.categoricalValue.call(dat, d));
-//          } else {
-//            x = __.categoricalValue.call(dat, d);
-//          }
-//          return [
-//            x, 
-//            __.quantativeValue.call(dat, d)
-//          ];
-//        });
-//        if (__.invert_data) {
-//          data = data.reverse();
-//        }
-//
-//        function delay (d, i) {
-//          // Attention, delay can not be longer of transition time! Test!
-//          return i / data.length * __.duration;
-//        }
-//
-//        params = {
-//          data: data,
-//          __: __,
-//          h: h,
-//          w: w,
-//          yScale: yScale,
-//          xScale: xScale,
-//          xAxis: xAxis,
-//          yAxis: yAxis,
-//          delay: delay,
-//          date_adjust: (w()/data.length)/2
-//        }
-//
-//        if (__.date_chart) {
-//          params.bar_width = (w() / data.length) - .5;
-//        }
-//
-//        self.applyXScale.call(xScale, __.orientation, params);
-//        self.applyYScale.call(yScale, __.orientation, params); 
-//
-//        // Select the svg element, if it exists.
-//        svg = selection.selectAll("svg").data([data]);
-//
-//        // Otherwise, create the skeletal chart.
-//        gEnter = svg.enter().append("svg").append("g");
-//        // Initializing the tooltip.
-//        if (tooltip) {
-//          tip = utils.tip(tooltip);
-//          gEnter.call(tip);
-//        }
-//        gEnter.append("g").attr("class", "bars");
-//        gEnter.append("g").attr("class", "x axis");
-//        if (__.date_chart) {
-//          gEnter.append("g").attr("class", "y axis")
-//           .attr("transform", "translate(-" + (params.date_adjust + 5) + ",0)");
-//        } else {
-//          gEnter.append("g").attr("class", "y axis");
-//        }
-//
-//        // Update the outer dimensions.
-//        svg.attr("width", __.width)
-//          .attr("height", __.height);
-//
-//        // Update the inner dimensions.
-//        g = svg.select("g")
-//          .attr("transform", "translate(" + 
-//          __.margin.left + "," + __.margin.top + ")");
-//
-//        // Transitions root.
-//        transition = g.transition().duration(__.duration)
-//        
-//        // Update the y axis.
-//        self.transitionYAxis.call(
-//          transition.selectAll('.y.axis'), __.orientation, params);
-//
-//        // Update the x axis.
-//        self.transitionXAxis.call(
-//          transition.selectAll('.x.axis'), __.orientation, params);
-//
-//        // Select the bar elements, if they exists.
-//        bars = g.select(".bars").selectAll(".bar")
-//          .data(data, dataIdentifier);
-//
-//        // Exit phase (let us push out old bars before the new ones come in).
-//        bars.exit()
-//          .transition().duration(__.duration).style('opacity', 0).remove();
-//
-//        // Otherwise, create them.
-//        bars = self.createBars.call(bars.enter(), __.orientation, params)
-//          .on('click', __.handleClick);
-//
-//        if (tooltip) {
-//          bars
-//           .on('mouseover', tip.show)
-//           .on('mouseout', tip.hide);
-//        }
-//          
-//        // And transition them.
-//        self.transitionBars
-//          .call(transition.selectAll('.bar'), __.orientation, params)
-//          .call(utils.endall, data, __.handleTransitionEnd);
-//
-//        return selection;
-
-
-
     }
 
     utils.getset(Bar, __);
@@ -1005,7 +867,7 @@ define('circle/scaffolding', [
       // Otherwise, create them.
       circles.enter().append("circle")
         .attr("class", "dot")
-        .attr("r", 4) // TODO: pass as an option
+        .attr("r", ov_circle_options && ov_circle_options.r ? ov_circle_options.r : 4)
         .attr("cx", function(d) { return __.xScale(d[0]); })
         .attr("cy", function(d) { return __.yScale(d[1]); })
         // TODO: this will need a fix if is an overlapping chart!
@@ -1196,6 +1058,8 @@ define('circle/circle',[
 
 
 define('chart',[
+  "d3", 
+  "d3_tip",
   "draw",
   "base_config",
   "utils/utils",
@@ -1218,6 +1082,8 @@ define('chart',[
   //"frame/state_machine",
   //"frame/frame"
 ], function(
+  d3, 
+  d3_tip,
   draw, 
   base_config, 
   utils, 
@@ -1241,7 +1107,10 @@ define('chart',[
   //Frame
 ) {
 
+  d3.d3_tip = d3_tip;
+
   return {
+    d3: d3,
     draw: draw,
     base_config: base_config,
     utils: utils,

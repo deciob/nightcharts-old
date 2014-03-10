@@ -10,8 +10,8 @@ define('bar/scaffolding', [
 
     // Select the bar elements, if they exists.
     // TODO: only handles first nested array!
-    //self.bars = self.g.select('g.bars').selectAll(".bar")
-    self.bars = self.g.select(".bars").selectAll(".bar")
+    // This must look like circles!!!!
+    self.bars = self.g.select("g.bars").selectAll(".bar")
       .data(data[0], self.dataIdentifier);
   
     // Exit phase (let us push out old bars before the new ones come in).
@@ -23,11 +23,11 @@ define('bar/scaffolding', [
       .on('click', __.handleClick);
 
     // And transition them.
-    self.bars = self.transitionBars
-      .call(self.transition.selectAll('.bar'), __.orientation, __);
-      //.call(utils.endall, data, __.handleTransitionEnd);
+    self.transitionBars
+      .call(self.transition.selectAll('.bar'), __.orientation, __)
+      .call(utils.endall, data, __.handleTransitionEnd);
 
-    if (self.tooltip) {
+    if (__.tooltip) {
       self.bars
        .on('mouseover', self.tip.show)
        .on('mouseout', self.tip.hide);
