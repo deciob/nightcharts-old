@@ -14,6 +14,23 @@ define('mixins/scale_helpers', [
     }
   }
 
+  // It assumes the data is correctly sorted.
+  // TODO: Guard against axis argument == null or undefined
+  function _getDomain (data, axis) {
+    var d0 = Infinity, 
+        d1 = 0, 
+        index = axis == 'x' ? 0 : 1;
+    data.forEach( function (dataset, i) {
+      if (dataset[0][index] < d0) {
+        d0 = dataset[0][index];
+      }
+      if (dataset[dataset.length - 1][index] > d1) {
+        d1 = dataset[dataset.length - 1][index];
+      }
+    });
+    return [d0, d1];
+  }
+
   function setScale (scale_type) {
     switch (scale_type) {
       case undefined:
@@ -47,9 +64,10 @@ define('mixins/scale_helpers', [
 
   function _applyTimeScale (range, __) {
     // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
-    var data = __.x_axis_data || __.data,  // FIXME this hack!
-        t1 = data[0][0],
-        t2 = data[data.length - 1][0],
+    var data = __.data,
+        domain = _getDomain(data, 'x'),
+        t1 = domain[0],
+        t2 = domain[1],
         offset = __.date_offset,
         t0,
         t3;
@@ -62,7 +80,7 @@ define('mixins/scale_helpers', [
           .domain([t1, t2])
           .range([0, __.w()])));
     } else {
-      return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
+      return this.range(range).domain(domain);
     }
   }
 

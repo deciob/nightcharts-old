@@ -194,7 +194,7 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
 });
 
 
-define('mixins/data_methods', [
+define('mixins/data_helpers', [
   "d3", 
   "utils/utils"
 ], function (d3, utils) {
@@ -249,7 +249,7 @@ define('mixins/data_methods', [
   };
 
 });
-define('mixins/layout_methods', [
+define('mixins/layout_helpers', [
   "d3", 
   "utils/utils"
 ], function (d3, utils) {
@@ -271,7 +271,7 @@ define('mixins/layout_methods', [
   };
 
 });
-define('mixins/scale_methods', [
+define('mixins/scale_helpers', [
   "d3", 
   "utils/utils"
 ], function (d3, utils) {
@@ -285,6 +285,23 @@ define('mixins/scale_methods', [
     } else if ( axis == 'y' && !vertical ) {
       return [0, __.w];
     }
+  }
+
+  // It assumes the data is correctly sorted.
+  // TODO: Guard against axis argument == null or undefined
+  function _getDomain (data, axis) {
+    var d0 = Infinity, 
+        d1 = 0, 
+        index = axis == 'x' ? 0 : 1;
+    data.forEach( function (dataset, i) {
+      if (dataset[0][index] < d0) {
+        d0 = dataset[0][index];
+      }
+      if (dataset[dataset.length - 1][index] > d1) {
+        d1 = dataset[dataset.length - 1][index];
+      }
+    });
+    return [d0, d1];
   }
 
   function setScale (scale_type) {
@@ -320,9 +337,10 @@ define('mixins/scale_methods', [
 
   function _applyTimeScale (range, __) {
     // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
-    var data = __.x_axis_data || __.data,  // FIXME this hack!
-        t1 = data[0][0],
-        t2 = data[data.length - 1][0],
+    var data = __.data,
+        domain = _getDomain(data, 'x'),
+        t1 = domain[0],
+        t2 = domain[1],
         offset = __.date_offset,
         t0,
         t3;
@@ -335,7 +353,7 @@ define('mixins/scale_methods', [
           .domain([t1, t2])
           .range([0, __.w()])));
     } else {
-      return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
+      return this.range(range).domain(domain);
     }
   }
 
@@ -376,7 +394,7 @@ define('mixins/scale_methods', [
 });
 
 
-define('mixins/axis_methods', [
+define('mixins/axis_helpers', [
   "d3", 
   "utils/utils"
 ], function (d3, utils) {
@@ -558,7 +576,7 @@ define('bar/config',[
 });
 
 
-define('bar/bar_methods',["d3", "utils/utils"], function(d3, utils) {
+define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
 
     function createBarsV (__) {
       return this.append("rect")
@@ -657,27 +675,38 @@ define('bar/scaffolding', [
     // Select the bar elements, if they exists.
     // TODO: only handles first nested array!
     // This must look like circles!!!!
-    self.bars = self.g.select("g.bars").selectAll(".bar")
-      .data(data[0], self.dataIdentifier);
+    self.bars_g = self.g.select("g.bars").selectAll(".bars")
+      .data(data, self.dataIdentifier);
   
     // Exit phase (let us push out old bars before the new ones come in).
-    self.bars.exit()
+    self.bars_g.exit()
       .transition().duration(__.duration).style('opacity', 0).remove();
 
     // Otherwise, create them.
-    self.bars = self.createBars.call(self.bars.enter(), __.orientation, __)
-      .on('click', __.handleClick);
+    self.bars_g.enter().append("g").each( function (data, i) {
+      var bars = d3.select(this).selectAll(".bar")
+        .data(data, self.dataIdentifier),
+      ov_options = __.overlapping_charts.options,
+      ov_bar_options = ov_options ? ov_options.bars : void 0;
 
-    // And transition them.
-    self.transitionBars
-      .call(self.transition.selectAll('.bar'), __.orientation, __)
-      .call(utils.endall, data, __.handleTransitionEnd);
+      // Exit phase (let us push out old circles before the new ones come in).
+      bars.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();
 
-    if (__.tooltip) {
-      self.bars
-       .on('mouseover', self.tip.show)
-       .on('mouseout', self.tip.hide);
-    }
+      self.createBars.call(bars.enter(), __.orientation, __)
+        .on('click', __.handleClick);
+  
+      // And transition them.
+      self.transitionBars
+        .call(self.transition.selectAll('.bar'), __.orientation, __)
+        .call(utils.endall, data, __.handleTransitionEnd);
+  
+      if (__.tooltip) {
+        bars
+         .on('mouseover', self.tip.show)
+         .on('mouseout', self.tip.hide);
+      }
+    });
       
     return this;
   }
@@ -746,24 +775,24 @@ define('bar/bar',[
   "d3", 
   "utils/utils",
   "bar/config", 
-  "mixins/data_methods",
-  "mixins/layout_methods",
-  "mixins/scale_methods",
-  "mixins/axis_methods",
+  "mixins/data_helpers",
+  "mixins/layout_helpers",
+  "mixins/scale_helpers",
+  "mixins/axis_helpers",
   "mixins/scaffolding",
-  "bar/bar_methods",
+  "bar/bar_helpers",
   "bar/scaffolding",
   "line/scaffolding",
 ], function(
   d3, 
   utils, 
   default_config, 
-  data_methods, 
-  layout_methods, 
-  scale_methods, 
-  axis_methods, 
+  data_helpers, 
+  layout_helpers, 
+  scale_helpers, 
+  axis_helpers, 
   scaffolding,
-  bar_methods,
+  bar_helpers,
   bar_scaffolding,
   line_scaffolding
 ) {
@@ -783,7 +812,7 @@ define('bar/bar',[
 
       self.__ = __;
       // apparently this is only used with the axis, so the first one for now works...
-      __.x_axis_data = data[0]; //FIXME
+      //__.x_axis_data = data[0]; //FIXME
 
       self.axisScaffolding.call(self, data, __);
 
@@ -802,12 +831,12 @@ define('bar/bar',[
     }
 
     utils.getset(Bar, __);
-    data_methods.call(Bar.prototype);
-    layout_methods.call(Bar.prototype);
-    scale_methods.call(Bar.prototype);
-    axis_methods.call(Bar.prototype);
+    data_helpers.call(Bar.prototype);
+    layout_helpers.call(Bar.prototype);
+    scale_helpers.call(Bar.prototype);
+    axis_helpers.call(Bar.prototype);
     scaffolding.call(Bar.prototype);
-    bar_methods.call(Bar.prototype);
+    bar_helpers.call(Bar.prototype);
     bar_scaffolding.call(Bar.prototype);
     line_scaffolding.call(Bar.prototype);
 
@@ -907,10 +936,10 @@ define('line/line',[
   "d3", 
   "utils/utils",
   "line/config", 
-  "mixins/data_methods",
-  "mixins/layout_methods",
-  "mixins/scale_methods",
-  "mixins/axis_methods",
+  "mixins/data_helpers",
+  "mixins/layout_helpers",
+  "mixins/scale_helpers",
+  "mixins/axis_helpers",
   "mixins/scaffolding",
   "line/scaffolding",
   "circle/scaffolding",
@@ -918,10 +947,10 @@ define('line/line',[
   d3, 
   utils, 
   default_config, 
-  data_methods, 
-  layout_methods, 
-  scale_methods, 
-  axis_methods, 
+  data_helpers, 
+  layout_helpers, 
+  scale_helpers, 
+  axis_helpers, 
   scaffolding,
   line_scaffolding,
   circle_scaffolding
@@ -956,10 +985,10 @@ define('line/line',[
     }
 
     utils.getset(Line, __);
-    data_methods.call(Line.prototype);
-    layout_methods.call(Line.prototype);
-    scale_methods.call(Line.prototype);
-    axis_methods.call(Line.prototype);
+    data_helpers.call(Line.prototype);
+    layout_helpers.call(Line.prototype);
+    scale_helpers.call(Line.prototype);
+    axis_helpers.call(Line.prototype);
     scaffolding.call(Line.prototype);
     line_scaffolding.call(Line.prototype);
     circle_scaffolding.call(Line.prototype);
@@ -1003,20 +1032,20 @@ define('circle/circle',[
   "d3", 
   "utils/utils",
   "circle/config", 
-  "mixins/data_methods",
-  "mixins/layout_methods",
-  "mixins/scale_methods",
-  "mixins/axis_methods",
+  "mixins/data_helpers",
+  "mixins/layout_helpers",
+  "mixins/scale_helpers",
+  "mixins/axis_helpers",
   "mixins/scaffolding",
   "circle/scaffolding",
 ], function(
   d3, 
   utils, 
   default_config, 
-  data_methods, 
-  layout_methods, 
-  scale_methods, 
-  axis_methods, 
+  data_helpers, 
+  layout_helpers, 
+  scale_helpers, 
+  axis_helpers, 
   scaffolding, 
   circle_scaffolding
 ) {
@@ -1044,10 +1073,10 @@ define('circle/circle',[
     }
 
     utils.getset(Circle, __);
-    data_methods.call(Circle.prototype);
-    layout_methods.call(Circle.prototype);
-    scale_methods.call(Circle.prototype);
-    axis_methods.call(Circle.prototype);
+    data_helpers.call(Circle.prototype);
+    layout_helpers.call(Circle.prototype);
+    scale_helpers.call(Circle.prototype);
+    axis_helpers.call(Circle.prototype);
     scaffolding.call(Circle.prototype);
     circle_scaffolding.call(Circle.prototype);
 
@@ -1063,13 +1092,13 @@ define('chart',[
   "draw",
   "base_config",
   "utils/utils",
-  "mixins/data_methods",
-  "mixins/layout_methods",
-  "mixins/scale_methods",
-  "mixins/axis_methods",
+  "mixins/data_helpers",
+  "mixins/layout_helpers",
+  "mixins/scale_helpers",
+  "mixins/axis_helpers",
   "mixins/scaffolding",
   "bar/config",
-  "bar/bar_methods", 
+  "bar/bar_helpers", 
   "bar/scaffolding",
   "bar/bar",
   "line/config",
@@ -1087,13 +1116,13 @@ define('chart',[
   draw, 
   base_config, 
   utils, 
-  data_methods, 
-  layout_methods, 
-  scale_methods,
-  axis_methods,
+  data_helpers, 
+  layout_helpers, 
+  scale_helpers,
+  axis_helpers,
   scaffolding,
   bar_config,
-  bar_methods,
+  bar_helpers,
   bar_scaffolding,
   Bar, 
   line_config,
@@ -1114,13 +1143,13 @@ define('chart',[
     draw: draw,
     base_config: base_config,
     utils: utils,
-    data_methods: data_methods,
-    layout_methods: layout_methods,
-    scale_methods: scale_methods,
-    axis_methods: axis_methods,
+    data_helpers: data_helpers,
+    layout_helpers: layout_helpers,
+    scale_helpers: scale_helpers,
+    axis_helpers: axis_helpers,
     scaffolding: scaffolding,
     bar_config: bar_config,
-    bar_methods: bar_methods,
+    bar_helpers: bar_helpers,
     bar_scaffolding: bar_scaffolding,
     Bar: Bar,
     line_config: line_config,
