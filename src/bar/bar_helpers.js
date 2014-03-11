@@ -1,4 +1,4 @@
-define('bar/bar_methods',["d3", "utils/utils"], function(d3, utils) {
+define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
 
     function createBarsV (__) {
       return this.append("rect")

@@ -4,10 +4,10 @@ define('line/line',[
   "d3", 
   "utils/utils",
   "line/config", 
-  "mixins/data_methods",
-  "mixins/layout_methods",
-  "mixins/scale_methods",
-  "mixins/axis_methods",
+  "mixins/data_helpers",
+  "mixins/layout_helpers",
+  "mixins/scale_helpers",
+  "mixins/axis_helpers",
   "mixins/scaffolding",
   "line/scaffolding",
   "circle/scaffolding",
@@ -15,10 +15,10 @@ define('line/line',[
   d3, 
   utils, 
   default_config, 
-  data_methods, 
-  layout_methods, 
-  scale_methods, 
-  axis_methods, 
+  data_helpers, 
+  layout_helpers, 
+  scale_helpers, 
+  axis_helpers, 
   scaffolding,
   line_scaffolding,
   circle_scaffolding
@@ -53,10 +53,10 @@ define('line/line',[
     }
 
     utils.getset(Line, __);
-    data_methods.call(Line.prototype);
-    layout_methods.call(Line.prototype);
-    scale_methods.call(Line.prototype);
-    axis_methods.call(Line.prototype);
+    data_helpers.call(Line.prototype);
+    layout_helpers.call(Line.prototype);
+    scale_helpers.call(Line.prototype);
+    axis_helpers.call(Line.prototype);
     scaffolding.call(Line.prototype);
     line_scaffolding.call(Line.prototype);
     circle_scaffolding.call(Line.prototype);

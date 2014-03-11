@@ -1,4 +1,4 @@
-define('mixins/axis_methods', [
+define('mixins/axis_helpers', [
   "d3", 
   "utils/utils"
 ], function (d3, utils) {

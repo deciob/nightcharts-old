@@ -1,4 +1,4 @@
-define('mixins/scale_methods', [
+define('mixins/scale_helpers', [
   "d3", 
   "utils/utils"
 ], function (d3, utils) {

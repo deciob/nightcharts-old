@@ -4,24 +4,24 @@ define('bar/bar',[
   "d3", 
   "utils/utils",
   "bar/config", 
-  "mixins/data_methods",
-  "mixins/layout_methods",
-  "mixins/scale_methods",
-  "mixins/axis_methods",
+  "mixins/data_helpers",
+  "mixins/layout_helpers",
+  "mixins/scale_helpers",
+  "mixins/axis_helpers",
   "mixins/scaffolding",
-  "bar/bar_methods",
+  "bar/bar_helpers",
   "bar/scaffolding",
   "line/scaffolding",
 ], function(
   d3, 
   utils, 
   default_config, 
-  data_methods, 
-  layout_methods, 
-  scale_methods, 
-  axis_methods, 
+  data_helpers, 
+  layout_helpers, 
+  scale_helpers, 
+  axis_helpers, 
   scaffolding,
-  bar_methods,
+  bar_helpers,
   bar_scaffolding,
   line_scaffolding
 ) {
@@ -60,12 +60,12 @@ define('bar/bar',[
     }
 
     utils.getset(Bar, __);
-    data_methods.call(Bar.prototype);
-    layout_methods.call(Bar.prototype);
-    scale_methods.call(Bar.prototype);
-    axis_methods.call(Bar.prototype);
+    data_helpers.call(Bar.prototype);
+    layout_helpers.call(Bar.prototype);
+    scale_helpers.call(Bar.prototype);
+    axis_helpers.call(Bar.prototype);
     scaffolding.call(Bar.prototype);
-    bar_methods.call(Bar.prototype);
+    bar_helpers.call(Bar.prototype);
     bar_scaffolding.call(Bar.prototype);
     line_scaffolding.call(Bar.prototype);
 

@@ -4,20 +4,20 @@ define('circle/circle',[
   "d3", 
   "utils/utils",
   "circle/config", 
-  "mixins/data_methods",
-  "mixins/layout_methods",
-  "mixins/scale_methods",
-  "mixins/axis_methods",
+  "mixins/data_helpers",
+  "mixins/layout_helpers",
+  "mixins/scale_helpers",
+  "mixins/axis_helpers",
   "mixins/scaffolding",
   "circle/scaffolding",
 ], function(
   d3, 
   utils, 
   default_config, 
-  data_methods, 
-  layout_methods, 
-  scale_methods, 
-  axis_methods, 
+  data_helpers, 
+  layout_helpers, 
+  scale_helpers, 
+  axis_helpers, 
   scaffolding, 
   circle_scaffolding
 ) {
@@ -45,10 +45,10 @@ define('circle/circle',[
     }
 
     utils.getset(Circle, __);
-    data_methods.call(Circle.prototype);
-    layout_methods.call(Circle.prototype);
-    scale_methods.call(Circle.prototype);
-    axis_methods.call(Circle.prototype);
+    data_helpers.call(Circle.prototype);
+    layout_helpers.call(Circle.prototype);
+    scale_helpers.call(Circle.prototype);
+    axis_helpers.call(Circle.prototype);
     scaffolding.call(Circle.prototype);
     circle_scaffolding.call(Circle.prototype);
 

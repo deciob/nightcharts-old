@@ -1,4 +1,4 @@
-define('mixins/data_methods', [
+define('mixins/data_helpers', [
   "d3", 
   "utils/utils"
 ], function (d3, utils) {

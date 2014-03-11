@@ -1,4 +1,4 @@
-define('mixins/layout_methods', [
+define('mixins/layout_helpers', [
   "d3", 
   "utils/utils"
 ], function (d3, utils) {
