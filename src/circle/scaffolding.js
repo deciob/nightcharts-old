@@ -8,7 +8,7 @@ define('circle/scaffolding', [
         data = __.data;
 
     // Select the circle elements, if they exists.
-    self.circles_g = d3.select('g.circles').selectAll(".circles")
+    self.circles_g = self.g.select('g.circles').selectAll(".circles")
       .data(data, self.dataIdentifier);
 
     // Exit phase (let us push out old circles before the new ones come in).

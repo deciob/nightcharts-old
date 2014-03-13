@@ -26,6 +26,12 @@ define('base_config', [
       // One of: ordinal, linear, time
       x_scale: 'ordinal',
       y_scale: 'linear',
+      // Forces the quantitative scale bounds:
+      // false    ->  min: 0, max: data_max
+      // true     ->  min: data_min, max: data_max
+      // obj      ->  min: obj.min, max: obj.max
+      // function ->  obj = function(data), min: obj.min, max: obj.max
+      force_scale_bounds: false,
       // axes, apart from `show`, properties match d3's api.
       x_axis: {
         show: true,

@@ -10047,6 +10047,12 @@ define('base_config', [
       // One of: ordinal, linear, time
       x_scale: 'ordinal',
       y_scale: 'linear',
+      // Forces the quantitative scale bounds:
+      // false    ->  min: 0, max: data_max
+      // true     ->  min: data_min, max: data_max
+      // obj      ->  min: obj.min, max: obj.max
+      // function ->  obj = function(data), min: obj.min, max: obj.max
+      force_scale_bounds: false,
       // axes, apart from `show`, properties match d3's api.
       x_axis: {
         show: true,
@@ -10186,6 +10192,18 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     return this[name+'Scaffolding'];
   }
 
+  function getMinMaxValues (data) {
+    var min = Infinity,
+        max = 0;
+    data.forEach( function (data, i) {
+      var min_p = d3.min( data, function(d) { return parseFloat(d[1]); } ),
+          max_p = d3.max( data, function(d) { return parseFloat(d[1]); } );
+      min = min_p < min ? min_p : min;
+      max = max_p > max ? max_p : max;
+    });
+    return {min: min, max: max};
+  }
+
   return {
     extend: extend,
     getset: getset,
@@ -10194,6 +10212,7 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     endall: endall,
     tip: tip,
     getScaffoldingMethod: getScaffoldingMethod,
+    getMinMaxValues: getMinMaxValues,
   };
 
 });
@@ -10212,7 +10231,6 @@ define('mixins/data_helpers', [
     var duration = __.duration,
         data = __.data;
     return function (d, i) {
-      //debugger;
       return i / data[0].length * duration;
     }
   };
@@ -10292,6 +10310,23 @@ define('mixins/scale_helpers', [
     }
   }
 
+  // It assumes the data is correctly sorted.
+  // TODO: Guard against axis argument == null or undefined
+  function _getDomain (data, axis) {
+    var d0 = Infinity, 
+        d1 = 0, 
+        index = axis == 'x' ? 0 : 1;
+    data.forEach( function (dataset, i) {
+      if (dataset[0][index] < d0) {
+        d0 = dataset[0][index];
+      }
+      if (dataset[dataset.length - 1][index] > d1) {
+        d1 = dataset[dataset.length - 1][index];
+      }
+    });
+    return [d0, d1];
+  }
+
   function setScale (scale_type) {
     switch (scale_type) {
       case undefined:
@@ -10310,24 +10345,35 @@ define('mixins/scale_helpers', [
   }
 
   // Sets the range and domain for the linear scale.
+  // TODO: unit test.
   function _applyLinearScale (range, __) {
-    var max;
-    if (__.max) {
-      max = __.max;
+    var force_scale_bounds = __.force_scale_bounds,
+        min_max,
+        min,
+        max;
+    if ( force_scale_bounds === false ) {
+      min_max = utils.getMinMaxValues(__.data);
+      return this.range(range).domain([0, min_max.max]);
+    } else if ( force_scale_bounds === true ) {
+      min_max = utils.getMinMaxValues(__.data);
+      return this.range(range).domain([min_max.min, min_max.max]);
+    } else if ( utils.isObject(force_scale_bounds) ) {
+      min_max = force_scale_bounds,
+      min = min_max.min || 0,
+      max = min_max.max || utils.getMinMaxValues(__.data).max;
+      return this.range(range).domain([min, max]);
     } else {
-      // TODO: this is fundamentally broken!!!
-      // It does not handle array of arrays...
-      // Relying for now on passing __.max
-      max = d3.max( __.data, function(d) { return parseFloat(d[1]); } );
+      min_max = force_scale_bounds(__.data);
+      return this.range(range).domain([min_max.min, min_max.max]);
     }
-    return this.range(range).domain([0, max]);
   }
 
   function _applyTimeScale (range, __) {
     // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
-    var data = __.x_axis_data || __.data,  // FIXME this hack!
-        t1 = data[0][0],
-        t2 = data[data.length - 1][0],
+    var data = __.data,
+        domain = _getDomain(data, 'x'),
+        t1 = domain[0],
+        t2 = domain[1],
         offset = __.date_offset,
         t0,
         t3;
@@ -10340,7 +10386,7 @@ define('mixins/scale_helpers', [
           .domain([t1, t2])
           .range([0, __.w()])));
     } else {
-      return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
+      return this.range(range).domain(domain);
     }
   }
 
@@ -10660,29 +10706,38 @@ define('bar/scaffolding', [
         bars_enter;
 
     // Select the bar elements, if they exists.
-    // TODO: only handles first nested array!
-    // This must look like circles!!!!
-    self.bars = self.g.select("g.bars").selectAll(".bar")
-      .data(data[0], self.dataIdentifier);
+    self.bars_g = self.g.select("g.bars").selectAll(".bars")
+      .data(data, self.dataIdentifier);
   
     // Exit phase (let us push out old bars before the new ones come in).
-    self.bars.exit()
+    self.bars_g.exit()
       .transition().duration(__.duration).style('opacity', 0).remove();
 
     // Otherwise, create them.
-    self.bars = self.createBars.call(self.bars.enter(), __.orientation, __)
-      .on('click', __.handleClick);
+    self.bars_g.enter().append("g").each( function (data, i) {
+      var bars = d3.select(this).selectAll(".bar")
+            .data(data, self.dataIdentifier),
+          ov_options = __.overlapping_charts.options,
+          ov_bar_options = ov_options ? ov_options.bars : void 0;
 
-    // And transition them.
-    self.transitionBars
-      .call(self.transition.selectAll('.bar'), __.orientation, __)
-      .call(utils.endall, data, __.handleTransitionEnd);
+      // Exit phase (let us push out old circles before the new ones come in).
+      bars.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();
 
-    if (__.tooltip) {
-      self.bars
-       .on('mouseover', self.tip.show)
-       .on('mouseout', self.tip.hide);
-    }
+      self.createBars.call(bars.enter(), __.orientation, __)
+        .on('click', __.handleClick);
+  
+      // And transition them.
+      self.transitionBars
+        .call(self.transition.selectAll('.bar'), __.orientation, __)
+        .call(utils.endall, data, __.handleTransitionEnd);
+  
+      if (__.tooltip) {
+        bars
+         .on('mouseover', self.tip.show)
+         .on('mouseout', self.tip.hide);
+      }
+    });
       
     return this;
   }
@@ -10711,30 +10766,42 @@ define('line/scaffolding', [
         data = __.data;
 
     // Select the line elements, if they exists.
-    self.lines = d3.select('g.lines').selectAll(".line")
+    self.lines_g = self.g.select('g.lines').selectAll(".lines")
       .data(data, self.dataIdentifier);
 
     // Exit phase (let us push out old lines before the new ones come in).
-    self.lines.exit()
+    self.lines_g.exit()
       .transition().duration(__.duration).style('opacity', 0).remove();
 
     // Otherwise, create them.
-    self.lines.enter().append("path")
-      .attr("class", "line")
-      .attr("d", self.line(__) )
-      .on('click', __.handleClick);
-    
-    if (__.tooltip) {
-      self.lines
-       .on('mouseover', self.tip.show)
-       .on('mouseout', self.tip.hide);
-    }
+    self.lines_g.enter().append("g").each( function (data, i) {
+      var lines = d3.select(this).selectAll(".bar")
+            .data([data], self.dataIdentifier),
+          ov_options = __.overlapping_charts.options,
+          ov_line_options = ov_options ? ov_options.bars : void 0;
+
+      // Exit phase (let us push out old lines before the new ones come in).
+      lines.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();      
+
+      lines.enter().append("path")
+        .attr("class", "line")
+        .attr("d", self.line(__) )
+        .on('click', __.handleClick);
       
-    //TODO
-    //And transition them.
-    //self.transitionLines
-    //  .call(transition.selectAll('.line'), 'vertical', params)
-    //  .call(utils.endall, data, __.handleTransitionEnd);
+      if (__.tooltip) {
+        lines
+         .on('mouseover', self.tip.show)
+         .on('mouseout', self.tip.hide);
+      }
+        
+      //TODO
+      //And transition them.
+      //self.transitionLines
+      //  .call(transition.selectAll('.line'), 'vertical', params)
+      //  .call(utils.endall, data, __.handleTransitionEnd);
+
+    });
 
     return this;
   }
@@ -10788,7 +10855,7 @@ define('bar/bar',[
 
       self.__ = __;
       // apparently this is only used with the axis, so the first one for now works...
-      __.x_axis_data = data[0]; //FIXME
+      //__.x_axis_data = data[0]; //FIXME
 
       self.axisScaffolding.call(self, data, __);
 
@@ -10851,7 +10918,7 @@ define('circle/scaffolding', [
         data = __.data;
 
     // Select the circle elements, if they exists.
-    self.circles_g = d3.select('g.circles').selectAll(".circles")
+    self.circles_g = self.g.select('g.circles').selectAll(".circles")
       .data(data, self.dataIdentifier);
 
     // Exit phase (let us push out old circles before the new ones come in).

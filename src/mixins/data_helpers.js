@@ -11,7 +11,6 @@ define('mixins/data_helpers', [
     var duration = __.duration,
         data = __.data;
     return function (d, i) {
-      //debugger;
       return i / data[0].length * duration;
     }
   };

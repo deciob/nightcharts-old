@@ -49,17 +49,27 @@ define('mixins/scale_helpers', [
   }
 
   // Sets the range and domain for the linear scale.
+  // TODO: unit test.
   function _applyLinearScale (range, __) {
-    var max;
-    if (__.max) {
-      max = __.max;
+    var force_scale_bounds = __.force_scale_bounds,
+        min_max,
+        min,
+        max;
+    if ( force_scale_bounds === false ) {
+      min_max = utils.getMinMaxValues(__.data);
+      return this.range(range).domain([0, min_max.max]);
+    } else if ( force_scale_bounds === true ) {
+      min_max = utils.getMinMaxValues(__.data);
+      return this.range(range).domain([min_max.min, min_max.max]);
+    } else if ( utils.isObject(force_scale_bounds) ) {
+      min_max = force_scale_bounds,
+      min = min_max.min || 0,
+      max = min_max.max || utils.getMinMaxValues(__.data).max;
+      return this.range(range).domain([min, max]);
     } else {
-      // TODO: this is fundamentally broken!!!
-      // It does not handle array of arrays...
-      // Relying for now on passing __.max
-      max = d3.max( __.data, function(d) { return parseFloat(d[1]); } );
+      min_max = force_scale_bounds(__.data);
+      return this.range(range).domain([min_max.min, min_max.max]);
     }
-    return this.range(range).domain([0, max]);
   }
 
   function _applyTimeScale (range, __) {

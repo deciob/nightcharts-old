@@ -9,8 +9,6 @@ define('bar/scaffolding', [
         bars_enter;
 
     // Select the bar elements, if they exists.
-    // TODO: only handles first nested array!
-    // This must look like circles!!!!
     self.bars_g = self.g.select("g.bars").selectAll(".bars")
       .data(data, self.dataIdentifier);
   
@@ -21,9 +19,9 @@ define('bar/scaffolding', [
     // Otherwise, create them.
     self.bars_g.enter().append("g").each( function (data, i) {
       var bars = d3.select(this).selectAll(".bar")
-        .data(data, self.dataIdentifier),
-      ov_options = __.overlapping_charts.options,
-      ov_bar_options = ov_options ? ov_options.bars : void 0;
+            .data(data, self.dataIdentifier),
+          ov_options = __.overlapping_charts.options,
+          ov_bar_options = ov_options ? ov_options.bars : void 0;
 
       // Exit phase (let us push out old circles before the new ones come in).
       bars.exit()

@@ -97,6 +97,18 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return this[name+'Scaffolding'];
   }
 
+  function getMinMaxValues (data) {
+    var min = Infinity,
+        max = 0;
+    data.forEach( function (data, i) {
+      var min_p = d3.min( data, function(d) { return parseFloat(d[1]); } ),
+          max_p = d3.max( data, function(d) { return parseFloat(d[1]); } );
+      min = min_p < min ? min_p : min;
+      max = max_p > max ? max_p : max;
+    });
+    return {min: min, max: max};
+  }
+
   return {
     extend: extend,
     getset: getset,
@@ -105,6 +117,7 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     endall: endall,
     tip: tip,
     getScaffoldingMethod: getScaffoldingMethod,
+    getMinMaxValues: getMinMaxValues,
   };
 
 });
