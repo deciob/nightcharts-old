@@ -35,7 +35,6 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
       };
   }
 
-
   // For each attribute in `state` it sets a getter-setter function 
   // on `obj`.
   // Accepts one level nested `state` objects.
