@@ -1488,23 +1488,9 @@ self.transitionLines
           data = self.normalizeData(selection.datum(), __),
           bars;
 
-      self.__ = __;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-52">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-52">&#182;</a>
-              </div>
-              <p>apparently this is only used with the axis, so the first one for now works...
-__.x_axis_data = data[0]; //FIXME</p>
+      self.__ = __;
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      self.axisScaffolding.call(self, data, __);
+      self.axisScaffolding.call(self, data, __);
 
       <span class="keyword">if</span> (__.x_scale == <span class="string">'time'</span>) {
         __.bar_width = (__.w / data[<span class="number">0</span>].length) - <span class="number">.5</span>;
@@ -1538,11 +1524,11 @@ __.x_axis_data = data[0]; //FIXME</p>
         </li>
         
         
-        <li id="section-53">
+        <li id="section-52">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
+                <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
               <p><strong>The default configuration module for the line.line module</strong></p>
 
@@ -1560,11 +1546,11 @@ __.x_axis_data = data[0]; //FIXME</p>
         </li>
         
         
-        <li id="section-54">
+        <li id="section-53">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               <p>TODO this is an yAxis offset....
 date_adjust: 5</p>
@@ -1590,11 +1576,11 @@ define(<span class="string">'circle/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-55">
+        <li id="section-54">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-55">&#182;</a>
+                <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <p>Select the circle elements, if they exists.</p>
 
@@ -1606,11 +1592,11 @@ define(<span class="string">'circle/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-56">
+        <li id="section-55">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
               <p>Exit phase (let us push out old circles before the new ones come in).</p>
 
@@ -1622,11 +1608,11 @@ define(<span class="string">'circle/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-57">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <p>Otherwise, create them.</p>
 
@@ -1641,11 +1627,11 @@ define(<span class="string">'circle/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-58">
+        <li id="section-57">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-57">&#182;</a>
               </div>
               <p>Exit phase (let us push out old circles before the new ones come in).</p>
 
@@ -1657,11 +1643,11 @@ define(<span class="string">'circle/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-59">
+        <li id="section-58">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-58">&#182;</a>
               </div>
               <p>Otherwise, create them.</p>
 
@@ -1676,11 +1662,11 @@ define(<span class="string">'circle/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-60">
+        <li id="section-59">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
+                <a class="pilcrow" href="#section-59">&#182;</a>
               </div>
               <p>TODO: this will need a fix if is an overlapping chart!</p>
 
@@ -1691,11 +1677,11 @@ define(<span class="string">'circle/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-61">
+        <li id="section-60">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-61">&#182;</a>
+                <a class="pilcrow" href="#section-60">&#182;</a>
               </div>
               <p>Tooltips.</p>
 
@@ -1716,11 +1702,11 @@ define(<span class="string">'circle/scaffolding'</span>, [
         </li>
         
         
-        <li id="section-62">
+        <li id="section-61">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
+                <a class="pilcrow" href="#section-61">&#182;</a>
               </div>
               <p>TODO
 And transition them.
@@ -1743,11 +1729,11 @@ self.transitionCircles
         </li>
         
         
-        <li id="section-63">
+        <li id="section-62">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-63">&#182;</a>
+                <a class="pilcrow" href="#section-62">&#182;</a>
               </div>
               <p><strong>The line.line module</strong></p>
 
@@ -1790,22 +1776,7 @@ self.transitionCircles
           data = self.normalizeData(selection.datum(), __),
           lines;
 
-      self.__ = __;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-64">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
-              </div>
-              <p>apparently this is only used with the axis, so the first one for now works...</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      __.x_axis_data = data[<span class="number">0</span>]; <span class="comment">//FIXME</span>
+      self.__ = __;
 
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, <span class="string">'lines'</span>);
@@ -1843,11 +1814,11 @@ self.transitionCircles
         </li>
         
         
-        <li id="section-65">
+        <li id="section-63">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-65">&#182;</a>
+                <a class="pilcrow" href="#section-63">&#182;</a>
               </div>
               <p><strong>The default configuration module for the point.point module</strong></p>
 
@@ -1864,11 +1835,11 @@ self.transitionCircles
         </li>
         
         
-        <li id="section-66">
+        <li id="section-64">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-66">&#182;</a>
+                <a class="pilcrow" href="#section-64">&#182;</a>
               </div>
               <p>x_scale: &#39;time&#39;,
 TODO this is an yAxis offset....
@@ -1885,11 +1856,11 @@ date_adjust: 5</p>
         </li>
         
         
-        <li id="section-67">
+        <li id="section-65">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-67">&#182;</a>
+                <a class="pilcrow" href="#section-65">&#182;</a>
               </div>
               <p><strong>The circle.circle module</strong></p>
 
@@ -1978,11 +1949,11 @@ define(<span class="string">'chart'</span>,[
         </li>
         
         
-        <li id="section-68">
+        <li id="section-66">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-68">&#182;</a>
+                <a class="pilcrow" href="#section-66">&#182;</a>
               </div>
               <p>&quot;frame/states&quot;,
 &quot;frame/state_machine&quot;,
@@ -2015,11 +1986,11 @@ define(<span class="string">'chart'</span>,[
         </li>
         
         
-        <li id="section-69">
+        <li id="section-67">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-69">&#182;</a>
+                <a class="pilcrow" href="#section-67">&#182;</a>
               </div>
               <p>states, 
 StateMachine, 
@@ -2055,11 +2026,11 @@ Frame</p>
         </li>
         
         
-        <li id="section-70">
+        <li id="section-68">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-70">&#182;</a>
+                <a class="pilcrow" href="#section-68">&#182;</a>
               </div>
               <p>Frame: Frame,
 states: states, 

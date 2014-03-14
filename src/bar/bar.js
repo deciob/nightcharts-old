@@ -40,8 +40,6 @@ define('bar/bar',[
           bars;
 
       self.__ = __;
-      // apparently this is only used with the axis, so the first one for now works...
-      //__.x_axis_data = data[0]; //FIXME
 
       self.axisScaffolding.call(self, data, __);
 

@@ -10855,8 +10855,6 @@ define('bar/bar',[
           bars;
 
       self.__ = __;
-      // apparently this is only used with the axis, so the first one for now works...
-      //__.x_axis_data = data[0]; //FIXME
 
       self.axisScaffolding.call(self, data, __);
 
@@ -11014,8 +11012,6 @@ define('line/line',[
           lines;
 
       self.__ = __;
-      // apparently this is only used with the axis, so the first one for now works...
-      __.x_axis_data = data[0]; //FIXME
 
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'lines');
