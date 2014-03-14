@@ -1115,7 +1115,7 @@ define(<span class="string">'bar/bar_helpers'</span>,[<span class="string">"d3"<
       <span class="keyword">return</span> <span class="keyword">this</span>.append(<span class="string">"rect"</span>)
         .attr(<span class="string">"class"</span>, <span class="string">"bar"</span>)
         .attr(<span class="string">"x"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> 
-          <span class="keyword">return</span> __.xScale(d[<span class="number">0</span>]) - __.y_axis_offset; 
+          <span class="keyword">return</span> __.xScale(d[<span class="number">0</span>]) - __.bar_width / <span class="number">2</span>;
         })
         .attr(<span class="string">"width"</span>, __.bar_width)</pre></div></div>
             
@@ -1157,7 +1157,7 @@ define(<span class="string">'bar/bar_helpers'</span>,[<span class="string">"d3"<
 
     <span class="function"><span class="keyword">function</span> <span class="title">transitionBarsV</span> <span class="params">(__)</span> {</span>
       <span class="keyword">return</span> <span class="keyword">this</span>.delay(__.delay)
-        .attr(<span class="string">"x"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> __.xScale(d[<span class="number">0</span>]); })
+        .attr(<span class="string">"x"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> __.xScale(d[<span class="number">0</span>]) + __.barOffSet; })
         .attr(<span class="string">"y"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> __.yScale(d[<span class="number">1</span>]); })
         .attr(<span class="string">"height"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> __.h - __.yScale(d[<span class="number">1</span>]); });
     }
@@ -1165,7 +1165,7 @@ define(<span class="string">'bar/bar_helpers'</span>,[<span class="string">"d3"<
     <span class="function"><span class="keyword">function</span> <span class="title">transitionTimeBarsV</span> <span class="params">(__)</span> {</span>
       <span class="keyword">return</span> <span class="keyword">this</span>.delay(__.delay)
         .attr(<span class="string">"x"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> 
-          <span class="keyword">return</span> __.xScale(d[<span class="number">0</span>]) - __.y_axis_offset; 
+          <span class="keyword">return</span> __.xScale(d[<span class="number">0</span>]) - __.bar_width / <span class="number">2</span>;
         })
         .attr(<span class="string">"y"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> __.yScale(d[<span class="number">1</span>]); })
         .attr(<span class="string">"height"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> __.h - __.yScale(d[<span class="number">1</span>]); });
@@ -1494,6 +1494,7 @@ self.transitionLines
 
       <span class="keyword">if</span> (__.x_scale == <span class="string">'time'</span>) {
         __.bar_width = (__.w / data[<span class="number">0</span>].length) - <span class="number">.5</span>;
+        __.y_axis_offset = __.y_axis_offset == <span class="number">0</span> ? __.bar_width * <span class="number">.6</span> : __.y_axis_offset;
       }
 
       self.chartScaffolding.call(self, selection, __, <span class="string">'bars'</span>);

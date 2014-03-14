@@ -45,6 +45,7 @@ define('bar/bar',[
 
       if (__.x_scale == 'time') {
         __.bar_width = (__.w / data[0].length) - .5;
+        __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
       }
 
       self.chartScaffolding.call(self, selection, __, 'bars');

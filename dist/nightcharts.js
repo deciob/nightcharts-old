@@ -620,7 +620,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
       return this.append("rect")
         .attr("class", "bar")
         .attr("x", function(d) { 
-          return __.xScale(d[0]) - __.y_axis_offset; 
+          return __.xScale(d[0]) - __.bar_width / 2;
         })
         .attr("width", __.bar_width)
         //attention TODO: this get then overridden by the transition
@@ -649,7 +649,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
 
     function transitionBarsV (__) {
       return this.delay(__.delay)
-        .attr("x", function(d) { return __.xScale(d[0]); })
+        .attr("x", function(d) { return __.xScale(d[0]) + __.barOffSet; })
         .attr("y", function(d) { return __.yScale(d[1]); })
         .attr("height", function(d) { return __.h - __.yScale(d[1]); });
     }
@@ -657,7 +657,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
     function transitionTimeBarsV (__) {
       return this.delay(__.delay)
         .attr("x", function(d) { 
-          return __.xScale(d[0]) - __.y_axis_offset; 
+          return __.xScale(d[0]) - __.bar_width / 2;
         })
         .attr("y", function(d) { return __.yScale(d[1]); })
         .attr("height", function(d) { return __.h - __.yScale(d[1]); });
@@ -855,6 +855,7 @@ define('bar/bar',[
 
       if (__.x_scale == 'time') {
         __.bar_width = (__.w / data[0].length) - .5;
+        __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
       }
 
       self.chartScaffolding.call(self, selection, __, 'bars');
