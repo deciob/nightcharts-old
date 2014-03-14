@@ -21,9 +21,8 @@ define([
       });
 
       barchart = chart.Bar()
-        .margin({left: 80, right: 70, bottom: 25})
-        .width(600)
-        .height(200)
+        .margin({left: 50, bottom: 25})
+        .ratio(.3)
         .duration(0)
         .x_scale('time')
         .date_type('string') // or 'epoc'

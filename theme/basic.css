@@ -39,6 +39,10 @@ section, footer {
   margin-bottom: 50px;
 }
 
+div.viz {
+  width: 600px;
+}
+
 section.title h1 {
   margin: 0;
 }

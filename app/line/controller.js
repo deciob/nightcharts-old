@@ -40,10 +40,8 @@ define([
       }
 
       linechart = chart.Line()
-        .margin({left: 80, right: 70, bottom: 25})
-        .width(600)
-        .height(200)
         .y_axis_offset(6)
+        .ratio(.3)
         .duration(0)
         .date_format('%b, %Y')
         .overlapping_charts({ 
