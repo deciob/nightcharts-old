@@ -10130,7 +10130,6 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
       };
   }
 
-
   // For each attribute in `state` it sets a getter-setter function 
   // on `obj`.
   // Accepts one level nested `state` objects.
@@ -10363,8 +10362,7 @@ define('mixins/scale_helpers', [
       max = min_max.max || utils.getMinMaxValues(__.data).max;
       return this.range(range).domain([min, max]);
     } else {
-      min_max = force_scale_bounds(__.data);
-      return this.range(range).domain([min_max.min, min_max.max]);
+      throw new Error("force_scale_bounds wrong type");
     }
   }
 
@@ -10421,6 +10419,9 @@ define('mixins/scale_helpers', [
     this.setScales = setScale;
     this.applyScale = applyScale;
     this.applyScales = applyScale;
+    // private methods, exposed for testing
+    this._applyLinearScale = _applyLinearScale;
+    this._getRange = _getRange;
     return this;
   };
 

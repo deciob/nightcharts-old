@@ -16,20 +16,19 @@ define([
 
   });
   
-  describe('mixins/data_helpers', function(){
+  describe('#mixins/data_helpers/normalizeData', function(){
     
-    it('parsed_data should contain time objects', function(){
+    it('should return an an array with time objects', function(){
       var __ = utils.extend(base_config, {
         x_scale: 'time',
         date_type: 'string',
         date_format: '%b, %e'
       });
       var parsed_data = data_helpers.normalizeData(data_string, __);
-      console.log(parsed_data[0][2][0])
       assert.isTrue( parsed_data[0][2][0].getMonth() == 9 );
     });
 
-    it('parsed_data should contain time objects part 2', function(){
+    it('should return an an array with time objects', function(){
       var __ = utils.extend(base_config, {
         x_scale: 'time',
         date_chart: true, 
