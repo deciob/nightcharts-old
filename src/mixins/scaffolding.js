@@ -4,6 +4,8 @@ define('mixins/scaffolding', [
 ], function (d3, utils) {
 
   function axisScaffolding (data, __) {
+
+    this.setDimensions();
     
     // Scales are functions that map from an input domain to an output range.
     this.xScale = this.setScale(__.x_scale)();

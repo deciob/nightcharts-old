@@ -39,6 +39,7 @@ define('line/line',[
 
       self.__ = __;
 
+      self.__.selection = selection;
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'lines');
       self.lineScaffolding.call(self, __);

@@ -10040,6 +10040,14 @@ define('base_config', [
     
     return {
       // layout.
+
+      dimensions: function (selector) {
+        var width = parseInt(d3.select(selector).style('width')),
+            ratio = .6,
+            height = width * ratio;
+        return {width: width, height: height, ratio: ratio};
+      },
+
       margin: {top: 20, right: 20, bottom: 40, left: 40},
       width: 500,
       height: 400,
@@ -10276,14 +10284,18 @@ define('mixins/layout_helpers', [
   "utils/utils"
 ], function (d3, utils) {
 
+  // TODO: these 2 functions could be merged and `dimensions` only called once.
+
   function w () {
-    var __ = this.__;
-    return __.width - __.margin.right - __.margin.left; 
+    var __ = this.__,
+       dim = __.dimensions(__.selection);
+    return dim.width - __.margin.right - __.margin.left;
   };
       
   function h () {
-    var __ = this.__;
-    return __.height - __.margin.top - __.margin.bottom; 
+    var __ = this.__,
+       dim = __.dimensions(__.selection);
+    return dim.height - __.margin.top - __.margin.bottom;
   };
 
   return function () {
@@ -10654,7 +10666,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
 
     function transitionBarsV (__) {
       return this.delay(__.delay)
-        .attr("x", function(d) { return __.xScale(d[0]) + __.barOffSet; })
+        .attr("x", function(d) { return __.xScale(d[0]); })
         .attr("y", function(d) { return __.yScale(d[1]); })
         .attr("height", function(d) { return __.h - __.yScale(d[1]); });
     }
@@ -11014,6 +11026,7 @@ define('line/line',[
 
       self.__ = __;
 
+      self.__.selection = selection;
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'lines');
       self.lineScaffolding.call(self, __);

@@ -41,6 +41,7 @@ define('bar/bar',[
 
       self.__ = __;
 
+      self.__.selection = selection;
       self.axisScaffolding.call(self, data, __);
 
       if (__.x_scale == 'time') {

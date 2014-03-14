@@ -36,7 +36,8 @@ define('circle/circle',[
           circles;
 
       self.__ = __;
-
+      
+      self.__.selection = selection;
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'circles');
       self.circleScaffolding.call(self, __);

@@ -20,8 +20,9 @@ define('base_config', [
     return {
       // layout.
       margin: {top: 20, right: 20, bottom: 40, left: 40},
-      width: 500,
-      height: 400,
+      width: void 0,
+      height: void 0, // if set, height has precedence on ratio
+      ratio: .4,
       vertical: true,
       // One of: ordinal, linear, time
       x_scale: 'ordinal',

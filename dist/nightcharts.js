@@ -36,8 +36,9 @@ define('base_config', [
     return {
       // layout.
       margin: {top: 20, right: 20, bottom: 40, left: 40},
-      width: 500,
-      height: 400,
+      width: void 0,
+      height: void 0, // if set, height has precedence on ratio
+      ratio: .4,
       vertical: true,
       // One of: ordinal, linear, time
       x_scale: 'ordinal',
@@ -271,6 +272,18 @@ define('mixins/layout_helpers', [
   "utils/utils"
 ], function (d3, utils) {
 
+  // TODO: unit test.
+  function setDimensions () {
+    var __ = this.__;
+    if ( __.width === undefined ) {
+      __.width  = +__.selection.style('width').replace(/[^0-9]+/g, '');
+      __.height = __.height || __.width * __.ratio;
+    } else if ( __.width && __.height === undefined) {
+      __.height = __.width * __.ratio;
+    }
+    return this;
+  }
+
   function w () {
     var __ = this.__;
     return __.width - __.margin.right - __.margin.left; 
@@ -282,6 +295,7 @@ define('mixins/layout_helpers', [
   };
 
   return function () {
+    this.setDimensions = setDimensions;
     this.w = w;
     this.h = h;
     return this;
@@ -493,6 +507,8 @@ define('mixins/scaffolding', [
 ], function (d3, utils) {
 
   function axisScaffolding (data, __) {
+
+    this.setDimensions();
     
     // Scales are functions that map from an input domain to an output range.
     this.xScale = this.setScale(__.x_scale)();
@@ -649,7 +665,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
 
     function transitionBarsV (__) {
       return this.delay(__.delay)
-        .attr("x", function(d) { return __.xScale(d[0]) + __.barOffSet; })
+        .attr("x", function(d) { return __.xScale(d[0]); })
         .attr("y", function(d) { return __.yScale(d[1]); })
         .attr("height", function(d) { return __.h - __.yScale(d[1]); });
     }
@@ -851,6 +867,7 @@ define('bar/bar',[
 
       self.__ = __;
 
+      self.__.selection = selection;
       self.axisScaffolding.call(self, data, __);
 
       if (__.x_scale == 'time') {
@@ -1009,6 +1026,7 @@ define('line/line',[
 
       self.__ = __;
 
+      self.__.selection = selection;
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'lines');
       self.lineScaffolding.call(self, __);
@@ -1100,7 +1118,8 @@ define('circle/circle',[
           circles;
 
       self.__ = __;
-
+      
+      self.__.selection = selection;
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'circles');
       self.circleScaffolding.call(self, __);
