@@ -18,7 +18,7 @@ define([
   
   describe('#mixins/data_helpers/normalizeData', function(){
     
-    it('should return an an array with time objects', function(){
+    it('should return an array with time objects', function(){
       var __ = utils.extend(base_config, {
         x_scale: 'time',
         date_type: 'string',
@@ -28,7 +28,7 @@ define([
       assert.isTrue( parsed_data[0][2][0].getMonth() == 9 );
     });
 
-    it('should return an an array with time objects', function(){
+    it('should return an array with time objects', function(){
       var __ = utils.extend(base_config, {
         x_scale: 'time',
         date_chart: true, 
@@ -36,6 +36,14 @@ define([
       });
       var parsed_data = data_helpers.normalizeData(data_epoch, __);
       assert.isFunction( parsed_data[0][2][0].getYear );
+    });
+
+    it('should NOT return an array with time objects', function(){
+      var __ = utils.extend(base_config, {
+        x_scale: 'linear',
+      });
+      var parsed_data = data_helpers.normalizeData(data_epoch, __);
+      assert.isUndefined( parsed_data[0][2][0].getYear );
     });
 
   });
