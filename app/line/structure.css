@@ -17,6 +17,15 @@
 
 #line-viz .line {
   fill: none;
-  stroke: #3A520F;
-  stroke-width: 1.5px;
+  stroke: #FF530D;
+  stroke-width: 2px;
 }
+
+circle.dot {
+  fill: #557AD4;
+}
+circle.dot:hover {
+  stroke: #ACB9D4;
+  stroke-width: 12px;
+}
+

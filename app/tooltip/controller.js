@@ -23,10 +23,11 @@ define([
     d3.json(args.data_url, function (err, data) {
       
       data = data.year.map( function(year, index) {
-        return [year, data.urban_pop_average_annual_rate_change[index]];
+        var rc = data.urban_pop_average_annual_rate_change[index];
+        return [year, rc];
       });
 
-      barchart = chart.bar()
+      barchart = chart.Bar()
         .margin({bottom: 35})
         .width(600)
         .height(200)
@@ -35,7 +36,7 @@ define([
         })
         .duration(0)
         .tooltip(tooltip_conf);
-      chart.draw(barchart, selection, data);
+      chart.draw(barchart, selection, [data]);
     });
 
   };

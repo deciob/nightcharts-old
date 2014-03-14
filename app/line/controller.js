@@ -9,17 +9,16 @@ define([
   var lineController = function (args) {
     var selection = d3.select(args.selector),
       linechart,
+      data_points,
       draw;
 
     d3.json(args.data_url, function (err, data) {
 
       var parse = d3.time.format("%b, %Y").parse;
-      var formatted_data = []
-      var max = 0;
+      var formatted_data = [];
       
       data.temperature.forEach( function (t, index) {
         var m = d3.max( t, function(d) {return parseFloat(d); } );
-        if (m > max) { max = m; }
         formatted_data.push(
           data.month.map( function (m, i) {
             return [m, data.temperature[index][i]];
@@ -27,16 +26,33 @@ define([
         )
       });
 
-      linechart = chart.line()
+      var fd = [ formatted_data[1].map(function(d) {
+        return [d[0]+', 2012', d[1]] }) ];
+
+      
+      var tooltip_format = d3.time.format("%b, %Y");
+      var tooltip_conf = {
+        html: function (d, i) {
+          return '<b>Date:</b> ' 
+            + tooltip_format(d[0]) + ' <br> <b>Temperature:</b> ' + d[1] + ' C';
+        },
+        offset: [-12, 0]  // [top, left]
+      }
+
+      linechart = chart.Line()
         .margin({left: 80, right: 70, bottom: 25})
         .width(600)
         .height(200)
+        .y_axis_offset(6)
         .duration(0)
-        .barOffSet(140)
-        //.parseDate(parse)
-        .max(max);
-        //.x_axis({tickFormat: d3.time.format("%b")});
-      chart.draw(linechart, selection, formatted_data);
+        .date_format('%b, %Y')
+        .overlapping_charts({ 
+          names: ['circles'],
+          options: { circles: { tooltip: tooltip_conf } }
+        })
+        .x_axis({tickFormat: d3.time.format("%b")});
+      chart.draw(linechart, selection, fd);
+
     });
 
   };
