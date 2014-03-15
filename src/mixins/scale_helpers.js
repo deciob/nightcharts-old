@@ -6,11 +6,11 @@ define('mixins/scale_helpers', [
   function _getRange (axis, __) {
     var vertical = __.vertical;
     if ( axis == 'x') {
-      return [0, __.w];
+      return [0, __.w()];
     } else if ( axis == 'y' && vertical ) {
-      return [__.h, 0];
+      return [__.h(), 0];
     } else if ( axis == 'y' && !vertical ) {
-      return [0, __.w];
+      return [0, __.w()];
     }
   }
 

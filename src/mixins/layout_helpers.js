@@ -7,7 +7,7 @@ define('mixins/layout_helpers', [
   function setDimensions () {
     var __ = this.__;
     if ( __.width === undefined ) {
-      __.width  = +__.selection.style('width').replace(/[^0-9]+/g, '');
+      __.width  = +__.selection.style('width').replace('px', '');
       __.height = __.height || __.width * __.ratio;
     } else if ( __.width && __.height === undefined) {
       __.height = __.width * __.ratio;
@@ -16,12 +16,12 @@ define('mixins/layout_helpers', [
   }
 
   function w () {
-    var __ = this.__;
+    var __ = this;
     return __.width - __.margin.right - __.margin.left; 
   };
       
   function h () {
-    var __ = this.__;
+    var __ = this;
     return __.height - __.margin.top - __.margin.bottom; 
   };
 

@@ -26,8 +26,8 @@ define([
       var __ =  utils.extend( base_config, {
                   vertical: true,
                   data: data_string,
-                  w: 200,
-                  h: 200,
+                  w: function () { return 200; },
+                  h: function () { return 200; },
                 }),
                 scale = scale_helpers.setScale('linear')(),
                 range_values = scale_helpers._getRange('x', __),
@@ -41,8 +41,8 @@ define([
       var __ =  utils.extend( base_config, {
                   vertical: true,
                   data: data_string,
-                  w: 200,
-                  h: 200,
+                  w: function () { return 200; },
+                  h: function () { return 200; },
                   force_scale_bounds: true
                 }),
                 scale = scale_helpers.setScale('linear')(),
@@ -57,8 +57,8 @@ define([
       var __ =  utils.extend( base_config, {
                   vertical: true,
                   data: data_string,
-                  w: 200,
-                  h: 200,
+                  w: function () { return 200; },
+                  h: function () { return 200; },
                   force_scale_bounds: {min: 5, max: 50}
                 }),
                 scale = scale_helpers.setScale('linear')(),
@@ -73,8 +73,8 @@ define([
       var __ =  utils.extend( base_config, {
                   vertical: true,
                   data: data_string,
-                  w: 200,
-                  h: 200,
+                  w: function () { return 200; },
+                  h: function () { return 200; },
                   force_scale_bounds: {min: 5}
                 }),
                 scale = scale_helpers.setScale('linear')(),

@@ -5,7 +5,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
         .attr("class", "bar")
         .attr("x", function(d) { return __.xScale(d[0]); })
         .attr("width", __.xScale.rangeBand())
-        .attr("y", __.h + __.barOffSet)
+        .attr("y", __.h() + __.barOffSet)
         .attr("height", 0);
     }
 
@@ -17,7 +17,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
         })
         .attr("width", __.bar_width)
         //attention TODO: this get then overridden by the transition
-        .attr("y", __.h + __.barOffSet) 
+        .attr("y", __.h() + __.barOffSet) 
         .attr("height", 0);
     }
 
@@ -44,7 +44,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
       return this.delay(__.delay)
         .attr("x", function(d) { return __.xScale(d[0]); })
         .attr("y", function(d) { return __.yScale(d[1]); })
-        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+        .attr("height", function(d) { return __.h() - __.yScale(d[1]); });
     }
 
     function transitionTimeBarsV (__) {
@@ -53,7 +53,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
           return __.xScale(d[0]) - __.bar_width / 2;
         })
         .attr("y", function(d) { return __.yScale(d[1]); })
-        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+        .attr("height", function(d) { return __.h() - __.yScale(d[1]); });
     }
 
     function transitionBarsH (__) {

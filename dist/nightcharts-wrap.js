@@ -10040,17 +10040,10 @@ define('base_config', [
     
     return {
       // layout.
-
-      dimensions: function (selector) {
-        var width = parseInt(d3.select(selector).style('width')),
-            ratio = .6,
-            height = width * ratio;
-        return {width: width, height: height, ratio: ratio};
-      },
-
       margin: {top: 20, right: 20, bottom: 40, left: 40},
-      width: 500,
-      height: 400,
+      width: void 0,
+      height: void 0, // if set, height has precedence on ratio
+      ratio: .4,
       vertical: true,
       // One of: ordinal, linear, time
       x_scale: 'ordinal',
@@ -10114,11 +10107,15 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     return copy;
   }
 
-  function extend (target, source, use_clone) {
+  function extend (target, source, use_clone, not_override) {
     var use_clone = (typeof use_clone === "undefined") ? true : use_clone,
         target_clone = use_clone ? clone(target): target;
     for(prop in source) {
-      target_clone[prop] = source[prop];
+      if (not_override) {
+        target_clone[prop] = target_clone[prop] ? target_clone[prop] : source[prop];
+      } else {
+        target_clone[prop] = source[prop];
+      }
     }
     return target_clone;
   }
@@ -10284,21 +10281,30 @@ define('mixins/layout_helpers', [
   "utils/utils"
 ], function (d3, utils) {
 
-  // TODO: these 2 functions could be merged and `dimensions` only called once.
+  // TODO: unit test.
+  function setDimensions () {
+    var __ = this.__;
+    if ( __.width === undefined ) {
+      __.width  = +__.selection.style('width').replace('px', '');
+      __.height = __.height || __.width * __.ratio;
+    } else if ( __.width && __.height === undefined) {
+      __.height = __.width * __.ratio;
+    }
+    return this;
+  }
 
   function w () {
-    var __ = this.__,
-       dim = __.dimensions(__.selection);
-    return dim.width - __.margin.right - __.margin.left;
+    var __ = this;
+    return __.width - __.margin.right - __.margin.left; 
   };
       
   function h () {
-    var __ = this.__,
-       dim = __.dimensions(__.selection);
-    return dim.height - __.margin.top - __.margin.bottom;
+    var __ = this;
+    return __.height - __.margin.top - __.margin.bottom; 
   };
 
   return function () {
+    this.setDimensions = setDimensions;
     this.w = w;
     this.h = h;
     return this;
@@ -10313,11 +10319,11 @@ define('mixins/scale_helpers', [
   function _getRange (axis, __) {
     var vertical = __.vertical;
     if ( axis == 'x') {
-      return [0, __.w];
+      return [0, __.w()];
     } else if ( axis == 'y' && vertical ) {
-      return [__.h, 0];
+      return [__.h(), 0];
     } else if ( axis == 'y' && !vertical ) {
-      return [0, __.w];
+      return [0, __.w()];
     }
   }
 
@@ -10533,10 +10539,12 @@ define('mixins/scaffolding', [
         xScale: this.xScale,
         xAxis: this.xAxis,
         yAxis: this.yAxis,
-        w: this.w(),
-        h: this.h(),
+        // From layout_helpers:
+        w: this.w,
+        h: this.h,
       }, 
-      false
+      false,  // Do not clone
+      true   // Do not override existing values
     );
 
     this.applyScale.call( this.xScale, 'x', __.x_scale, __ );
@@ -10629,7 +10637,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
         .attr("class", "bar")
         .attr("x", function(d) { return __.xScale(d[0]); })
         .attr("width", __.xScale.rangeBand())
-        .attr("y", __.h + __.barOffSet)
+        .attr("y", __.h() + __.barOffSet)
         .attr("height", 0);
     }
 
@@ -10641,7 +10649,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
         })
         .attr("width", __.bar_width)
         //attention TODO: this get then overridden by the transition
-        .attr("y", __.h + __.barOffSet) 
+        .attr("y", __.h() + __.barOffSet) 
         .attr("height", 0);
     }
 
@@ -10668,7 +10676,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
       return this.delay(__.delay)
         .attr("x", function(d) { return __.xScale(d[0]); })
         .attr("y", function(d) { return __.yScale(d[1]); })
-        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+        .attr("height", function(d) { return __.h() - __.yScale(d[1]); });
     }
 
     function transitionTimeBarsV (__) {
@@ -10677,7 +10685,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
           return __.xScale(d[0]) - __.bar_width / 2;
         })
         .attr("y", function(d) { return __.yScale(d[1]); })
-        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+        .attr("height", function(d) { return __.h() - __.yScale(d[1]); });
     }
 
     function transitionBarsH (__) {
@@ -10868,12 +10876,21 @@ define('bar/bar',[
 
       self.__ = __;
 
-      self.axisScaffolding.call(self, data, __);
+      self.__.selection = selection;
+      self.setDimensions();
+      __.w = this.w;
+      __.h = this.h;
 
       if (__.x_scale == 'time') {
-        __.bar_width = (__.w / data[0].length) - .5;
+        __.bar_width = (__.w() / data[0].length) * .9;
         __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
+        //TODO: set events?
+        __.margin = utils.extend(__.margin, {
+            left: __.margin.left + __.y_axis_offset,
+            right: __.margin.right + __.y_axis_offset
+        });
       }
+      self.axisScaffolding.call(self, data, __);
 
       self.chartScaffolding.call(self, selection, __, 'bars');
       self.barScaffolding.call(self, __);
@@ -11027,6 +11044,7 @@ define('line/line',[
       self.__ = __;
 
       self.__.selection = selection;
+      self.setDimensions();
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'lines');
       self.lineScaffolding.call(self, __);
@@ -11118,7 +11136,9 @@ define('circle/circle',[
           circles;
 
       self.__ = __;
-
+      
+      self.__.selection = selection;
+      self.setDimensions();
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'circles');
       self.circleScaffolding.call(self, __);

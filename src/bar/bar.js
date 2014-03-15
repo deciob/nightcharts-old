@@ -42,12 +42,20 @@ define('bar/bar',[
       self.__ = __;
 
       self.__.selection = selection;
-      self.axisScaffolding.call(self, data, __);
+      self.setDimensions();
+      __.w = this.w;
+      __.h = this.h;
 
       if (__.x_scale == 'time') {
-        __.bar_width = (__.w / data[0].length) - .5;
+        __.bar_width = (__.w() / data[0].length) * .9;
         __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
+        //TODO: set events?
+        __.margin = utils.extend(__.margin, {
+            left: __.margin.left + __.y_axis_offset,
+            right: __.margin.right + __.y_axis_offset
+        });
       }
+      self.axisScaffolding.call(self, data, __);
 
       self.chartScaffolding.call(self, selection, __, 'bars');
       self.barScaffolding.call(self, __);
