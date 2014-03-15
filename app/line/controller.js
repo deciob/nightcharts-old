@@ -41,7 +41,6 @@ define([
 
       linechart = chart.Line()
         .y_axis_offset(6)
-        .ratio(.3)
         .duration(0)
         .date_format('%b, %Y')
         .overlapping_charts({ 

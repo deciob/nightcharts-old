@@ -29,7 +29,6 @@ define([
 
       barchart = chart.Bar()
         .margin({bottom: 35})
-        .ratio(.3)
         .x_axis({
           tickValues: ['1950-1955', '2045-2050']
         })

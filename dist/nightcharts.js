@@ -102,11 +102,15 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     return copy;
   }
 
-  function extend (target, source, use_clone) {
+  function extend (target, source, use_clone, not_override) {
     var use_clone = (typeof use_clone === "undefined") ? true : use_clone,
         target_clone = use_clone ? clone(target): target;
     for(prop in source) {
-      target_clone[prop] = source[prop];
+      if (not_override) {
+        target_clone[prop] = target_clone[prop] ? target_clone[prop] : source[prop];
+      } else {
+        target_clone[prop] = source[prop];
+      }
     }
     return target_clone;
   }
@@ -276,7 +280,7 @@ define('mixins/layout_helpers', [
   function setDimensions () {
     var __ = this.__;
     if ( __.width === undefined ) {
-      __.width  = +__.selection.style('width').replace(/[^0-9]+/g, '');
+      __.width  = +__.selection.style('width').replace('px', '');
       __.height = __.height || __.width * __.ratio;
     } else if ( __.width && __.height === undefined) {
       __.height = __.width * __.ratio;
@@ -285,12 +289,12 @@ define('mixins/layout_helpers', [
   }
 
   function w () {
-    var __ = this.__;
+    var __ = this;
     return __.width - __.margin.right - __.margin.left; 
   };
       
   function h () {
-    var __ = this.__;
+    var __ = this;
     return __.height - __.margin.top - __.margin.bottom; 
   };
 
@@ -310,11 +314,11 @@ define('mixins/scale_helpers', [
   function _getRange (axis, __) {
     var vertical = __.vertical;
     if ( axis == 'x') {
-      return [0, __.w];
+      return [0, __.w()];
     } else if ( axis == 'y' && vertical ) {
-      return [__.h, 0];
+      return [__.h(), 0];
     } else if ( axis == 'y' && !vertical ) {
-      return [0, __.w];
+      return [0, __.w()];
     }
   }
 
@@ -507,8 +511,6 @@ define('mixins/scaffolding', [
 ], function (d3, utils) {
 
   function axisScaffolding (data, __) {
-
-    this.setDimensions();
     
     // Scales are functions that map from an input domain to an output range.
     this.xScale = this.setScale(__.x_scale)();
@@ -532,10 +534,12 @@ define('mixins/scaffolding', [
         xScale: this.xScale,
         xAxis: this.xAxis,
         yAxis: this.yAxis,
-        w: this.w(),
-        h: this.h(),
+        // From layout_helpers:
+        w: this.w,
+        h: this.h,
       }, 
-      false
+      false,  // Do not clone
+      true   // Do not override existing values
     );
 
     this.applyScale.call( this.xScale, 'x', __.x_scale, __ );
@@ -628,7 +632,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
         .attr("class", "bar")
         .attr("x", function(d) { return __.xScale(d[0]); })
         .attr("width", __.xScale.rangeBand())
-        .attr("y", __.h + __.barOffSet)
+        .attr("y", __.h() + __.barOffSet)
         .attr("height", 0);
     }
 
@@ -640,7 +644,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
         })
         .attr("width", __.bar_width)
         //attention TODO: this get then overridden by the transition
-        .attr("y", __.h + __.barOffSet) 
+        .attr("y", __.h() + __.barOffSet) 
         .attr("height", 0);
     }
 
@@ -667,7 +671,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
       return this.delay(__.delay)
         .attr("x", function(d) { return __.xScale(d[0]); })
         .attr("y", function(d) { return __.yScale(d[1]); })
-        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+        .attr("height", function(d) { return __.h() - __.yScale(d[1]); });
     }
 
     function transitionTimeBarsV (__) {
@@ -676,7 +680,7 @@ define('bar/bar_helpers',["d3", "utils/utils"], function(d3, utils) {
           return __.xScale(d[0]) - __.bar_width / 2;
         })
         .attr("y", function(d) { return __.yScale(d[1]); })
-        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+        .attr("height", function(d) { return __.h() - __.yScale(d[1]); });
     }
 
     function transitionBarsH (__) {
@@ -868,12 +872,21 @@ define('bar/bar',[
       self.__ = __;
 
       self.__.selection = selection;
-      self.axisScaffolding.call(self, data, __);
+      self.setDimensions();
+      __.w = this.w;
+      __.h = this.h;
 
       if (__.x_scale == 'time') {
-        __.bar_width = (__.w / data[0].length) - .5;
+        __.bar_width = (__.w() / data[0].length) * .9;
         __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
+        //TODO: set events?
+        __.margin = utils.extend(__.margin, {
+            left: __.margin.left + __.y_axis_offset,
+            right: __.margin.right + __.y_axis_offset
+        });
+        //self.setDimensions();
       }
+      self.axisScaffolding.call(self, data, __);
 
       self.chartScaffolding.call(self, selection, __, 'bars');
       self.barScaffolding.call(self, __);
@@ -1027,6 +1040,7 @@ define('line/line',[
       self.__ = __;
 
       self.__.selection = selection;
+      self.setDimensions();
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'lines');
       self.lineScaffolding.call(self, __);
@@ -1120,6 +1134,7 @@ define('circle/circle',[
       self.__ = __;
       
       self.__.selection = selection;
+      self.setDimensions();
       self.axisScaffolding.call(self, data, __);
       self.chartScaffolding.call(self, selection, __, 'circles');
       self.circleScaffolding.call(self, __);
