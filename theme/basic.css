@@ -56,7 +56,7 @@ section.viz {
   padding: 20px 0;
 }
 
-section.viz:nth-of-type(odd) {
+section.viz:nth-of-type(even) {
   background: #fafafa;
 }
 
