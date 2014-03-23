@@ -476,13 +476,14 @@ define('mixins/axis', [
   }
 
   function _transitionXAxisH (__) {
-    return this.attr("transform", "translate(" + 10 +
-      "," + __.h + ")").call(__.xAxis);
+    return this
+      .attr("transform", "translate(" + 10 + "," + __.h + ")")
+      .call(__.xAxis);
   }
 
   function _transitionXAxis (__) {
     if ( !__.x_axis.show ) { return; }
-    __.quantitative_scale
+    __.quantitative_scale //?????????????
     if (__.quantitative_scale == 'y') {
       return _transitionXAxisV.call(this, __);
     } else if (__.quantitative_scale == 'x') {
@@ -568,7 +569,7 @@ define('mixins/chart', [
 
     // Update the x axis.
     self.transitionAxis.call(
-      this.transition.selectAll('.x.axis'), 'x', __);
+      self.transition.selectAll('.x.axis'), 'x', __);
 
     return self;
   };

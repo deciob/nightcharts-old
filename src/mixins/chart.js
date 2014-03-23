@@ -48,7 +48,7 @@ define('mixins/chart', [
 
     // Update the x axis.
     self.transitionAxis.call(
-      this.transition.selectAll('.x.axis'), 'x', __);
+      self.transition.selectAll('.x.axis'), 'x', __);
 
     return self;
   };

@@ -801,13 +801,14 @@ define(<span class="string">'mixins/axis'</span>, [
   }
 
   <span class="function"><span class="keyword">function</span> <span class="title">_transitionXAxisH</span> <span class="params">(__)</span> {</span>
-    <span class="keyword">return</span> <span class="keyword">this</span>.attr(<span class="string">"transform"</span>, <span class="string">"translate("</span> + <span class="number">10</span> +
-      <span class="string">","</span> + __.h + <span class="string">")"</span>).call(__.xAxis);
+    <span class="keyword">return</span> <span class="keyword">this</span>
+      .attr(<span class="string">"transform"</span>, <span class="string">"translate("</span> + <span class="number">10</span> + <span class="string">","</span> + __.h + <span class="string">")"</span>)
+      .call(__.xAxis);
   }
 
   <span class="function"><span class="keyword">function</span> <span class="title">_transitionXAxis</span> <span class="params">(__)</span> {</span>
     <span class="keyword">if</span> ( !__.x_axis.show ) { <span class="keyword">return</span>; }
-    __.quantitative_scale
+    __.quantitative_scale <span class="comment">//?????????????</span>
     <span class="keyword">if</span> (__.quantitative_scale == <span class="string">'y'</span>) {
       <span class="keyword">return</span> _transitionXAxisV.call(<span class="keyword">this</span>, __);
     } <span class="keyword">else</span> <span class="keyword">if</span> (__.quantitative_scale == <span class="string">'x'</span>) {
@@ -1015,7 +1016,7 @@ define(<span class="string">'mixins/chart'</span>, [
             </div>
             
             <div class="content"><div class='highlight'><pre>    self.transitionAxis.call(
-      <span class="keyword">this</span>.transition.selectAll(<span class="string">'.x.axis'</span>), <span class="string">'x'</span>, __);
+      self.transition.selectAll(<span class="string">'.x.axis'</span>), <span class="string">'x'</span>, __);
 
     <span class="keyword">return</span> self;
   };
