@@ -64,21 +64,18 @@ define('base_config', [
         tickValues: void 0,
       },
       y_axis_offset: 0,
-//      // if x_scale: 'time'
+      // if x_scale: 'time'
       date_type: 'string', // or 'epoc'
       date_format: '%Y',
-//      // false or string: 'month', 'year', etc.
-//      // used for extending the timescale on the margins.
+      // false or string: 'month', 'year', etc.
+      // used for extending the timescale on the margins.
       date_offset: false,
       duration: 900,  // transition duration
-//      colour: 'LightSteelBlue',
-//      // data
-//      max: void 0,         // Max value for the linear scale
-//      invert_data: false,  // Data sorting
+      invert_data: false,  // Data sorting
       categoricalValue: function (d) { return d[0]; },
       quantativeValue: function (d) { return d[1]; },
       // events
-//      handleClick: function (d, i) { return void 0; },
+      handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
       // can pass boolean or object with d3-tip configuration.
@@ -175,9 +172,10 @@ define('utils/mixins',["d3", "d3_tip"], function(d3, d3_tip) {
     return tip;
   }
 
-  function getScaffoldingMethod (chart_name) {
-    var name = chart_name.substring(0, chart_name.length - 1);
-    return this[name+'Scaffolding'];
+  function getGraphHelperMethod (chart_name) {
+    var name = chart_name.replace(/(?:^|\s)\S/g, 
+      function(a) { return a.toUpperCase(); });
+    return this['set' + name];
   }
 
   function getMinMaxValues (data) {
@@ -199,7 +197,7 @@ define('utils/mixins',["d3", "d3_tip"], function(d3, d3_tip) {
     this.getset = getset;
     this.endall = endall;
     this.tip = tip;
-    this.getScaffoldingMethod = getScaffoldingMethod;
+    this.getGraphHelperMethod = getGraphHelperMethod;
     this.getMinMaxValues = getMinMaxValues;
     return this;
   };
@@ -213,13 +211,17 @@ define('mixins/data', [
     return d[0];
   }
 
-  function delay (__) {
-    var duration = __.duration,
+  function setDelay () {
+    var __ = this.__,
+        duration = __.duration,
         data = __.data;
     if (duration == undefined) { throw new Error('__.duration unset')}
-    return function (d, i) {
+    __.delay = function (d, i) {
+      // FIXME: only referring to the first dataset, 
+      // while setting the delay on all!
       return i / data[0].length * duration;
     }
+    return this;
   };
 
   function normalizeData () {
@@ -258,7 +260,7 @@ define('mixins/data', [
 
   return function () {
     this.dataIdentifier = dataIdentifier;
-    //this.delay = delay;
+    this.setDelay = setDelay;
     this.normalizeData = normalizeData;
     return this;
   };
@@ -279,8 +281,8 @@ define('mixins/layout', [
     } else if ( __.width && __.height === undefined) {
       __.height = __.width * __.ratio;
     }
-    setW();
-    setH();
+    this.setW();
+    this.setH();
     return this;
   }
 
@@ -432,6 +434,7 @@ define('mixins/scale', [
   }
 
   function applyScales () {
+    var __ = this.__;
     this.applyScale.call( __.xScale, 'x', __.x_scale, __ );
     this.applyScale.call( __.yScale, 'y', __.y_scale, __ );
     return this;
@@ -700,77 +703,9 @@ define('bar/mixins',["d3"], function(d3) {
       }
     }
 
-    return function (orientation, __) {
-      this.createBars = createBars;
-      this.transitionBars = transitionBars;
-      return this;
-    };
-
-});
-
-
-// **The bar.bar module**
-
-define('bar/bar',[
-  "d3", 
-  "utils/mixins",
-  "bar/config", 
-  "mixins/data",
-  "mixins/layout",
-  "mixins/scale",
-  "mixins/axis",
-  "mixins/chart",
-  "bar/mixins",
-//  "bar/scaffolding",
-//  "line/scaffolding",
-], function(
-  d3, 
-  utils_mixins, 
-  default_config, 
-  data_mixins,
-  layout_mixins,
-  scale_mixins,
-  axis_mixins,
-  chart_mixins,
-  bar_mixins
-//  bar_scaffolding,
-//  line_scaffolding
-) {
-  
-  return function (user_config) {
-
-    var config = user_config || {},
-        utils  = utils_mixins()
-        extend = utils.extend,
-        getset = utils.getset,
-        __     = extend(default_config, config);
-
-    function Bar (selection) {
-
-      var self = this instanceof Bar
-               ? this
-               : new Bar(selection),
-          has_timescale = __.x_scale == 'time',
-          bars;
-
-      self.__        = __;
-      self.selection = selection;
-
-      self.normalizeData();
-      self.setDimensions();
-
-      if (has_timescale) { self.adjustDimensionsToTimeScale(); }
-
-      self.setScales();
-      self.setAxes();
-
-      __.delay = function (d, i) {
-        // Attention, delay can not be longer of transition time! Test!
-        return i / __.data.length * __.duration;
-      }
-
-      self.applyScales();
-      self.setChart('bars');
+    function setBars () {
+      var self = this,
+          __ = this.__;
 
       // Select the bar elements, if they exists.
       self.bars_g = self.g.select("g.bars").selectAll(".bars")
@@ -805,7 +740,74 @@ define('bar/bar',[
            .on('mouseout', self.tip.hide);
         }
       });
-//
+
+    }
+
+    return function (orientation, __) {
+      this.setBars = setBars;
+      this.transitionBars = transitionBars;
+      this.createBars = createBars;
+      return this;
+    };
+
+});
+
+
+// **The bar.bar module**
+
+define('bar/bar',[
+  "d3", 
+  "utils/mixins",
+  "bar/config", 
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "bar/mixins",
+], function(
+  d3, 
+  utils_mixins, 
+  default_config, 
+  data_mixins,
+  layout_mixins,
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  bar_mixins
+) {
+  
+  return function (user_config) {
+
+    var config = user_config || {},
+        utils  = utils_mixins(),
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config);
+
+    function Bar (selection) {
+
+      var self = this instanceof Bar
+               ? this
+               : new Bar(selection),
+          has_timescale = __.x_scale == 'time',
+          bars;
+
+      self.__        = __;
+      self.selection = selection;
+
+      self.normalizeData();
+      self.setDimensions();
+
+      if (has_timescale) { self.adjustDimensionsToTimeScale(); }
+
+      self.setScales();
+      self.setAxes();
+      self.setDelay();
+      self.applyScales();
+      self.setChart('bars');
+      self.setBars();
+
 //      __.overlapping_charts.names.forEach( function (chart_name) {
 //        utils.getScaffoldingMethod.call(self, chart_name).call(self, __);
 //      });
@@ -821,12 +823,10 @@ define('bar/bar',[
     axis_mixins.call(Bar.prototype);
     chart_mixins.call(Bar.prototype);
     bar_mixins.call(Bar.prototype);
-    //bar_scaffolding.call(Bar.prototype);
-    //line_scaffolding.call(Bar.prototype);
 
     Bar.prototype.adjustDimensionsToTimeScale = function () {
       __.bar_width = (__.w / __.data[0].length) * .9;
-      __.width += __.bar_width;
+      __.width += __.bar_width; //FIXME: this should be smarter!
       __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
       __.margin = utils.extend(__.margin, {
           left: __.margin.left + __.y_axis_offset,
@@ -841,13 +841,319 @@ define('bar/bar',[
 });
 
 
+// **The default configuration module for the line.line module**
+
+define('line/config',[
+  "d3", 
+  "base_config",
+  "utils/mixins",
+], function(d3, base_config, utils_mixins) {
+    
+  var config = {
+        x_scale: 'time',
+      },
+      utils = utils_mixins();
+
+  return utils.extend(base_config, config);
+  
+});
+
+
+define('line/mixins', ["d3"], function (d3) {
+
+  function setLines () {
+    var self = this,
+          __ = this.__;
+
+    // Select the line elements, if they exists.
+    self.lines_g = self.g.select('g.lines').selectAll(".lines")
+      .data(__.data, self.dataIdentifier);
+
+    // Exit phase (let us push out old lines before the new ones come in).
+    self.lines_g.exit()
+      .transition().duration(__.duration).style('opacity', 0).remove();
+
+    // Otherwise, create them.
+    self.lines_g.enter().append("g").each( function (data, i) {
+      var lines = d3.select(this).selectAll(".bar")
+            .data([data], self.dataIdentifier),
+          ov_options = __.overlapping_charts.options,
+          ov_line_options = ov_options ? ov_options.bars : void 0;
+
+      // Exit phase (let us push out old lines before the new ones come in).
+      lines.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();      
+
+      lines.enter().append("path")
+        .attr("class", "line")
+        .attr("d", self.line(__) )
+        .on('click', __.handleClick);
+      
+      if (__.tooltip) {
+        lines
+         .on('mouseover', self.tip.show)
+         .on('mouseout', self.tip.hide);
+      }
+        
+      //TODO
+      //And transition them.
+      //self.transitionLines
+      //  .call(transition.selectAll('.line'), 'vertical', params)
+      //  .call(utils.endall, data, __.handleTransitionEnd);
+
+    });
+
+    return this;
+  }
+
+  return function () {
+    this.setLines = setLines;
+    return this;
+  };
+
+});
+
+
+define('circle/mixins', ["d3"], function (d3, utils) {
+
+  function setCircles () {
+    var self = this,
+          __ = this.__;
+
+    // Select the circle elements, if they exists.
+    self.circles_g = self.g.select('g.circles').selectAll(".circles")
+      .data(__.data, self.dataIdentifier);
+
+    // Exit phase (let us push out old circles before the new ones come in).
+    self.circles_g.exit()
+      .transition().duration(__.duration).style('opacity', 0).remove();
+
+    // Otherwise, create them.
+    self.circles_g.enter().append("g").each( function (data, i) {
+      var circles = d3.select(this).selectAll(".circle")
+            .data(data, self.dataIdentifier),
+          tip,
+          ov_options = __.overlapping_charts.options,
+          ov_circle_options = ov_options ? ov_options.circles : void 0;
+
+      // Exit phase (let us push out old circles before the new ones come in).
+      circles.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();
+
+      // Otherwise, create them.
+      circles.enter().append("circle")
+        .attr("class", "dot")
+        .attr("r", ov_circle_options && ov_circle_options.r ? ov_circle_options.r : 4)
+        .attr("cx", function(d) { return __.xScale(d[0]); })
+        .attr("cy", function(d) { return __.yScale(d[1]); })
+        // TODO: this will need a fix if is an overlapping chart!
+        .on('click', __.handleClick); 
+
+      // Tooltips.
+      if (ov_circle_options && ov_circle_options.tooltip) {
+        tip = self.tip( ov_circle_options.tooltip );
+        self.gEnter.call(tip);
+      }
+      if (__.tooltip || ov_circle_options && ov_circle_options.tooltip) {
+        tip = tip || self.tip;
+        circles
+         .on('mouseover', tip.show)
+         .on('mouseout', tip.hide);
+      }
+
+    });
+    
+    //TODO
+    //And transition them.
+    //self.transitionCircles
+    //  .call(transition.selectAll('.circle'), 'vertical', params)
+    //  .call(utils.endall, data, __.handleTransitionEnd);
+
+    return this;
+  }
+
+  return function () {
+    this.setCircles = setCircles;
+    return this;
+  };
+
+});
+// **The line.line module**
+
+define('line/line',[
+  "d3", 
+  "utils/mixins",
+  "line/config", 
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "line/mixins",
+  "circle/mixins",
+], function(
+  d3, 
+  utils_mixins, 
+  default_config, 
+  data_mixins,
+  layout_mixins,
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  line_mixins,
+  circle_mixins
+) {
+  
+  return function (user_config) {
+
+    var config = user_config || {},
+        utils  = utils_mixins(),
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config);
+
+    function Line (selection) {
+
+      var self = this instanceof Line
+               ? this
+               : new Line(selection),
+          has_timescale = __.x_scale == 'time',
+          lines;
+
+      self.__ = __;
+      self.selection = selection;
+
+      self.normalizeData();
+      self.setDimensions();
+      self.setScales();
+      self.setAxes();
+      self.setDelay();
+      self.applyScales();
+      self.setChart('lines');
+      self.setLines();
+
+      __.overlapping_charts.names.forEach( function (chart_name) {
+        utils.getGraphHelperMethod.call(self, chart_name).call(self, __);
+      });
+
+      return selection;
+    }
+
+    getset(Line, __);
+    utils_mixins.call(Line.prototype);
+    data_mixins.call(Line.prototype);
+    layout_mixins.call(Line.prototype);
+    scale_mixins.call(Line.prototype);
+    axis_mixins.call(Line.prototype);
+    chart_mixins.call(Line.prototype);
+    line_mixins.call(Line.prototype);
+    circle_mixins.call(Line.prototype);
+
+    Line.prototype.line = function (__) {
+      return d3.svg.line().x(function(d, i) {
+        return __.xScale(d[0]);
+      }).y(function(d, i) {
+        return __.yScale(d[1]);
+      });
+    }
+
+    return Line;
+  }
+
+});
+
+
+// **The default configuration module for the point.point module**
+
+define('circle/config', [
+  "base_config",
+  "utils/mixins",
+], function(base_config, utils_mixins) {
+    
+  var config = {},
+      utils = utils_mixins();
+
+  return utils.extend(base_config, config);
+  
+});
+
+
+// **The circle.circle module**
+
+define('circle/circle',[
+  "d3", 
+  "utils/mixins",
+  "circle/config", 
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "circle/mixins",
+], function(
+  d3, 
+  utils_mixins, 
+  default_config, 
+  data_mixins,
+  layout_mixins,
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  circle_mixins
+) {
+  
+  return function (user_config) {
+
+    var config = user_config || {},
+        utils  = utils_mixins(),
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config);
+
+    function Circle (selection) {
+
+      var self = this instanceof Circle
+               ? this
+               : new Circle(selection),
+          has_timescale = __.x_scale == 'time',
+          circles;
+
+      self.__ = __;
+      self.selection = selection;
+
+      self.normalizeData();
+      self.setDimensions();
+      self.setScales();
+      self.setAxes();
+      self.setDelay();
+      self.applyScales();
+      self.setChart('circles');
+      self.setCircles();
+
+      return selection;
+    }
+
+    getset(Line, __);
+    utils_mixins.call(Circle.prototype);
+    data_mixins.call(Circle.prototype);
+    layout_mixins.call(Circle.prototype);
+    scale_mixins.call(Circle.prototype);
+    axis_mixins.call(Circle.prototype);
+    chart_mixins.call(Circle.prototype);
+    circle_mixins.call(Circle.prototype);
+
+    return Circle;
+  }
+
+});
+
+
 define('chart',[
   "d3", 
   "d3_tip",
   "draw",
   "base_config",
   "utils/mixins",
-  ////"utils/mixins",
   "mixins/data",
   "mixins/layout",
   "mixins/scale",
@@ -855,14 +1161,13 @@ define('chart',[
   "mixins/chart",
   "bar/config",
   "bar/mixins", 
-  //"bar/scaffolding",
-  "bar/bar"
-  //"line/config",
-  //"line/scaffolding",
-  //"line/line",
-  //"circle/config",
-  //"circle/scaffolding",
-  //"circle/circle",
+  "bar/bar",
+  "line/config",
+  "line/mixins",
+  "line/line",
+  "circle/config",
+  "circle/mixins",
+  "circle/circle",
   //"frame/states",
   //"frame/state_machine",
   //"frame/frame"
@@ -871,8 +1176,7 @@ define('chart',[
   d3_tip,
   draw, 
   base_config, 
-  utils_mixins,
-  ////utils_mixins, 
+  utils_mixins, 
   data_mixins, 
   layout_mixins, 
   scale_mixins,
@@ -880,14 +1184,13 @@ define('chart',[
   chart_mixins,
   bar_config,
   bar_mixins,
-  //bar_scaffolding,
-  Bar
-  //line_config,
-  //line_scaffolding,
-  //Line,
-  //circle_config,
-  //circle_scaffolding,
-  //Circle
+  Bar,
+  line_config,
+  line_mixins,
+  Line,
+  circle_config,
+  circle_mixins,
+  Circle
   //states, 
   //StateMachine, 
   //Frame
@@ -900,7 +1203,6 @@ define('chart',[
     draw: draw,
     base_config: base_config,
     utils_mixins: utils_mixins,
-    ////utils_mixins: utils_mixins,
     data_mixins: data_mixins,
     layout_mixins: layout_mixins,
     scale_mixins: scale_mixins,
@@ -908,14 +1210,13 @@ define('chart',[
     chart_mixins: chart_mixins,
     bar_config: bar_config,
     bar_mixins: bar_mixins,
-    //bar_scaffolding: bar_scaffolding,
-    Bar: Bar
-    //line_config: line_config,
-    //line_scaffolding: line_scaffolding,
-    //Line: Line,
-    //circle_config: circle_config,
-    //circle_scaffolding: circle_scaffolding,
-    //Circle: Circle,
+    Bar: Bar,
+    line_config: line_config,
+    line_mixins: line_mixins,
+    Line: Line,
+    circle_config: circle_config,
+    circle_mixins: circle_mixins,
+    Circle: Circle,
     //Frame: Frame,
     //states: states, 
     //StateMachine: StateMachine,

@@ -92,9 +92,50 @@ define('bar/mixins',["d3"], function(d3) {
       }
     }
 
+    function setBars () {
+      var self = this,
+          __ = this.__;
+
+      // Select the bar elements, if they exists.
+      self.bars_g = self.g.select("g.bars").selectAll(".bars")
+        .data(__.data, self.dataIdentifier);
+
+      // Exit phase (pushes out old bar groups before new ones come in).
+      self.bars_g.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();
+  
+      // Otherwise, create them.
+      self.bars_g.enter().append("g").each( function (data, i) {
+        var bars = d3.select(this).selectAll(".bar")
+              .data(data, self.dataIdentifier),
+            ov_options = __.overlapping_charts.options,
+            ov_bar_options = ov_options ? ov_options.bars : void 0;
+  
+        // Exit phase (pushes out old bars before new ones come in).
+        bars.exit()
+          .transition().duration(__.duration).style('opacity', 0).remove();
+  
+        self.createBars.call(bars.enter(), __)
+          .on('click', __.handleClick);
+    
+        // And transition them.
+        self.transitionBars
+          .call(self.transition.selectAll('.bar'), __.orientation, __)
+          .call(self.endall, data, __.handleTransitionEnd);
+    
+        if (__.tooltip) {
+          bars
+           .on('mouseover', self.tip.show)
+           .on('mouseout', self.tip.hide);
+        }
+      });
+
+    }
+
     return function (orientation, __) {
-      this.createBars = createBars;
+      this.setBars = setBars;
       this.transitionBars = transitionBars;
+      this.createBars = createBars;
       return this;
     };
 

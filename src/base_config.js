@@ -48,21 +48,18 @@ define('base_config', [
         tickValues: void 0,
       },
       y_axis_offset: 0,
-//      // if x_scale: 'time'
+      // if x_scale: 'time'
       date_type: 'string', // or 'epoc'
       date_format: '%Y',
-//      // false or string: 'month', 'year', etc.
-//      // used for extending the timescale on the margins.
+      // false or string: 'month', 'year', etc.
+      // used for extending the timescale on the margins.
       date_offset: false,
       duration: 900,  // transition duration
-//      colour: 'LightSteelBlue',
-//      // data
-//      max: void 0,         // Max value for the linear scale
-//      invert_data: false,  // Data sorting
+      invert_data: false,  // Data sorting
       categoricalValue: function (d) { return d[0]; },
       quantativeValue: function (d) { return d[1]; },
       // events
-//      handleClick: function (d, i) { return void 0; },
+      handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
       // can pass boolean or object with d3-tip configuration.

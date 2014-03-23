@@ -84,9 +84,10 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return tip;
   }
 
-  function getScaffoldingMethod (chart_name) {
-    var name = chart_name.substring(0, chart_name.length - 1);
-    return this[name+'Scaffolding'];
+  function getGraphHelperMethod (chart_name) {
+    var name = chart_name.replace(/(?:^|\s)\S/g, 
+      function(a) { return a.toUpperCase(); });
+    return this['set' + name];
   }
 
   function getMinMaxValues (data) {
@@ -108,7 +109,7 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     this.getset = getset;
     this.endall = endall;
     this.tip = tip;
-    this.getScaffoldingMethod = getScaffoldingMethod;
+    this.getGraphHelperMethod = getGraphHelperMethod;
     this.getMinMaxValues = getMinMaxValues;
     return this;
   };

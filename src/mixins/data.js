@@ -6,13 +6,17 @@ define('mixins/data', [
     return d[0];
   }
 
-  function delay (__) {
-    var duration = __.duration,
+  function setDelay () {
+    var __ = this.__,
+        duration = __.duration,
         data = __.data;
     if (duration == undefined) { throw new Error('__.duration unset')}
-    return function (d, i) {
+    __.delay = function (d, i) {
+      // FIXME: only referring to the first dataset, 
+      // while setting the delay on all!
       return i / data[0].length * duration;
     }
+    return this;
   };
 
   function normalizeData () {
@@ -51,7 +55,7 @@ define('mixins/data', [
 
   return function () {
     this.dataIdentifier = dataIdentifier;
-    //this.delay = delay;
+    this.setDelay = setDelay;
     this.normalizeData = normalizeData;
     return this;
   };

@@ -125,6 +125,7 @@ define('mixins/scale', [
   }
 
   function applyScales () {
+    var __ = this.__;
     this.applyScale.call( __.xScale, 'x', __.x_scale, __ );
     this.applyScale.call( __.yScale, 'y', __.y_scale, __ );
     return this;

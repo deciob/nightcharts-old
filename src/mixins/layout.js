@@ -11,8 +11,8 @@ define('mixins/layout', [
     } else if ( __.width && __.height === undefined) {
       __.height = __.width * __.ratio;
     }
-    setW();
-    setH();
+    this.setW();
+    this.setH();
     return this;
   }
 
