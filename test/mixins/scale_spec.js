@@ -17,7 +17,7 @@ function(chai, d3, utils_mixins, scale_mixins) {
 
     it('should set the domain to 0 - max_data', function() {
       __.xScale = d3.scale.linear();
-      __.scale_bounds = false;
+      __.scale_bounds = '0,max';
       var s = _applyLinearScale.call(__.xScale, range, __);
       assert.equal(s(0), 0, 
         'Expected scale(0) to be 0');
@@ -27,7 +27,7 @@ function(chai, d3, utils_mixins, scale_mixins) {
 
     it('should set the domain to min_data - max_data', function() {
       __.xScale = d3.scale.linear();
-      __.scale_bounds = true;
+      __.scale_bounds = 'min,max';
       var s = _applyLinearScale.call(__.xScale, range, __);
       assert.isTrue(s(0) < 0, 
         'Expected scale(0) to be smaller than 0');

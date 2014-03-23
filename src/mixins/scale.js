@@ -52,27 +52,28 @@ define('mixins/scale', [
     return this;
   }
 
+  //TODO: throw on wrong input
+  function _parseScaleBounds (bounds, __) {
+    var min_max = getMinMaxValues(__.data);
+    bounds = bounds.split(',');
+    if (bounds[0] == 'min') { 
+      bounds[0] = min_max.min; 
+    } else {
+      bounds[0] = +bounds[0];
+    }
+    if (bounds[1] == 'max') {
+      bounds[1] = min_max.max; 
+    } else {
+      bounds[1] = +bounds[1];
+    }
+    return bounds;
+  }
+
   // Sets the range and domain for the linear scale.
   function _applyLinearScale (range, __) {
     var scale_bounds = __.scale_bounds,
-        min_max,
-        min,
-        max,
-        getMinMaxValues = utils_mixins().getMinMaxValues;
-    if ( scale_bounds === false ) {
-      min_max = getMinMaxValues(__.data);
-      return this.range(range).domain([0, min_max.max]);
-    } else if ( scale_bounds === true ) {
-      min_max = getMinMaxValues(__.data);
-      return this.range(range).domain([min_max.min, min_max.max]);
-    } else if ( this.isObject(scale_bounds) ) {
-      min_max = scale_bounds,
-      min = min_max.min || 0,
-      max = min_max.max || getMinMaxValues(__.data).max;
-      return this.range(range).domain([min, max]);
-    } else {
-      throw new Error("scale_bounds wrong type");
-    }
+        min_max = _parseScaleBounds(scale_bounds, __);  
+    return this.range(range).domain(min_max);
   }
 
   function _applyTimeScale (range, __) {

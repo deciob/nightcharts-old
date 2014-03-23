@@ -32,7 +32,7 @@ define('base_config', [
       // false    ->  min: 0, max: data_max
       // true     ->  min: data_min, max: data_max
       // obj      ->  min: obj.min, max: obj.max
-      scale_bounds: false,
+      scale_bounds: '0,max',
       // axes, apart from `show`, properties match d3's api.
       x_axis: {
         show: true,
