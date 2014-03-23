@@ -37,6 +37,7 @@ define('mixins/axis_helpers', [
 
   function _transitionYAxis (__) {
     if ( !__.y_axis.show ) { return; }
+    console.log(this, __);
     return this.call(__.yAxis)
       .selectAll("g")
       .delay( __.delay );
