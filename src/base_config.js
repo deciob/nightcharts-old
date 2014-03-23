@@ -49,11 +49,11 @@ define('base_config', [
       },
       y_axis_offset: 0,
 //      // if x_scale: 'time'
-//      date_type: 'string', // or 'epoc'
-//      date_format: '%Y',
+      date_type: 'string', // or 'epoc'
+      date_format: '%Y',
 //      // false or string: 'month', 'year', etc.
 //      // used for extending the timescale on the margins.
-//      date_offset: false,
+      date_offset: false,
       duration: 900,  // transition duration
 //      colour: 'LightSteelBlue',
 //      // data
@@ -63,10 +63,10 @@ define('base_config', [
       quantativeValue: function (d) { return d[1]; },
       // events
 //      handleClick: function (d, i) { return void 0; },
-//      handleTransitionEnd: function(d) { return void 0; },
-//      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
-//      // can pass boolean or object with d3-tip configuration.
-//      tooltip: false,
+      handleTransitionEnd: function(d) { return void 0; },
+      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
+      // can pass boolean or object with d3-tip configuration.
+      tooltip: false,
       overlapping_charts: { names: [] }
     };
   

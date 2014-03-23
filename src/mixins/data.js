@@ -24,25 +24,27 @@ define('mixins/data', [
         date_type = __.date_type,
         categoricalValue = __.categoricalValue;
     data.forEach( function (dataset, index) {
-      parsed_data.push(dataset.map(function(d, i) {
-        var x;
-        // The time data is encoded in a string:
-        if (date_chart && date_type == 'string') {
-          x = d3.time.format(date_format)
-            .parse(categoricalValue.call(dataset, d));
-        // The time data is encoded in an epoch number:
-        } else if (date_chart && __.date_type == 'epoch') {
-          x = new Date(categoricalValue.call(dataset, d) * 1000);
-        // Real categorical value:
-        } else {
-          x = __.categoricalValue.call(dataset, d);
-        }
-        return [x, __.quantativeValue.call(dataset, d)];
-      }));
+      if (date_chart) {
+        parsed_data.push(dataset.map(function(d, i) {
+          var x;
+          // The time data is encoded in a string:
+          if (date_chart && date_type == 'string') {
+            x = d3.time.format(date_format)
+              .parse(categoricalValue.call(dataset, d));
+          // The time data is encoded in an epoch number:
+          } else if (date_chart && __.date_type == 'epoch') {
+            x = new Date(categoricalValue.call(dataset, d) * 1000);
+          } 
+          return [x, __.quantativeValue.call(dataset, d)];
+        }));
+      } else {
+        dataset = __.invert_data ? dataset.reverse() : dataset;
+        parsed_data.push(dataset.map(function(d, i) {
+          var x = __.categoricalValue.call(dataset, d);
+          return [x, __.quantativeValue.call(dataset, d)];
+        }));
+      }
     });
-    if (__.invert_data) {
-      //parsed_data = data.reverse();  // TODO!!!
-    }
     __.data = parsed_data;
     return this;
   }
@@ -55,3 +57,4 @@ define('mixins/data', [
   };
 
 });
+

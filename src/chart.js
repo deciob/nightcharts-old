@@ -11,7 +11,7 @@ define([
   "mixins/axis",
   "mixins/chart",
   "bar/config",
-  //"bar/bar_helpers", 
+  "bar/mixins", 
   //"bar/scaffolding",
   "bar/bar"
   //"line/config",
@@ -36,7 +36,7 @@ define([
   axis_mixins,
   chart_mixins,
   bar_config,
-  //bar_helpers,
+  bar_mixins,
   //bar_scaffolding,
   Bar
   //line_config,
@@ -64,7 +64,7 @@ define([
     axis_mixins: axis_mixins,
     chart_mixins: chart_mixins,
     bar_config: bar_config,
-    //bar_helpers: bar_helpers,
+    bar_mixins: bar_mixins,
     //bar_scaffolding: bar_scaffolding,
     Bar: Bar
     //line_config: line_config,

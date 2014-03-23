@@ -65,11 +65,11 @@ define('base_config', [
       },
       y_axis_offset: 0,
 //      // if x_scale: 'time'
-//      date_type: 'string', // or 'epoc'
-//      date_format: '%Y',
+      date_type: 'string', // or 'epoc'
+      date_format: '%Y',
 //      // false or string: 'month', 'year', etc.
 //      // used for extending the timescale on the margins.
-//      date_offset: false,
+      date_offset: false,
       duration: 900,  // transition duration
 //      colour: 'LightSteelBlue',
 //      // data
@@ -79,10 +79,10 @@ define('base_config', [
       quantativeValue: function (d) { return d[1]; },
       // events
 //      handleClick: function (d, i) { return void 0; },
-//      handleTransitionEnd: function(d) { return void 0; },
-//      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
-//      // can pass boolean or object with d3-tip configuration.
-//      tooltip: false,
+      handleTransitionEnd: function(d) { return void 0; },
+      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
+      // can pass boolean or object with d3-tip configuration.
+      tooltip: false,
       overlapping_charts: { names: [] }
     };
   
@@ -231,25 +231,27 @@ define('mixins/data', [
         date_type = __.date_type,
         categoricalValue = __.categoricalValue;
     data.forEach( function (dataset, index) {
-      parsed_data.push(dataset.map(function(d, i) {
-        var x;
-        // The time data is encoded in a string:
-        if (date_chart && date_type == 'string') {
-          x = d3.time.format(date_format)
-            .parse(categoricalValue.call(dataset, d));
-        // The time data is encoded in an epoch number:
-        } else if (date_chart && __.date_type == 'epoch') {
-          x = new Date(categoricalValue.call(dataset, d) * 1000);
-        // Real categorical value:
-        } else {
-          x = __.categoricalValue.call(dataset, d);
-        }
-        return [x, __.quantativeValue.call(dataset, d)];
-      }));
+      if (date_chart) {
+        parsed_data.push(dataset.map(function(d, i) {
+          var x;
+          // The time data is encoded in a string:
+          if (date_chart && date_type == 'string') {
+            x = d3.time.format(date_format)
+              .parse(categoricalValue.call(dataset, d));
+          // The time data is encoded in an epoch number:
+          } else if (date_chart && __.date_type == 'epoch') {
+            x = new Date(categoricalValue.call(dataset, d) * 1000);
+          } 
+          return [x, __.quantativeValue.call(dataset, d)];
+        }));
+      } else {
+        dataset = __.invert_data ? dataset.reverse() : dataset;
+        parsed_data.push(dataset.map(function(d, i) {
+          var x = __.categoricalValue.call(dataset, d);
+          return [x, __.quantativeValue.call(dataset, d)];
+        }));
+      }
     });
-    if (__.invert_data) {
-      //parsed_data = data.reverse();  // TODO!!!
-    }
     __.data = parsed_data;
     return this;
   }
@@ -262,6 +264,8 @@ define('mixins/data', [
   };
 
 });
+
+
 define('mixins/layout', [
   "d3"
 ], function (d3) {
@@ -602,6 +606,109 @@ define('bar/config', [
 });
 
 
+define('bar/mixins',["d3"], function(d3) {
+
+    function _getBarOrientation (__) {
+      if ( (__.x_scale == 'ordinal' || __.x_scale == 'time') &&
+            __.y_scale == 'linear') {
+        return 'vertical';
+      } else if (__.x_scale == 'linear' && __.y_scale == 'ordinal') {
+        return 'horizontal';
+      } else {
+        throw new Error('x_scale-y_scale wrong options combination');
+      }
+    }
+
+    function _createVerticalBars (__) {
+      return this.append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return __.xScale(d[0]); })
+        .attr("width", __.xScale.rangeBand())
+        .attr("y", __.h + __.barOffSet)
+        .attr("height", 0);
+    }
+
+    function _createTimeBars (__) {
+      return this.append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { 
+          return __.xScale(d[0]) - __.bar_width / 2;
+        })
+        .attr("width", __.bar_width)
+        //attention TODO: this get then overridden by the transition
+        .attr("y", __.h + __.barOffSet) 
+        .attr("height", 0);
+    }
+
+    function _createHorizontalBars (__) {
+      return this.append("rect")
+        .attr("class", "bar")
+        .attr("x", __.barOffSet)
+        .attr("width", 0)
+        .attr("y", function(d) { return __.yScale(d[0]); })
+        .attr("height", __.yScale.rangeBand());
+    }
+
+    function createBars (__) {
+      var orientation = _getBarOrientation(__);
+      if (orientation == 'vertical' && __.x_scale !== 'time') {
+        return _createVerticalBars.call(this, __);
+      } else if (orientation == 'vertical' && __.x_scale == 'time') {
+        return _createTimeBars.call(this, __);
+      } else if (orientation == 'horizontal') {
+        return _createHorizontalBars.call(this, __);
+      } else {
+        throw new Error("orientation-x_scale wrong combination");
+      }
+    }
+
+    function _transitionVerticalBars (__) {
+      return this.delay(__.delay)
+        .attr("x", function(d) { return __.xScale(d[0]); })
+        .attr("y", function(d) { return __.yScale(d[1]); })
+        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+    }
+
+    function _transitionTimeBars (__) {
+      return this.delay(__.delay)
+        .attr("x", function(d) { 
+          return __.xScale(d[0]) - __.bar_width / 2;
+        })
+        .attr("y", function(d) { return __.yScale(d[1]); })
+        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+    }
+
+    function _transitionHorizontalBars (__) {
+      return this.delay(__.delay)
+        .attr("y", function(d) { return __.yScale(d[0]); })
+        .attr("x", __.barOffSet)
+        .attr("width", function(d) { 
+          return __.xScale(d[1]) + __.barOffSet; 
+        });
+    }
+
+    function transitionBars (orientation, __) {
+      var orientation = _getBarOrientation(__);
+      if (orientation == 'vertical' && __.x_scale !== 'time') {
+        return _transitionVerticalBars.call(this, __);
+      } else if (orientation == 'vertical' && __.x_scale == 'time') {
+        return _transitionTimeBars.call(this, __);
+      } else if (orientation == 'horizontal') {
+        return _transitionHorizontalBars.call(this, __);
+      } else {
+        throw new Error("orientation-x_scale wrong combination");
+      }
+    }
+
+    return function (orientation, __) {
+      this.createBars = createBars;
+      this.transitionBars = transitionBars;
+      return this;
+    };
+
+});
+
+
 // **The bar.bar module**
 
 define('bar/bar',[
@@ -613,7 +720,7 @@ define('bar/bar',[
   "mixins/scale",
   "mixins/axis",
   "mixins/chart",
-//  "bar/bar_helpers",
+  "bar/mixins",
 //  "bar/scaffolding",
 //  "line/scaffolding",
 ], function(
@@ -624,8 +731,8 @@ define('bar/bar',[
   layout_mixins,
   scale_mixins,
   axis_mixins,
-  chart_mixins
-//  bar_helpers,
+  chart_mixins,
+  bar_mixins
 //  bar_scaffolding,
 //  line_scaffolding
 ) {
@@ -652,15 +759,7 @@ define('bar/bar',[
       self.normalizeData();
       self.setDimensions();
 
-      if (has_timescale) {
-//        __.bar_width = (__.w() / data[0].length) * .9;
-//        __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
-//        //TODO: set events?
-//        __.margin = utils.extend(__.margin, {
-//            left: __.margin.left + __.y_axis_offset,
-//            right: __.margin.right + __.y_axis_offset
-//        });
-      }
+      if (has_timescale) { self.adjustDimensionsToTimeScale(); }
 
       self.setScales();
       self.setAxes();
@@ -673,9 +772,39 @@ define('bar/bar',[
       self.applyScales();
       self.setChart('bars');
 
-//
-//      self.chartScaffolding.call(self, selection, __, 'bars');
-//      //self.barScaffolding.call(self, __);
+      // Select the bar elements, if they exists.
+      self.bars_g = self.g.select("g.bars").selectAll(".bars")
+        .data(__.data, self.dataIdentifier);
+
+      // Exit phase (pushes out old bar groups before new ones come in).
+      self.bars_g.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();
+  
+      // Otherwise, create them.
+      self.bars_g.enter().append("g").each( function (data, i) {
+        var bars = d3.select(this).selectAll(".bar")
+              .data(data, self.dataIdentifier),
+            ov_options = __.overlapping_charts.options,
+            ov_bar_options = ov_options ? ov_options.bars : void 0;
+  
+        // Exit phase (pushes out old bars before new ones come in).
+        bars.exit()
+          .transition().duration(__.duration).style('opacity', 0).remove();
+  
+        self.createBars.call(bars.enter(), __)
+          .on('click', __.handleClick);
+    
+        // And transition them.
+        self.transitionBars
+          .call(self.transition.selectAll('.bar'), __.orientation, __)
+          .call(self.endall, data, __.handleTransitionEnd);
+    
+        if (__.tooltip) {
+          bars
+           .on('mouseover', self.tip.show)
+           .on('mouseout', self.tip.hide);
+        }
+      });
 //
 //      __.overlapping_charts.names.forEach( function (chart_name) {
 //        utils.getScaffoldingMethod.call(self, chart_name).call(self, __);
@@ -691,9 +820,20 @@ define('bar/bar',[
     scale_mixins.call(Bar.prototype);
     axis_mixins.call(Bar.prototype);
     chart_mixins.call(Bar.prototype);
-    //bar_helpers.call(Bar.prototype);
+    bar_mixins.call(Bar.prototype);
     //bar_scaffolding.call(Bar.prototype);
     //line_scaffolding.call(Bar.prototype);
+
+    Bar.prototype.adjustDimensionsToTimeScale = function () {
+      __.bar_width = (__.w / __.data[0].length) * .9;
+      __.width += __.bar_width;
+      __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
+      __.margin = utils.extend(__.margin, {
+          left: __.margin.left + __.y_axis_offset,
+          right: __.margin.right + __.y_axis_offset
+      });
+      return this;
+    }
 
     return Bar;
   }
@@ -714,7 +854,7 @@ define('chart',[
   "mixins/axis",
   "mixins/chart",
   "bar/config",
-  //"bar/bar_helpers", 
+  "bar/mixins", 
   //"bar/scaffolding",
   "bar/bar"
   //"line/config",
@@ -739,7 +879,7 @@ define('chart',[
   axis_mixins,
   chart_mixins,
   bar_config,
-  //bar_helpers,
+  bar_mixins,
   //bar_scaffolding,
   Bar
   //line_config,
@@ -767,7 +907,7 @@ define('chart',[
     axis_mixins: axis_mixins,
     chart_mixins: chart_mixins,
     bar_config: bar_config,
-    //bar_helpers: bar_helpers,
+    bar_mixins: bar_mixins,
     //bar_scaffolding: bar_scaffolding,
     Bar: Bar
     //line_config: line_config,

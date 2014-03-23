@@ -6,8 +6,6 @@ define(['chai', 'utils/mixins'], function(chai, utils_mixins) {
     myOtherFunction,
     __;
 
-  //console.log(utils)
-
   before( function() {
     myFunction = function() {};
     myOtherFunction = function(d) { return d; }
