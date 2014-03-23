@@ -17,7 +17,7 @@ define([
         return '<b>Period:</b> ' 
           + d[0] + ' <br> <b>Rate of change:</b> ' + d[1] + '%';
       },
-      offset: [-5, 0]  // [top, left]
+      offset: [-10, 0]  // [top, left]
     }
 
     d3.json(args.data_url, function (err, data) {
@@ -28,11 +28,14 @@ define([
       });
 
       barchart = chart.Bar()
-        .margin({bottom: 35})
+        .margin({left: 90, bottom: 35})
         .x_axis({
           tickValues: ['1950-1955', '2045-2050']
         })
-        .duration(0)
+        .duration(500)
+        .quantitative_scale('y')
+        .y_scale('linear')
+        .x_scale('ordinal')
         .tooltip(tooltip_conf);
       chart.draw(barchart, selection, [data]);
     });
