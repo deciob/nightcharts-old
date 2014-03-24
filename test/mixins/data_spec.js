@@ -66,6 +66,22 @@ function(chai, d3, utils_mixins, data_mixins) {
         'Expected exit data to be time object');
     });
 
+    it('should return an array of arrays such as [time, quantitative]', function() {
+      var selection = d3.select('body'),
+          context = {},
+          normalized_data,
+          data = [ [[1305376000, 56], [1315376000, 26], [1325376000, 66]] ];
+      selection.datum(data);
+      __.x_scale = 'time';
+      __.date_type = 'epoch';
+      context.__ = __;
+      context.selection = selection;
+
+      normalized_data = data_mixins().normalizeData.call(context);
+      assert.isTrue( __.data[0][1][0].getMonth() == 8,
+        'Expected exit data to be time object, September');
+    });
+
   });
 
 });
