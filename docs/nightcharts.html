@@ -1892,6 +1892,390 @@ self.transitionCircles
     <span class="keyword">return</span> Circle;
   }
 
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
+              </div>
+              <p><strong>frame.states module</strong></p>
+<p>Used by the <em>frame.state_machine</em> module.
+Name-spaced, might add other states if needed.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'frame/states'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span>
+
+  <span class="keyword">var</span> transition_states = [
+    {
+      <span class="string">'name'</span>: <span class="string">'in_pause'</span>,
+      <span class="string">'initial'</span>: <span class="literal">true</span>,
+      <span class="string">'events'</span>: {
+        <span class="string">'start'</span>: <span class="string">'in_transition_start'</span>,
+        <span class="string">'next'</span>: <span class="string">'in_transition_next'</span>,
+        <span class="string">'prev'</span>: <span class="string">'in_transition_prev'</span>,
+        <span class="string">'jump'</span>: <span class="string">'in_transition_jump'</span>,
+        <span class="string">'reset'</span>: <span class="string">'in_transition_reset'</span>
+      }
+    },
+    {
+      <span class="string">'name'</span>: <span class="string">'in_transition_start'</span>,
+      <span class="string">'events'</span>: {
+        <span class="string">'stop'</span>: <span class="string">'in_pause'</span>
+      }
+    },
+    {
+      <span class="string">'name'</span>: <span class="string">'in_transition_next'</span>,
+      <span class="string">'events'</span>: {
+        <span class="string">'stop'</span>: <span class="string">'in_pause'</span>
+      }
+    },
+    {
+      <span class="string">'name'</span>: <span class="string">'in_transition_prev'</span>,
+      <span class="string">'events'</span>: {
+        <span class="string">'stop'</span>: <span class="string">'in_pause'</span>
+      }
+    },
+    {
+      <span class="string">'name'</span>: <span class="string">'in_transition_jump'</span>,
+      <span class="string">'events'</span>: {
+        <span class="string">'stop'</span>: <span class="string">'in_pause'</span>
+      }
+    },
+    {
+      <span class="string">'name'</span>: <span class="string">'in_transition_reset'</span>,
+      <span class="string">'events'</span>: {
+        <span class="string">'stop'</span>: <span class="string">'in_pause'</span>
+      }
+    }
+  ];
+
+  <span class="keyword">return</span> { transition_states: transition_states};
+
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-63">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-63">&#182;</a>
+              </div>
+              <p><strong>frame.state_machine module</strong></p>
+<p>From <a href="http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/">http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/</a></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'frame/state_machine'</span>,[<span class="string">'require'</span>],<span class="function"><span class="keyword">function</span><span class="params">(require)</span> {</span>
+
+  <span class="function"><span class="keyword">function</span> <span class="title">StateMachine</span> <span class="params">(states)</span> {</span>
+    <span class="keyword">this</span>.states = states;
+    <span class="keyword">this</span>.indexes = {};
+    <span class="keyword">for</span>( <span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>.states.length; i++) {
+      <span class="keyword">this</span>.indexes[<span class="keyword">this</span>.states[i].name] = i;
+      <span class="keyword">if</span> (<span class="keyword">this</span>.states[i].initial){
+        <span class="keyword">this</span>.currentState = <span class="keyword">this</span>.states[i];
+      }
+    }
+  }
+
+  StateMachine.prototype.consumeEvent = <span class="function"><span class="keyword">function</span> <span class="params">(e)</span> {</span>
+    <span class="keyword">if</span>(<span class="keyword">this</span>.currentState.events[e]){
+      <span class="keyword">this</span>.currentState = <span class="keyword">this</span>.states[<span class="keyword">this</span>.indexes[<span class="keyword">this</span>.currentState.events[e]]];
+    }
+  }
+
+  StateMachine.prototype.getStatus = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">this</span>.currentState.name;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>getLastEvent();</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">return</span> StateMachine;
+
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-65">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-65">&#182;</a>
+              </div>
+              <p><strong>frame.frame module</strong></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'frame/frame'</span>,[
+  <span class="string">'d3'</span>,
+  <span class="string">'utils/mixins'</span>,
+  <span class="string">'frame/states'</span>,
+  <span class="string">'frame/state_machine'</span>
+], <span class="function"><span class="keyword">function</span><span class="params">(d3, utils_mixins, states, StateMachine)</span> {</span>
+
+  <span class="keyword">var</span> Frame = <span class="function"><span class="keyword">function</span> <span class="params">(conf)</span> {</span>
+    <span class="keyword">var</span> self  = <span class="keyword">this</span>,
+        utils = utils_mixins();
+    
+    <span class="keyword">this</span>.initial_frame = <span class="keyword">this</span>.frame = conf.frame;
+    <span class="keyword">this</span>.old_frame =   <span class="keyword">void</span> <span class="number">0</span>;
+    <span class="keyword">this</span>.current_timeout = <span class="keyword">void</span> <span class="number">0</span>;
+    <span class="keyword">this</span>.drawChart = conf.drawChart;
+    <span class="keyword">this</span>.delta = conf.delta;
+    <span class="keyword">this</span>.step = conf.step;
+    <span class="keyword">this</span>.data = conf.data;
+
+    <span class="keyword">this</span>.state_machine = <span class="keyword">new</span> StateMachine(states.transition_states);
+    <span class="keyword">this</span>.dispatch = d3.dispatch(
+      <span class="string">'start'</span>, 
+      <span class="string">'stop'</span>, 
+      <span class="string">'next'</span>, 
+      <span class="string">'prev'</span>, 
+      <span class="string">'reset'</span>, 
+      <span class="string">'end'</span>,
+      <span class="string">'jump'</span>,
+      <span class="string">'at_beginning_of_transition'</span>
+    );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-66">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-66">&#182;</a>
+              </div>
+              <p>Initial frame. The chart is rendered for the first time.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.drawChart(<span class="keyword">this</span>.data[<span class="keyword">this</span>.frame]);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-67">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-67">&#182;</a>
+              </div>
+              <p>Fired when all the chart related transitions within a frame are 
+terminated.
+It is the only dispatch event that does not have a state_machine 
+equivalent event.
+<code>frame</code> is an arbitrary namespace, in order to register multiple 
+listeners for the same event type.</p>
+<p><a href="https://github.com/mbostock/d3/wiki/Internals#events">https://github.com/mbostock/d3/wiki/Internals#events</a>:
+If an event listener was already registered for the same type, the 
+existing listener is removed before the new listener is added. To 
+register multiple listeners for the same event type, the type may be 
+followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.bar&#39;.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.dispatch.on(<span class="string">'end.frame'</span>, self.handleFrameEnd);
+
+    <span class="keyword">this</span>.dispatch.on(<span class="string">'stop'</span>, self.handleStop);
+
+    <span class="keyword">this</span>.dispatch.on(<span class="string">'start'</span>, self.handleStart);
+
+    <span class="keyword">this</span>.dispatch.on(<span class="string">'next'</span>, self.handleNext);
+
+    <span class="keyword">this</span>.dispatch.on(<span class="string">'prev'</span>, self.handlePrev);
+
+    <span class="keyword">this</span>.dispatch.on(<span class="string">'reset'</span>, self.handleReset);
+
+    <span class="keyword">this</span>.dispatch.on(<span class="string">'jump'</span>, self.handleJump);
+  }
+
+
+  Frame.prototype.startTransition = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">var</span> self = <span class="keyword">this</span>;
+    clearTimeout(<span class="keyword">this</span>.current_timeout);
+    <span class="keyword">if</span> (<span class="keyword">this</span>.data[<span class="keyword">this</span>.frame]) {
+      <span class="keyword">this</span>.current_timeout = setTimeout( <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-68">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-68">&#182;</a>
+              </div>
+              <p>Re-render the chart</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        self.drawChart(self.data[self.frame]);
+      }, self.step);
+    } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-69">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-69">&#182;</a>
+              </div>
+              <p>When no data is left to consume, let us stop the running frames!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'stop'</span>);
+      <span class="keyword">this</span>.frame = <span class="keyword">this</span>.old_frame;
+    }
+    self.dispatch.at_beginning_of_transition.call(self);
+  }
+
+  Frame.prototype.handleFrameEnd = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">this</span>.handleTransition();
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }
+
+  Frame.prototype.handleStop = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'stop'</span>);
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-70">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-70">&#182;</a>
+              </div>
+              <p>TODO: there is a lot of repetition here!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Frame.prototype.handleStart = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">if</span> (<span class="keyword">this</span>.state_machine.getStatus() === <span class="string">'in_pause'</span>) {
+      <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'start'</span>);
+      <span class="keyword">this</span>.handleTransition();
+    } <span class="keyword">else</span> {
+      console.log(<span class="string">'State already in in_transition_start.'</span>);
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-71">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-71">&#182;</a>
+              </div>
+              <p>TODO:
+for next and prev we are allowing multiple prev-next events to be 
+fired without waiting for the current frame to end. Change?</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Frame.prototype.handleNext = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'next'</span>);
+    <span class="keyword">if</span> (<span class="keyword">this</span>.state_machine.getStatus() === <span class="string">'in_transition_next'</span>) {
+      <span class="keyword">this</span>.handleTransition();
+    } <span class="keyword">else</span> {
+      console.log(<span class="string">'State not in pause when next event was fired.'</span>);
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }
+
+  Frame.prototype.handlePrev = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'prev'</span>);
+    <span class="keyword">if</span> (<span class="keyword">this</span>.state_machine.getStatus() === <span class="string">'in_transition_prev'</span>) {
+      <span class="keyword">this</span>.handleTransition();
+    } <span class="keyword">else</span> {
+      console.log(<span class="string">'State not in pause when prev event was fired.'</span>);
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }
+
+  Frame.prototype.handleReset = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'reset'</span>);
+    <span class="keyword">if</span> (<span class="keyword">this</span>.state_machine.getStatus() === <span class="string">'in_transition_reset'</span>) {
+      <span class="keyword">this</span>.handleTransition();
+    } <span class="keyword">else</span> {
+      console.log(<span class="string">'State not in pause when reset event was fired.'</span>);
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }
+
+  Frame.prototype.handleJump = <span class="function"><span class="keyword">function</span> <span class="params">(value)</span> {</span>
+    <span class="keyword">this</span>.state_machine.consumeEvent(<span class="string">'jump'</span>);
+    <span class="keyword">if</span> (<span class="keyword">this</span>.state_machine.getStatus() === <span class="string">'in_transition_jump'</span>) {
+      <span class="keyword">this</span>.handleTransition(value);
+    } <span class="keyword">else</span> {
+      console.log(<span class="string">'State not in pause when jump event was fired.'</span>);
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  }
+
+  
+  Frame.prototype.handleTransition = <span class="function"><span class="keyword">function</span> <span class="params">(value)</span> {</span>
+    <span class="keyword">var</span> self = <span class="keyword">this</span>, status = <span class="keyword">this</span>.state_machine.getStatus();
+    <span class="keyword">if</span> (status === <span class="string">'in_transition_start'</span>) {
+      <span class="keyword">this</span>.old_frame = <span class="keyword">this</span>.frame;
+      <span class="keyword">this</span>.frame += <span class="keyword">this</span>.delta;
+      <span class="keyword">this</span>.startTransition();
+    } <span class="keyword">else</span> <span class="keyword">if</span> (status === <span class="string">'in_transition_prev'</span>) {
+      <span class="keyword">this</span>.old_frame = <span class="keyword">this</span>.frame;
+      <span class="keyword">this</span>.frame -= <span class="keyword">this</span>.delta;
+      <span class="keyword">this</span>.startTransition();
+      self.state_machine.consumeEvent(<span class="string">'stop'</span>);
+    } <span class="keyword">else</span> <span class="keyword">if</span> (status === <span class="string">'in_transition_next'</span>) {
+      <span class="keyword">this</span>.old_frame = <span class="keyword">this</span>.frame;
+      <span class="keyword">this</span>.frame += <span class="keyword">this</span>.delta;
+      <span class="keyword">this</span>.startTransition();
+      self.state_machine.consumeEvent(<span class="string">'stop'</span>);
+    } <span class="keyword">else</span> <span class="keyword">if</span> (status === <span class="string">'in_transition_jump'</span>) {
+      <span class="keyword">if</span> (!value) <span class="keyword">return</span> <span class="keyword">new</span> Error(<span class="string">'need to pass a value to jump!'</span>);
+      <span class="keyword">this</span>.old_frame = <span class="keyword">this</span>.frame;
+      <span class="keyword">this</span>.frame = value;
+      <span class="keyword">this</span>.startTransition();
+      self.state_machine.consumeEvent(<span class="string">'stop'</span>);
+    } <span class="keyword">else</span> <span class="keyword">if</span> (status === <span class="string">'in_transition_reset'</span>) {
+      <span class="keyword">this</span>.old_frame = <span class="keyword">this</span>.frame;
+      <span class="keyword">this</span>.frame = <span class="keyword">this</span>.initial_frame;
+      <span class="keyword">this</span>.startTransition();
+      self.state_machine.consumeEvent(<span class="string">'stop'</span>);
+    } <span class="keyword">else</span> <span class="keyword">if</span> (status === <span class="string">'in_pause'</span>) {
+      <span class="keyword">return</span>;
+    } 
+  }
+
+  <span class="keyword">return</span> Frame;
+  
 });
 
 
@@ -1914,24 +2298,11 @@ define(<span class="string">'chart'</span>,[
   <span class="string">"line/line"</span>,
   <span class="string">"circle/config"</span>,
   <span class="string">"circle/mixins"</span>,
-  <span class="string">"circle/circle"</span>,</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-62">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
-              </div>
-              <p>&quot;frame/states&quot;,
-&quot;frame/state_machine&quot;,
-&quot;frame/frame&quot;</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>], <span class="function"><span class="keyword">function</span><span class="params">(
+  <span class="string">"circle/circle"</span>,
+  <span class="string">"frame/states"</span>,
+  <span class="string">"frame/state_machine"</span>,
+  <span class="string">"frame/frame"</span>
+], <span class="function"><span class="keyword">function</span><span class="params">(
   d3, 
   d3_tip,
   draw, 
@@ -1950,24 +2321,11 @@ define(<span class="string">'chart'</span>,[
   Line,
   circle_config,
   circle_mixins,
-  Circle</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-63">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-63">&#182;</a>
-              </div>
-              <p>states, 
-StateMachine, 
-Frame</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>) {
+  Circle,
+  states, 
+  StateMachine, 
+  Frame
+)</span> {</span>
 
   d3.d3_tip = d3_tip;
 
@@ -1989,24 +2347,11 @@ Frame</p>
     Line: Line,
     circle_config: circle_config,
     circle_mixins: circle_mixins,
-    Circle: Circle,</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-64">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
-              </div>
-              <p>Frame: Frame,
-states: states, 
-StateMachine: StateMachine,</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  };
+    Circle: Circle,
+    Frame: Frame,
+    states: states, 
+    StateMachine: StateMachine,
+  };
 
 });</pre></div></div>
             

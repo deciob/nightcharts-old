@@ -18,9 +18,9 @@ define([
   "circle/config",
   "circle/mixins",
   "circle/circle",
-  //"frame/states",
-  //"frame/state_machine",
-  //"frame/frame"
+  "frame/states",
+  "frame/state_machine",
+  "frame/frame"
 ], function(
   d3, 
   d3_tip,
@@ -40,10 +40,10 @@ define([
   Line,
   circle_config,
   circle_mixins,
-  Circle
-  //states, 
-  //StateMachine, 
-  //Frame
+  Circle,
+  states, 
+  StateMachine, 
+  Frame
 ) {
 
   d3.d3_tip = d3_tip;
@@ -67,9 +67,9 @@ define([
     circle_config: circle_config,
     circle_mixins: circle_mixins,
     Circle: Circle,
-    //Frame: Frame,
-    //states: states, 
-    //StateMachine: StateMachine,
+    Frame: Frame,
+    states: states, 
+    StateMachine: StateMachine,
   };
 
 });
