@@ -10045,15 +10045,15 @@ define('base_config', [
       height: void 0, // if set, height has precedence on ratio
       ratio: .4,
       //vertical: true,
-      quantitative_scale: 'x',
+      quantitative_scale: 'y',
       // One of: ordinal, linear, time
-      x_scale: 'linear',
-      y_scale: 'ordinal',
+      x_scale: 'ordinal',
+      y_scale: 'linear',
       // Forces the quantitative scale bounds:
       // false    ->  min: 0, max: data_max
       // true     ->  min: data_min, max: data_max
       // obj      ->  min: obj.min, max: obj.max
-      force_scale_bounds: false,
+      scale_bounds: '0,max',
       // axes, apart from `show`, properties match d3's api.
       x_axis: {
         show: true,
@@ -10068,27 +10068,24 @@ define('base_config', [
         orient: 'left',
         tickValues: void 0,
       },
-//      y_axis_offset: 0,
-//      // if x_scale: 'time'
-//      date_type: 'string', // or 'epoc'
-//      date_format: '%Y',
-//      // false or string: 'month', 'year', etc.
-//      // used for extending the timescale on the margins.
-//      date_offset: false,
-//      duration: 900,  // transition duration
-//      colour: 'LightSteelBlue',
-//      // data
-//      max: void 0,         // Max value for the linear scale
-//      invert_data: false,  // Data sorting
+      y_axis_offset: 0,
+      // if x_scale: 'time'
+      date_type: 'string', // or 'epoc'
+      date_format: '%Y',
+      // false or string: 'month', 'year', etc.
+      // used for extending the timescale on the margins.
+      date_offset: false,
+      duration: 900,  // transition duration
+      invert_data: false,  // Data sorting
       categoricalValue: function (d) { return d[0]; },
       quantativeValue: function (d) { return d[1]; },
       // events
-//      handleClick: function (d, i) { return void 0; },
-//      handleTransitionEnd: function(d) { return void 0; },
-//      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
-//      // can pass boolean or object with d3-tip configuration.
-//      tooltip: false,
-//      overlapping_charts: { names: [] }
+      handleClick: function (d, i) { return void 0; },
+      handleTransitionEnd: function(d) { return void 0; },
+      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
+      // can pass boolean or object with d3-tip configuration.
+      tooltip: false,
+      overlapping_charts: { names: [] }
     };
   
 });
@@ -10108,13 +10105,13 @@ define('utils/mixins',["d3", "d3_tip"], function(d3, d3_tip) {
   }
 
   function extend (target, source, clone_target, not_override) {
-    var clone = (typeof clone === "undefined") ? true : clone,
+    var clone_target = (typeof clone === "undefined") ? true : clone,
         target_c = clone_target ? clone(target): target;
     for(prop in source) {
       if (not_override) {
         target_c[prop] = target_c[prop] ? target_c[prop] : source[prop];
       } else {
-        target_clone[prop] = source[prop];
+        target_c[prop] = source[prop];
       }
     }
     return target_c;
@@ -10180,9 +10177,10 @@ define('utils/mixins',["d3", "d3_tip"], function(d3, d3_tip) {
     return tip;
   }
 
-  function getScaffoldingMethod (chart_name) {
-    var name = chart_name.substring(0, chart_name.length - 1);
-    return this[name+'Scaffolding'];
+  function getGraphHelperMethod (chart_name) {
+    var name = chart_name.replace(/(?:^|\s)\S/g, 
+      function(a) { return a.toUpperCase(); });
+    return this['set' + name];
   }
 
   function getMinMaxValues (data) {
@@ -10204,12 +10202,399 @@ define('utils/mixins',["d3", "d3_tip"], function(d3, d3_tip) {
     this.getset = getset;
     this.endall = endall;
     this.tip = tip;
-    this.getScaffoldingMethod = getScaffoldingMethod;
+    this.getGraphHelperMethod = getGraphHelperMethod;
     this.getMinMaxValues = getMinMaxValues;
     return this;
   };
 
 });
+define('mixins/data', [
+  "d3"
+], function (d3) {
+
+  function dataIdentifier (d) {
+    return d[0];
+  }
+
+  function setDelay () {
+    var __ = this.__,
+        duration = __.duration,
+        data = __.data;
+    if (duration == undefined) { throw new Error('__.duration unset')}
+    __.delay = function (d, i) {
+      // FIXME: only referring to the first dataset, 
+      // while setting the delay on all!
+      return i / data[0].length * duration;
+    }
+    return this;
+  };
+
+  function normalizeData () {
+    var data = this.selection.datum(),
+        __ = this.__,
+        parsed_data = [],
+        date_chart = __.x_scale == 'time' ? true : false,
+        date_format = __.date_format,
+        date_type = __.date_type,
+        categoricalValue = __.categoricalValue;
+    data.forEach( function (dataset, index) {
+      if (date_chart) {
+        parsed_data.push(dataset.map(function(d, i) {
+          var x;
+          // The time data is encoded in a string:
+          if (date_chart && date_type == 'string') {
+            x = d3.time.format(date_format)
+              .parse(categoricalValue.call(dataset, d));
+          // The time data is encoded in an epoch number:
+          } else if (date_chart && __.date_type == 'epoch') {
+            x = new Date(categoricalValue.call(dataset, d) * 1000);
+          } 
+          return [x, __.quantativeValue.call(dataset, d)];
+        }));
+      } else {
+        dataset = __.invert_data ? dataset.reverse() : dataset;
+        parsed_data.push(dataset.map(function(d, i) {
+          var x = __.categoricalValue.call(dataset, d);
+          return [x, __.quantativeValue.call(dataset, d)];
+        }));
+      }
+    });
+    __.data = parsed_data;
+    return this;
+  }
+
+  return function () {
+    this.dataIdentifier = dataIdentifier;
+    this.setDelay = setDelay;
+    this.normalizeData = normalizeData;
+    return this;
+  };
+
+});
+
+
+define('mixins/layout', [
+  "d3"
+], function (d3) {
+
+  // TODO: unit test.
+  function setDimensions () {
+    var __ = this.__;
+    if ( __.width === undefined ) {
+      __.width  = +this.selection.style('width').replace('px', '');
+      __.height = __.height || __.width * __.ratio;
+    } else if ( __.width && __.height === undefined) {
+      __.height = __.width * __.ratio;
+    }
+    this.setW();
+    this.setH();
+    return this;
+  }
+
+  function setW () {
+    var __ = this.__;
+    __.w   = __.width - __.margin.right - __.margin.left;
+    return this;
+  };
+      
+  function setH () {
+    var __ = this.__;
+    __.h   = __.height - __.margin.top - __.margin.bottom;
+    return this; 
+  };
+
+  return function () {
+    this.setDimensions = setDimensions;
+    this.setW = setW;
+    this.setH = setH;
+    return this;
+  };
+
+});
+
+define('mixins/scale', [
+  "d3",
+  "utils/mixins",
+], function (d3, utils_mixins) {
+
+  function _getRange (axis, __) {
+    if ( axis == 'x') {
+      return [0, __.w];
+    } else if ( axis == 'y') {
+      return [__.h, 0];
+    }
+  }
+
+  // It assumes the data is correctly sorted.
+  // TODO: Guard against axis argument == null or undefined
+  function _getDomain (data, axis) {
+    var d0 = Infinity, 
+        d1 = 0, 
+        index = axis == 'x' ? 0 : 1;
+    data.forEach( function (dataset, i) {
+      if (dataset[0][index] < d0) {
+        d0 = dataset[0][index];
+      }
+      if (dataset[dataset.length - 1][index] > d1) {
+        d1 = dataset[dataset.length - 1][index];
+      }
+    });
+    return [d0, d1];
+  }
+
+  function _setScale (scale_type) {
+    switch (scale_type) {
+      case undefined:
+        return;
+      case 'ordinal':
+        return d3.scale.ordinal;
+      case 'linear':
+        return d3.scale.linear;
+      case 'time':
+        return d3.time.scale;
+      default:
+        throw new Error('scale_type `'
+          + scale_type
+          + '` is not supported. Supported types are: ordinal, linear, time' );
+    }
+  }
+
+  function setScales () {
+    var __ = this.__;
+    __.xScale = this._setScale(__.x_scale)();
+    __.yScale = this._setScale(__.y_scale)();
+    return this;
+  }
+
+  //TODO: throw on wrong input
+  function _parseScaleBounds (bounds, __) {
+    var min_max = getMinMaxValues(__.data);
+    bounds = bounds.split(',');
+    if (bounds[0] == 'min') { 
+      bounds[0] = min_max.min; 
+    } else {
+      bounds[0] = +bounds[0];
+    }
+    if (bounds[1] == 'max') {
+      bounds[1] = min_max.max; 
+    } else {
+      bounds[1] = +bounds[1];
+    }
+    return bounds;
+  }
+
+  // Sets the range and domain for the linear scale.
+  function _applyLinearScale (range, __) {
+    var scale_bounds = __.scale_bounds,
+        min_max = _parseScaleBounds(scale_bounds, __);  
+    return this.range(range).domain(min_max);
+  }
+
+  function _applyTimeScale (range, __) {
+    // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
+    var data = __.data,
+        domain = _getDomain(data, 'x'),
+        t1 = domain[0],
+        t2 = domain[1],
+        offset = __.date_offset,
+        t0,
+        t3;
+    if (__.date_offset) {
+      t0 = d3.time[offset].offset(t1, -1);
+      t3 = d3.time[offset].offset(t2, +1);
+      return this
+        .domain([t0, t3])
+        .range([t0, t3].map(d3.time.scale()
+          .domain([t1, t2])
+          .range([0, __.w])));
+    } else {
+      return this.range(range).domain(domain);
+    }
+  }
+
+  // Sets the range and domain for the ordinal scale.
+  function _applyOrdinalScale (range, __) {
+    var data = __.x_axis_data || __.data;  // FIXME this hack!
+    return this
+      .rangeRoundBands(range, __.padding)
+      .domain( __.data[0].map( function(d) { return d[0]; } ) );
+  }
+
+  function _applyScale (axis, scale_type, __) {
+    var range = _getRange(axis, __);
+    switch (scale_type) {
+      case 'ordinal':
+        return _applyOrdinalScale.call(this, range, __);
+      case 'linear':
+        return _applyLinearScale.call(this, range, __);
+      case 'time':
+        return _applyTimeScale.call(this, range, __);
+      case undefined:
+        return new Error('scale cannot be undefined');
+      default:
+        throw new Error('scale_type ' 
+                         + scale_type 
+                         + ' not supported. Is it misspelled?' );
+    }
+  }
+
+  function applyScales () {
+    var __ = this.__;
+    this.applyScale.call( __.xScale, 'x', __.x_scale, __ );
+    this.applyScale.call( __.yScale, 'y', __.y_scale, __ );
+    return this;
+  }
+
+  return function () {
+
+    this.setScales = setScales;
+    this.applyScales = applyScales;
+    this.applyScale = _applyScale;
+    // private methods, exposed for testing
+    this._setScale = _setScale;
+    this._applyLinearScale = _applyLinearScale;
+    this._getRange = _getRange;
+    return this;
+  };
+
+});
+
+
+define('mixins/axis', [
+  "d3"
+], function (d3) {
+
+  function _setProps (axis_conf, scale) { 
+    if ( !axis_conf.show ) { return; }
+    var axis = d3.svg.axis().scale(scale);
+    d3.entries(axis_conf).forEach(function(o) {
+      if ( o.value !== undefined && o.key !== 'show' ) {
+        axis[o.key](o.value);
+      }
+    });
+    return axis;
+  }
+
+  function setAxes () {
+    var __ = this.__;
+    __.xAxis = this._setProps(__.x_axis, __.xScale);
+    __.yAxis = this._setProps(__.y_axis, __.yScale);
+    return this;
+  }
+
+  function _transitionXAxisV (__) {
+    return this
+      .attr("transform", "translate(0," + __.yScale.range()[0] + ")")
+      .call(__.xAxis);
+  }
+
+  function _transitionXAxisH (__) {
+    return this
+      .attr("transform", "translate(" + 10 + "," + __.h + ")")
+      .call(__.xAxis);
+  }
+
+  function _transitionXAxis (__) {
+    if ( !__.x_axis.show ) { return; }
+    __.quantitative_scale //?????????????
+    if (__.quantitative_scale == 'y') {
+      return _transitionXAxisV.call(this, __);
+    } else if (__.quantitative_scale == 'x') {
+      return _transitionXAxisH.call(this, __);
+    } else {
+      throw new Error('quantitative_scale must be one of: x, y');
+    } 
+  }
+
+  function _transitionYAxis (__) {
+    if ( !__.y_axis.show ) { return; }
+    return this.call(__.yAxis)
+      .selectAll("g")
+      .delay( __.delay );
+  }
+
+  function transitionAxis (axis, __) {
+    switch (axis) {
+      case 'x':
+        return _transitionXAxis.call(this, __);
+      case 'y':
+        return _transitionYAxis.call(this, __);
+      default:
+        throw new Error('axis must be one of: x, y. Not ' + axis );
+    } 
+  } 
+
+  return function () {
+    this.setAxes = setAxes;
+    this._setProps = _setProps;
+    this.transitionAxis = transitionAxis;
+    return this;
+  };
+
+});
+define('mixins/chart', [
+  "d3"
+], function (d3) {
+
+  function setChart (chart_class) {
+
+    //console.log(selection[0].tagName.toLowerCase())
+    var self = this,
+        __   = self.__;
+
+    // Select the svg element, if it exists.
+    self.svg = self.selection.selectAll("svg").data([__.data]);
+    // Otherwise, create the skeletal chart.
+    self.gEnter = self.svg.enter().append("svg")
+      .append("g");
+    // Initializing the tooltip.
+    if ( __.tooltip ) {
+      self.tip = self.tip( __.tooltip );
+      self.gEnter.call(self.tip);
+    }
+   
+    self.gEnter.append("g").attr("class", chart_class);
+    //TODO: we need to handle bar offsets and others?
+
+    __.overlapping_charts.names.forEach( function (chart_name) {
+      self.gEnter.append("g").attr("class", chart_name);
+    });
+
+    self.gEnter.append("g").attr("class", "x axis");
+    self.gEnter.append("g").attr("class", "y axis")
+     .attr("transform", "translate(-" + (__.y_axis_offset) + ",0)");
+     
+    // Update the outer dimensions.
+    self.svg.attr("width", __.width)
+      .attr("height", __.height);
+
+    // Update the inner dimensions.
+    self.g = self.svg.select("g")
+      .attr("transform", "translate(" + 
+      __.margin.left + "," + __.margin.top + ")");
+
+    // Transitions root.
+    self.transition = self.g.transition().duration(__.duration);
+
+    // Update the y axis.
+    self.transitionAxis.call(
+      self.transition.selectAll('.y.axis'), 'y', __);
+
+    // Update the x axis.
+    self.transitionAxis.call(
+      self.transition.selectAll('.x.axis'), 'x', __);
+
+    return self;
+  };
+
+  return function () {
+    this.setChart = setChart;
+    return this;
+  };
+
+});
+
+
 // **The default configuration module for the bar.bar module**
 
 define('bar/config', [
@@ -10229,91 +10614,179 @@ define('bar/config', [
 });
 
 
-define('mixins/data', [
-  "d3"
-], function (d3) {
+define('bar/mixins',["d3"], function(d3) {
 
-  function dataIdentifier (d) {
-    return d[0];
-  }
-
-  function delay (__) {
-    var duration = __.duration,
-        data = __.data;
-    return function (d, i) {
-      return i / data[0].length * duration;
+    function _getBarOrientation (__) {
+      if ( (__.x_scale == 'ordinal' || __.x_scale == 'time') &&
+            __.y_scale == 'linear') {
+        return 'vertical';
+      } else if (__.x_scale == 'linear' && __.y_scale == 'ordinal') {
+        return 'horizontal';
+      } else {
+        throw new Error('x_scale-y_scale wrong options combination');
+      }
     }
-  };
 
-  function normalizeData (data, __) {
-    var parsed_data = [],
-        date_chart = __.x_scale == 'time' ? true : false,
-        date_format = __.date_format,
-        date_type = __.date_type,
-        categoricalValue = __.categoricalValue;
-    data.forEach( function (dataset, index) {
-      parsed_data.push(dataset.map(function(d, i) {
-        var x;
-        // The time data is encoded in a string:
-        if (date_chart && date_type == 'string') {
-          x = d3.time.format(date_format)
-            .parse(categoricalValue.call(dataset, d));
-        // The time data is encoded in an epoch number:
-        } else if (date_chart && __.date_type == 'epoch') {
-          x = new Date(categoricalValue.call(dataset, d) * 1000);
-        // Real categorical value:
-        } else {
-          x = __.categoricalValue.call(dataset, d);
+    function _createVerticalBars (__) {
+      return this.append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return __.xScale(d[0]); })
+        .attr("width", __.xScale.rangeBand())
+        .attr("y", __.h + __.barOffSet)
+        .attr("height", 0);
+    }
+
+    function _createTimeBars (__) {
+      return this.append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { 
+          return __.xScale(d[0]) - __.bar_width / 2;
+        })
+        .attr("width", __.bar_width)
+        //attention TODO: this get then overridden by the transition
+        .attr("y", __.h + __.barOffSet) 
+        .attr("height", 0);
+    }
+
+    function _createHorizontalBars (__) {
+      return this.append("rect")
+        .attr("class", "bar")
+        .attr("x", __.barOffSet)
+        .attr("width", 0)
+        .attr("y", function(d) { return __.yScale(d[0]); })
+        .attr("height", __.yScale.rangeBand());
+    }
+
+    function createBars (__) {
+      var orientation = _getBarOrientation(__);
+      if (orientation == 'vertical' && __.x_scale !== 'time') {
+        return _createVerticalBars.call(this, __);
+      } else if (orientation == 'vertical' && __.x_scale == 'time') {
+        return _createTimeBars.call(this, __);
+      } else if (orientation == 'horizontal') {
+        return _createHorizontalBars.call(this, __);
+      } else {
+        throw new Error("orientation-x_scale wrong combination");
+      }
+    }
+
+    function _transitionVerticalBars (__) {
+      return this.delay(__.delay)
+        .attr("x", function(d) { return __.xScale(d[0]); })
+        .attr("y", function(d) { return __.yScale(d[1]); })
+        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+    }
+
+    function _transitionTimeBars (__) {
+      return this.delay(__.delay)
+        .attr("x", function(d) { 
+          return __.xScale(d[0]) - __.bar_width / 2;
+        })
+        .attr("y", function(d) { return __.yScale(d[1]); })
+        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+    }
+
+    function _transitionHorizontalBars (__) {
+      return this.delay(__.delay)
+        .attr("y", function(d) { return __.yScale(d[0]); })
+        .attr("x", __.barOffSet)
+        .attr("width", function(d) { 
+          return __.xScale(d[1]) + __.barOffSet; 
+        });
+    }
+
+    function transitionBars (orientation, __) {
+      var orientation = _getBarOrientation(__);
+      if (orientation == 'vertical' && __.x_scale !== 'time') {
+        return _transitionVerticalBars.call(this, __);
+      } else if (orientation == 'vertical' && __.x_scale == 'time') {
+        return _transitionTimeBars.call(this, __);
+      } else if (orientation == 'horizontal') {
+        return _transitionHorizontalBars.call(this, __);
+      } else {
+        throw new Error("orientation-x_scale wrong combination");
+      }
+    }
+
+    function setBars () {
+      var self = this,
+          __ = this.__;
+
+//      // Select the bar elements, if they exists.
+//      self.bars_g = self.g.selectAll(".bars")
+//        .data(__.data, self.dataIdentifier);
+//
+//      // Exit phase (pushes out old bar groups before new ones come in).
+//      self.bars_g.exit()
+//        .transition().duration(__.duration).style('opacity', 0).remove();
+  
+      // Otherwise, create them.
+      //self.bars_g = self.g.append("g")
+      __.data.forEach( function (data, i) {
+        var bars = self.g.selectAll(".bar")
+              .data(data, self.dataIdentifier),
+            ov_options = __.overlapping_charts.options,
+            ov_bar_options = ov_options ? ov_options.bars : void 0;
+  
+        // Exit phase (pushes out old bars before new ones come in).
+        bars.exit()
+          .transition().duration(__.duration).style('opacity', 0).remove();
+  
+        self.createBars.call(bars.enter(), __)
+          .on('click', __.handleClick);
+    
+        // And transition them.
+        self.transitionBars
+          .call(self.transition.selectAll('.bar'), __.orientation, __)
+          .call(self.endall, data, __.handleTransitionEnd);
+    
+        if (__.tooltip) {
+          bars
+           .on('mouseover', self.tip.show)
+           .on('mouseout', self.tip.hide);
         }
-        return [x, __.quantativeValue.call(dataset, d)];
-      }));
-    });
-    if (__.invert_data) {
-      //parsed_data = data.reverse();  // TODO!!!
-    }
-    return parsed_data;
-  }
+      });
 
-  return function () {
-    this.dataIdentifier = dataIdentifier;
-    //this.delay = delay;
-    this.normalizeData = normalizeData;
-    return this;
-  };
+    }
+
+    return function (orientation, __) {
+      this.setBars = setBars;
+      this.transitionBars = transitionBars;
+      this.createBars = createBars;
+      return this;
+    };
 
 });
+
+
 // **The bar.bar module**
 
 define('bar/bar',[
   "d3", 
   "utils/mixins",
   "bar/config", 
-  "mixins/data"
-//  "mixins/layout_helpers",
-//  "mixins/scale_helpers",
-//  "mixins/axis_helpers",
-//  "mixins/scaffolding",
-//  "bar/bar_helpers",
-//  "bar/scaffolding",
-//  "line/scaffolding",
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "bar/mixins",
 ], function(
   d3, 
   utils_mixins, 
   default_config, 
-  data_mixins
-//  layout_helpers, 
-//  scale_helpers, 
-//  axis_helpers, 
-//  scaffolding,
-//  bar_helpers,
-//  bar_scaffolding,
-//  line_scaffolding
+  data_mixins,
+  layout_mixins,
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  bar_mixins
 ) {
   
   return function (user_config) {
 
     var config = user_config || {},
-        utils  = utils_mixins()
+        utils  = utils_mixins(),
         extend = utils.extend,
         getset = utils.getset,
         __     = extend(default_config, config);
@@ -10323,30 +10796,24 @@ define('bar/bar',[
       var self = this instanceof Bar
                ? this
                : new Bar(selection),
-          data = self.normalizeData(selection.datum(), __),
+          has_timescale = __.x_scale == 'time',
           bars;
 
-//      self.__ = __;
-//
-//      self.__.selection = selection;
-//      self.setDimensions();
-//      __.w = this.w;
-//      __.h = this.h;
-//
-//      if (__.x_scale == 'time') {
-//        __.bar_width = (__.w() / data[0].length) * .9;
-//        __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
-//        //TODO: set events?
-//        __.margin = utils.extend(__.margin, {
-//            left: __.margin.left + __.y_axis_offset,
-//            right: __.margin.right + __.y_axis_offset
-//        });
-//      }
-//      self.axisScaffolding.call(self, data, __);
-//
-//      self.chartScaffolding.call(self, selection, __, 'bars');
-//      //self.barScaffolding.call(self, __);
-//
+      self.__        = __;
+      self.selection = selection;
+
+      self.normalizeData();
+      self.setDimensions();
+
+      if (has_timescale) { self.adjustDimensionsToTimeScale(); }
+
+      self.setScales();
+      self.setAxes();
+      self.setDelay();
+      self.applyScales();
+      self.setChart('bars');
+      self.setBars();
+
 //      __.overlapping_charts.names.forEach( function (chart_name) {
 //        utils.getScaffoldingMethod.call(self, chart_name).call(self, __);
 //      });
@@ -10357,17 +10824,607 @@ define('bar/bar',[
     getset(Bar, __);
     utils_mixins.call(Bar.prototype);
     data_mixins.call(Bar.prototype);
-    //layout_helpers.call(Bar.prototype);
-    //scale_helpers.call(Bar.prototype);
-    //axis_helpers.call(Bar.prototype);
-    //scaffolding.call(Bar.prototype);
-    //bar_helpers.call(Bar.prototype);
-    //bar_scaffolding.call(Bar.prototype);
-    //line_scaffolding.call(Bar.prototype);
+    layout_mixins.call(Bar.prototype);
+    scale_mixins.call(Bar.prototype);
+    axis_mixins.call(Bar.prototype);
+    chart_mixins.call(Bar.prototype);
+    bar_mixins.call(Bar.prototype);
+
+    Bar.prototype.adjustDimensionsToTimeScale = function () {
+      __.bar_width = (__.w / __.data[0].length) * .9;
+      __.width += __.bar_width; //FIXME: this should be smarter!
+      __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
+      __.margin = utils.extend(__.margin, {
+          left: __.margin.left + __.y_axis_offset,
+          right: __.margin.right + __.y_axis_offset
+      });
+      return this;
+    }
 
     return Bar;
   }
 
+});
+
+
+// **The default configuration module for the line.line module**
+
+define('line/config',[
+  "d3", 
+  "base_config",
+  "utils/mixins",
+], function(d3, base_config, utils_mixins) {
+    
+  var config = {
+        x_scale: 'time',
+      },
+      utils = utils_mixins();
+
+  return utils.extend(base_config, config);
+  
+});
+
+
+define('line/mixins', ["d3"], function (d3) {
+
+  function setLines () {
+    var self = this,
+          __ = this.__;
+
+    // Select the line elements, if they exists.
+    self.lines_g = self.g.select('g.lines').selectAll(".lines")
+      .data(__.data, self.dataIdentifier);
+
+    // Exit phase (let us push out old lines before the new ones come in).
+    self.lines_g.exit()
+      .transition().duration(__.duration).style('opacity', 0).remove();
+
+    // Otherwise, create them.
+    self.lines_g.enter().append("g").each( function (data, i) {
+      var lines = d3.select(this).selectAll(".bar")
+            .data([data], self.dataIdentifier),
+          ov_options = __.overlapping_charts.options,
+          ov_line_options = ov_options ? ov_options.bars : void 0;
+
+      // Exit phase (let us push out old lines before the new ones come in).
+      lines.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();      
+
+      lines.enter().append("path")
+        .attr("class", "line")
+        .attr("d", self.line(__) )
+        .on('click', __.handleClick);
+      
+      if (__.tooltip) {
+        lines
+         .on('mouseover', self.tip.show)
+         .on('mouseout', self.tip.hide);
+      }
+        
+      //TODO
+      //And transition them.
+      //self.transitionLines
+      //  .call(transition.selectAll('.line'), 'vertical', params)
+      //  .call(utils.endall, data, __.handleTransitionEnd);
+
+    });
+
+    return this;
+  }
+
+  return function () {
+    this.setLines = setLines;
+    return this;
+  };
+
+});
+
+
+define('circle/mixins', ["d3"], function (d3, utils) {
+
+  function setCircles () {
+    var self = this,
+          __ = this.__;
+
+    // Select the circle elements, if they exists.
+    self.circles_g = self.g.select('g.circles').selectAll(".circles")
+      .data(__.data, self.dataIdentifier);
+
+    // Exit phase (let us push out old circles before the new ones come in).
+    self.circles_g.exit()
+      .transition().duration(__.duration).style('opacity', 0).remove();
+
+    // Otherwise, create them.
+    self.circles_g.enter().append("g").each( function (data, i) {
+      var circles = d3.select(this).selectAll(".circle")
+            .data(data, self.dataIdentifier),
+          tip,
+          ov_options = __.overlapping_charts.options,
+          ov_circle_options = ov_options ? ov_options.circles : void 0;
+
+      // Exit phase (let us push out old circles before the new ones come in).
+      circles.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();
+
+      // Otherwise, create them.
+      circles.enter().append("circle")
+        .attr("class", "dot")
+        .attr("r", ov_circle_options && ov_circle_options.r ? ov_circle_options.r : 4)
+        .attr("cx", function(d) { return __.xScale(d[0]); })
+        .attr("cy", function(d) { return __.yScale(d[1]); })
+        // TODO: this will need a fix if is an overlapping chart!
+        .on('click', __.handleClick); 
+
+      // Tooltips.
+      if (ov_circle_options && ov_circle_options.tooltip) {
+        tip = self.tip( ov_circle_options.tooltip );
+        self.gEnter.call(tip);
+      }
+      if (__.tooltip || ov_circle_options && ov_circle_options.tooltip) {
+        tip = tip || self.tip;
+        circles
+         .on('mouseover', tip.show)
+         .on('mouseout', tip.hide);
+      }
+
+    });
+    
+    //TODO
+    //And transition them.
+    //self.transitionCircles
+    //  .call(transition.selectAll('.circle'), 'vertical', params)
+    //  .call(utils.endall, data, __.handleTransitionEnd);
+
+    return this;
+  }
+
+  return function () {
+    this.setCircles = setCircles;
+    return this;
+  };
+
+});
+// **The line.line module**
+
+define('line/line',[
+  "d3", 
+  "utils/mixins",
+  "line/config", 
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "line/mixins",
+  "circle/mixins",
+], function(
+  d3, 
+  utils_mixins, 
+  default_config, 
+  data_mixins,
+  layout_mixins,
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  line_mixins,
+  circle_mixins
+) {
+  
+  return function (user_config) {
+
+    var config = user_config || {},
+        utils  = utils_mixins(),
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config);
+
+    function Line (selection) {
+
+      var self = this instanceof Line
+               ? this
+               : new Line(selection),
+          has_timescale = __.x_scale == 'time',
+          lines;
+
+      self.__ = __;
+      self.selection = selection;
+
+      self.normalizeData();
+      self.setDimensions();
+      self.setScales();
+      self.setAxes();
+      self.setDelay();
+      self.applyScales();
+      self.setChart('lines');
+      self.setLines();
+
+      __.overlapping_charts.names.forEach( function (chart_name) {
+        utils.getGraphHelperMethod.call(self, chart_name).call(self, __);
+      });
+
+      return selection;
+    }
+
+    getset(Line, __);
+    utils_mixins.call(Line.prototype);
+    data_mixins.call(Line.prototype);
+    layout_mixins.call(Line.prototype);
+    scale_mixins.call(Line.prototype);
+    axis_mixins.call(Line.prototype);
+    chart_mixins.call(Line.prototype);
+    line_mixins.call(Line.prototype);
+    circle_mixins.call(Line.prototype);
+
+    Line.prototype.line = function (__) {
+      return d3.svg.line().x(function(d, i) {
+        return __.xScale(d[0]);
+      }).y(function(d, i) {
+        return __.yScale(d[1]);
+      });
+    }
+
+    return Line;
+  }
+
+});
+
+
+// **The default configuration module for the point.point module**
+
+define('circle/config', [
+  "base_config",
+  "utils/mixins",
+], function(base_config, utils_mixins) {
+    
+  var config = {},
+      utils = utils_mixins();
+
+  return utils.extend(base_config, config);
+  
+});
+
+
+// **The circle.circle module**
+
+define('circle/circle',[
+  "d3", 
+  "utils/mixins",
+  "circle/config", 
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "circle/mixins",
+], function(
+  d3, 
+  utils_mixins, 
+  default_config, 
+  data_mixins,
+  layout_mixins,
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  circle_mixins
+) {
+  
+  return function (user_config) {
+
+    var config = user_config || {},
+        utils  = utils_mixins(),
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config);
+
+    function Circle (selection) {
+
+      var self = this instanceof Circle
+               ? this
+               : new Circle(selection),
+          has_timescale = __.x_scale == 'time',
+          circles;
+
+      self.__ = __;
+      self.selection = selection;
+
+      self.normalizeData();
+      self.setDimensions();
+      self.setScales();
+      self.setAxes();
+      self.setDelay();
+      self.applyScales();
+      self.setChart('circles');
+      self.setCircles();
+
+      return selection;
+    }
+
+    getset(Line, __);
+    utils_mixins.call(Circle.prototype);
+    data_mixins.call(Circle.prototype);
+    layout_mixins.call(Circle.prototype);
+    scale_mixins.call(Circle.prototype);
+    axis_mixins.call(Circle.prototype);
+    chart_mixins.call(Circle.prototype);
+    circle_mixins.call(Circle.prototype);
+
+    return Circle;
+  }
+
+});
+
+
+// **frame.states module**
+
+// Used by the *frame.state_machine* module.
+// Name-spaced, might add other states if needed.
+
+define('frame/states',['require'],function(require) {
+
+  var transition_states = [
+    {
+      'name': 'in_pause',
+      'initial': true,
+      'events': {
+        'start': 'in_transition_start',
+        'next': 'in_transition_next',
+        'prev': 'in_transition_prev',
+        'jump': 'in_transition_jump',
+        'reset': 'in_transition_reset'
+      }
+    },
+    {
+      'name': 'in_transition_start',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_next',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_prev',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_jump',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_reset',
+      'events': {
+        'stop': 'in_pause'
+      }
+    }
+  ];
+
+  return { transition_states: transition_states};
+
+});
+
+
+// **frame.state_machine module**
+// 
+// From http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/
+
+define('frame/state_machine',['require'],function(require) {
+
+  function StateMachine (states) {
+    this.states = states;
+    this.indexes = {};
+    for( var i = 0; i < this.states.length; i++) {
+      this.indexes[this.states[i].name] = i;
+      if (this.states[i].initial){
+        this.currentState = this.states[i];
+      }
+    }
+  }
+
+  StateMachine.prototype.consumeEvent = function (e) {
+    if(this.currentState.events[e]){
+      this.currentState = this.states[this.indexes[this.currentState.events[e]]];
+    }
+  }
+
+  StateMachine.prototype.getStatus = function () {
+    return this.currentState.name;
+  }
+
+  // getLastEvent();
+
+  return StateMachine;
+
+});
+
+
+// **frame.frame module**
+
+define('frame/frame',[
+  'd3',
+  'utils/mixins',
+  'frame/states',
+  'frame/state_machine'
+], function(d3, utils_mixins, states, StateMachine) {
+
+  var Frame = function (conf) {
+    var self  = this,
+        utils = utils_mixins();
+    
+    this.initial_frame = this.frame = conf.frame;
+    this.old_frame =   void 0;
+    this.current_timeout = void 0;
+    this.drawChart = conf.drawChart;
+    this.delta = conf.delta;
+    this.step = conf.step;
+    this.data = conf.data;
+
+    this.state_machine = new StateMachine(states.transition_states);
+    this.dispatch = d3.dispatch(
+      'start', 
+      'stop', 
+      'next', 
+      'prev', 
+      'reset', 
+      'end',
+      'jump',
+      'at_beginning_of_transition'
+    );
+    
+    // Initial frame. The chart is rendered for the first time.
+    this.drawChart(this.data[this.frame]);
+
+    // Fired when all the chart related transitions within a frame are 
+    // terminated.
+    // It is the only dispatch event that does not have a state_machine 
+    // equivalent event.
+    // `frame` is an arbitrary namespace, in order to register multiple 
+    // listeners for the same event type.
+    //
+    // https://github.com/mbostock/d3/wiki/Internals#events:
+    // If an event listener was already registered for the same type, the 
+    // existing listener is removed before the new listener is added. To 
+    // register multiple listeners for the same event type, the type may be 
+    // followed by an optional namespace, such as 'click.foo' and 'click.bar'.
+    this.dispatch.on('end.frame', self.handleFrameEnd);
+
+    this.dispatch.on('stop', self.handleStop);
+
+    this.dispatch.on('start', self.handleStart);
+
+    this.dispatch.on('next', self.handleNext);
+
+    this.dispatch.on('prev', self.handlePrev);
+
+    this.dispatch.on('reset', self.handleReset);
+
+    this.dispatch.on('jump', self.handleJump);
+  }
+
+
+  Frame.prototype.startTransition = function () {
+    var self = this;
+    clearTimeout(this.current_timeout);
+    if (this.data[this.frame]) {
+      this.current_timeout = setTimeout( function () {
+        // Re-render the chart
+        self.drawChart(self.data[self.frame]);
+      }, self.step);
+    } else {
+      // When no data is left to consume, let us stop the running frames!
+      this.state_machine.consumeEvent('stop');
+      this.frame = this.old_frame;
+    }
+    self.dispatch.at_beginning_of_transition.call(self);
+  }
+
+  Frame.prototype.handleFrameEnd = function () {
+    this.handleTransition();
+    return this;
+  }
+
+  Frame.prototype.handleStop = function () {
+    this.state_machine.consumeEvent('stop');
+    return this;
+  }
+
+  // TODO: there is a lot of repetition here!
+
+  Frame.prototype.handleStart = function () {
+    if (this.state_machine.getStatus() === 'in_pause') {
+      this.state_machine.consumeEvent('start');
+      this.handleTransition();
+    } else {
+      console.log('State already in in_transition_start.');
+    }
+    return this;
+  }
+
+  // TODO:
+  // for next and prev we are allowing multiple prev-next events to be 
+  // fired without waiting for the current frame to end. Change?
+
+  Frame.prototype.handleNext = function () {
+    this.state_machine.consumeEvent('next');
+    if (this.state_machine.getStatus() === 'in_transition_next') {
+      this.handleTransition();
+    } else {
+      console.log('State not in pause when next event was fired.');
+    }
+    return this;
+  }
+
+  Frame.prototype.handlePrev = function () {
+    this.state_machine.consumeEvent('prev');
+    if (this.state_machine.getStatus() === 'in_transition_prev') {
+      this.handleTransition();
+    } else {
+      console.log('State not in pause when prev event was fired.');
+    }
+    return this;
+  }
+
+  Frame.prototype.handleReset = function () {
+    this.state_machine.consumeEvent('reset');
+    if (this.state_machine.getStatus() === 'in_transition_reset') {
+      this.handleTransition();
+    } else {
+      console.log('State not in pause when reset event was fired.');
+    }
+    return this;
+  }
+
+  Frame.prototype.handleJump = function (value) {
+    this.state_machine.consumeEvent('jump');
+    if (this.state_machine.getStatus() === 'in_transition_jump') {
+      this.handleTransition(value);
+    } else {
+      console.log('State not in pause when jump event was fired.');
+    }
+    return this;
+  }
+
+  
+  Frame.prototype.handleTransition = function (value) {
+    var self = this, status = this.state_machine.getStatus();
+    if (status === 'in_transition_start') {
+      this.old_frame = this.frame;
+      this.frame += this.delta;
+      this.startTransition();
+    } else if (status === 'in_transition_prev') {
+      this.old_frame = this.frame;
+      this.frame -= this.delta;
+      this.startTransition();
+      self.state_machine.consumeEvent('stop');
+    } else if (status === 'in_transition_next') {
+      this.old_frame = this.frame;
+      this.frame += this.delta;
+      this.startTransition();
+      self.state_machine.consumeEvent('stop');
+    } else if (status === 'in_transition_jump') {
+      if (!value) return new Error('need to pass a value to jump!');
+      this.old_frame = this.frame;
+      this.frame = value;
+      this.startTransition();
+      self.state_machine.consumeEvent('stop');
+    } else if (status === 'in_transition_reset') {
+      this.old_frame = this.frame;
+      this.frame = this.initial_frame;
+      this.startTransition();
+      self.state_machine.consumeEvent('stop');
+    } else if (status === 'in_pause') {
+      return;
+    } 
+  }
+
+  return Frame;
+  
 });
 
 
@@ -10377,50 +11434,46 @@ define('chart',[
   "draw",
   "base_config",
   "utils/mixins",
-  ////"utils/mixins",
-  //"mixins/data_helpers",
-  //"mixins/layout_helpers",
-  //"mixins/scale_helpers",
-  //"mixins/axis_helpers",
-  //"mixins/scaffolding",
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
   "bar/config",
-  //"bar/bar_helpers", 
-  //"bar/scaffolding",
-  "bar/bar"
-  //"line/config",
-  //"line/scaffolding",
-  //"line/line",
-  //"circle/config",
-  //"circle/scaffolding",
-  //"circle/circle",
-  //"frame/states",
-  //"frame/state_machine",
-  //"frame/frame"
+  "bar/mixins", 
+  "bar/bar",
+  "line/config",
+  "line/mixins",
+  "line/line",
+  "circle/config",
+  "circle/mixins",
+  "circle/circle",
+  "frame/states",
+  "frame/state_machine",
+  "frame/frame"
 ], function(
   d3, 
   d3_tip,
   draw, 
   base_config, 
-  utils_mixins,
-  ////utils_mixins, 
-  //data_helpers, 
-  //layout_helpers, 
-  //scale_helpers,
-  //axis_helpers,
-  //scaffolding,
+  utils_mixins, 
+  data_mixins, 
+  layout_mixins, 
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
   bar_config,
-  //bar_helpers,
-  //bar_scaffolding,
-  Bar
-  //line_config,
-  //line_scaffolding,
-  //Line,
-  //circle_config,
-  //circle_scaffolding,
-  //Circle
-  //states, 
-  //StateMachine, 
-  //Frame
+  bar_mixins,
+  Bar,
+  line_config,
+  line_mixins,
+  Line,
+  circle_config,
+  circle_mixins,
+  Circle,
+  states, 
+  StateMachine, 
+  Frame
 ) {
 
   d3.d3_tip = d3_tip;
@@ -10430,25 +11483,23 @@ define('chart',[
     draw: draw,
     base_config: base_config,
     utils_mixins: utils_mixins,
-    ////utils_mixins: utils_mixins,
-    //data_helpers: data_helpers,
-    //layout_helpers: layout_helpers,
-    //scale_helpers: scale_helpers,
-    //axis_helpers: axis_helpers,
-    //scaffolding: scaffolding,
+    data_mixins: data_mixins,
+    layout_mixins: layout_mixins,
+    scale_mixins: scale_mixins,
+    axis_mixins: axis_mixins,
+    chart_mixins: chart_mixins,
     bar_config: bar_config,
-    //bar_helpers: bar_helpers,
-    //bar_scaffolding: bar_scaffolding,
+    bar_mixins: bar_mixins,
     Bar: Bar,
-    //line_config: line_config,
-    //line_scaffolding: line_scaffolding,
-    //Line: Line,
-    //circle_config: circle_config,
-    //circle_scaffolding: circle_scaffolding,
-    //Circle: Circle,
-    //Frame: Frame,
-    //states: states, 
-    //StateMachine: StateMachine,
+    line_config: line_config,
+    line_mixins: line_mixins,
+    Line: Line,
+    circle_config: circle_config,
+    circle_mixins: circle_mixins,
+    Circle: Circle,
+    Frame: Frame,
+    states: states, 
+    StateMachine: StateMachine,
   };
 
 });
