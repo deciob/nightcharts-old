@@ -23,11 +23,7 @@ define('base_config', [
       width: void 0,
       height: void 0, // if set, height has precedence on ratio
       ratio: .4,
-      //
-      offset_x: 0,
-      offset_y: 0,
-      //vertical: true,
-      quantitative_scale: 'y',
+      vertical: true,
       // One of: ordinal, linear, time
       x_scale: 'ordinal',
       y_scale: 'linear',
@@ -35,7 +31,7 @@ define('base_config', [
       // false    ->  min: 0, max: data_max
       // true     ->  min: data_min, max: data_max
       // obj      ->  min: obj.min, max: obj.max
-      scale_bounds: '0,max',
+      force_scale_bounds: false,
       // axes, apart from `show`, properties match d3's api.
       x_axis: {
         show: true,
@@ -50,6 +46,7 @@ define('base_config', [
         orient: 'left',
         tickValues: void 0,
       },
+      y_axis_offset: 0,
       // if x_scale: 'time'
       date_type: 'string', // or 'epoc'
       date_format: '%Y',
@@ -57,6 +54,9 @@ define('base_config', [
       // used for extending the timescale on the margins.
       date_offset: false,
       duration: 900,  // transition duration
+      colour: 'LightSteelBlue',
+      // data
+      max: void 0,         // Max value for the linear scale
       invert_data: false,  // Data sorting
       categoricalValue: function (d) { return d[0]; },
       quantativeValue: function (d) { return d[1]; },

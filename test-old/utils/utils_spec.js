@@ -1,4 +1,4 @@
-define(['chai', 'utils/mixins'], function(chai, utils_mixins) {
+define(['chai', 'utils/utils'], function(chai, utils) {
 
   var params, 
     assert = chai.assert,
@@ -16,11 +16,9 @@ define(['chai', 'utils/mixins'], function(chai, utils_mixins) {
     };
   });
 
-  describe('utils.mixins.getset', function(){
+  describe('utils/utils', function(){
 
-    var utils = utils_mixins();
-
-    it('should be setter with arguments, getter without', function(){
+    it('getset - calling with arguments is setter, without is getter', function(){
       utils.getset(myFunction, __);
       myFunction.x('xxx');
       assert.equal(myFunction.x(), 'xxx');
@@ -29,7 +27,7 @@ define(['chai', 'utils/mixins'], function(chai, utils_mixins) {
       assert.equal(myFunction.colour(), 'steelBlue');
     });
 
-    it('should be setter with arguments, getter without - nested', function(){
+    it('getset nested - calling with arguments is setter, without is getter', function(){
       utils.getset(myFunction, __);
       myFunction.margin({top: 30});
       assert.equal(myFunction.margin().top, 30);

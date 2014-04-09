@@ -1,179 +1,86 @@
 // **The bar.bar module**
 
 define('bar/bar',[
-    "d3", 
-    "utils/utils",
-    "bar/config", 
-    "mixins/common_mixins",
-    "mixins/bar_mixins",
-  ], function(d3, utils, default_config, common_mixins, bar_mixins) {
+  "d3", 
+  "utils/mixins",
+  "bar/config", 
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "bar/mixins",
+], function(
+  d3, 
+  utils_mixins, 
+  default_config, 
+  data_mixins,
+  layout_mixins,
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  bar_mixins
+) {
   
   return function (user_config) {
 
-    var config = user_config || {}
-      , __
-      , w
-      , h
-      , xScale
-      , yScale
-      , xAxis
-      , yAxis;
-
-    __ = utils.extend(default_config, config);
-
-    function dataIdentifier (d) {
-      return d[0];
-    }
+    var config = user_config || {},
+        utils  = utils_mixins(),
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config);
 
     function Bar (selection) {
 
       var self = this instanceof Bar
                ? this
-               : new Bar(selection);
+               : new Bar(selection),
+          has_timescale = __.x_scale == 'time',
+          bars;
 
-      w = function () { return __.width - __.margin.right - __.margin.left; };
-      h = function () { return __.height - __.margin.top - __.margin.bottom; };
-  
-      // Scales are functions that map from an input domain to an output range.
-      // Presently no assumption is made about the chart orientation.
-      xScale = self.setXScale(__.orientation, __.parseDate)();
-      yScale = self.setYScale(__.orientation)();
-  
-      // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
-      // Presently no assumption is made about the chart orientation.
-      xAxis = self.setXAxis(__.x_axis, xScale);
-      yAxis = self.setYAxis(__.y_axis, yScale);
-      
-      selection.each( function (dat) {
+      self.__        = __;
+      self.selection = selection;
 
-        var data
-          , tooltip = __.tooltip
-          , tip
-          , svg
-          , gEnter
-          , g
-          , bars
-          , transition
-          , params;
+      self.normalizeData();
+      self.setDimensions();
 
-        // data structure:
-        // 0: name
-        // 1: value
-        data = dat.map(function(d, i) {
-          var x;
-          if (__.parseDate) {
-            x = __.parseDate(__.categoricalValue.call(dat, d));
-          } else {
-            x = __.categoricalValue.call(dat, d);
-          }
-          return [
-            x, 
-            __.quantativeValue.call(dat, d)
-          ];
-        });
-        if (__.invert_data) {
-          data = data.reverse();
-        }
+      if (has_timescale) { self.adjustDimensionsToTimeScale(); }
 
-        function delay (d, i) {
-          // Attention, delay can not be longer of transition time! Test!
-          return i / data.length * __.duration;
-        }
+      self.setScales();
+      self.setAxes();
+      self.setDelay();
+      self.applyScales();
+      self.setChart('bars');
+      self.setBars();
 
-        params = {
-          data: data,
-          __: __,
-          h: h,
-          w: w,
-          yScale: yScale,
-          xScale: xScale,
-          xAxis: xAxis,
-          yAxis: yAxis,
-          delay: delay,
-          date_adjust: (w()/data.length)/2
-        }
+//      __.overlapping_charts.names.forEach( function (chart_name) {
+//        utils.getScaffoldingMethod.call(self, chart_name).call(self, __);
+//      });
 
-        if (__.parseDate) {
-          params.bar_width = (w() / data.length) - .5;
-        }
-
-        self.applyXScale.call(xScale, __.orientation, params);
-        self.applyYScale.call(yScale, __.orientation, params); 
-
-        // Select the svg element, if it exists.
-        svg = selection.selectAll("svg").data([data]);
-
-        // Otherwise, create the skeletal chart.
-        gEnter = svg.enter().append("svg").append("g");
-        // Initializing the tooltip.
-        if (tooltip) {
-          tip = utils.tip(tooltip);
-          gEnter.call(tip);
-        }
-        gEnter.append("g").attr("class", "bars");
-        gEnter.append("g").attr("class", "x axis");
-        if (__.parseDate) {
-          gEnter.append("g").attr("class", "y axis")
-           .attr("transform", "translate(-" + (params.date_adjust + 5) + ",0)");
-        } else {
-          gEnter.append("g").attr("class", "y axis");
-        }
-
-        // Update the outer dimensions.
-        svg.attr("width", __.width)
-          .attr("height", __.height);
-
-        // Update the inner dimensions.
-        g = svg.select("g")
-          .attr("transform", "translate(" + 
-          __.margin.left + "," + __.margin.top + ")");
-
-        // Transitions root.
-        transition = g.transition().duration(__.duration)
-        
-        // Update the y axis.
-        self.transitionYAxis.call(
-          transition.selectAll('.y.axis'), __.orientation, params);
-
-        // Update the x axis.
-        self.transitionXAxis.call(
-          transition.selectAll('.x.axis'), __.orientation, params);
-
-        // Select the bar elements, if they exists.
-        bars = g.select(".bars").selectAll(".bar")
-          .data(data, dataIdentifier);
-
-        // Exit phase (let us push out old bars before the new ones come in).
-        bars.exit()
-          .transition().duration(__.duration).style('opacity', 0).remove();
-
-        // Otherwise, create them.
-        bars = self.createBars.call(bars.enter(), __.orientation, params)
-          .on('click', __.handleClick);
-
-        if (tooltip) {
-          bars
-           .on('mouseover', tip.show)
-           .on('mouseout', tip.hide);
-        }
-          
-        // And transition them.
-        self.transitionBars
-          .call(transition.selectAll('.bar'), __.orientation, params)
-          .call(utils.endall, data, __.handleTransitionEnd);
-
-        return selection;
-
-      });
-
+      return selection;
     }
 
-    utils.getset(Bar, __);
-    common_mixins.call(Bar.prototype);
+    getset(Bar, __);
+    utils_mixins.call(Bar.prototype);
+    data_mixins.call(Bar.prototype);
+    layout_mixins.call(Bar.prototype);
+    scale_mixins.call(Bar.prototype);
+    axis_mixins.call(Bar.prototype);
+    chart_mixins.call(Bar.prototype);
     bar_mixins.call(Bar.prototype);
 
-    return Bar;
+    Bar.prototype.adjustDimensionsToTimeScale = function () {
+      __.bar_width = (__.w / __.data[0].length) * .9;
+      __.width += __.bar_width + __.offset_x; //FIXME: this should be smarter!
+      offset_x = __.offset_x == 0 ? __.bar_width * .6 : __.offset_x;
+      __.margin = utils.extend(__.margin, {
+          left: __.margin.left + offset_x,
+          right: __.margin.right + offset_x
+      });
+      return this;
+    }
 
+    return Bar;
   }
 
 });

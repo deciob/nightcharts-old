@@ -1,7 +1,7 @@
 // **Useful functions that can be shared across modules**
 
 define(["d3", "d3_tip"], function(d3, d3_tip) {
-  
+
   function clone (obj) {
     if (null == obj || "object" != typeof obj) return obj;
     var copy = obj.constructor();
@@ -11,29 +11,22 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return copy;
   }
 
-  function extend (target, source) {
-    var target_clone = clone(target);
+  function extend (target, source, clone_target, not_override) {
+    var clone_target = (typeof clone === "undefined") ? true : clone,
+        target_c = clone_target ? clone(target): target;
     for(prop in source) {
-      target_clone[prop] = source[prop];
+      if (not_override) {
+        target_c[prop] = target_c[prop] ? target_c[prop] : source[prop];
+      } else {
+        target_c[prop] = source[prop];
+      }
     }
-    return target_clone;
+    return target_c;
   }
 
   function isObject (o) {
     return Object.prototype.toString.call(o) === "[object Object]";
   }
-
-  /* Adapted from Stoyan Stafanov */
-  function schonfinkelize(fn) {
-      var slice = Array.prototype.slice,
-          stored_args = slice.call(arguments, 1);
-      return function () {
-          var new_args = slice.call(arguments),
-              args = stored_args.concat(new_args);
-          return fn.apply(null, args);
-      };
-  }
-
 
   // For each attribute in `state` it sets a getter-setter function 
   // on `obj`.
@@ -91,14 +84,34 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return tip;
   }
 
-  return {
-    extend: extend,
-    getset: getset,
-    isObject: isObject,
-    schonfinkelize: schonfinkelize,
-    endall: endall,
-    tip: tip,
+  function getGraphHelperMethod (chart_name) {
+    var name = chart_name.replace(/(?:^|\s)\S/g, 
+      function(a) { return a.toUpperCase(); });
+    return this['set' + name];
+  }
+
+  function getMinMaxValues (data) {
+    var min = Infinity,
+        max = 0;
+    data.forEach( function (data, i) {
+      var min_p = d3.min( data, function(d) { return parseFloat(d[1]); } ),
+          max_p = d3.max( data, function(d) { return parseFloat(d[1]); } );
+      min = min_p < min ? min_p : min;
+      max = max_p > max ? max_p : max;
+    });
+    return {min: min, max: max};
+  }
+
+  return function () {
+    this.clone = clone;
+    this.extend = extend;
+    this.isObject = isObject;
+    this.getset = getset;
+    this.endall = endall;
+    this.tip = tip;
+    this.getGraphHelperMethod = getGraphHelperMethod;
+    this.getMinMaxValues = getMinMaxValues;
+    return this;
   };
 
 });
-

@@ -12,13 +12,8 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
     }
 
     function _applyTimeScale (params, range) {
-      var data = params.data;
-      return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
-    }
-
-    function _applyTimeScale (params, range) {
       // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
-      var data = params.data,
+      var data = params.x_axis_data || params.data,  // FIXME this hack!
           t1 = data[0][0],
           t2 = data[data.length - 1][0],
           offset = params.__.time_offset,
@@ -39,14 +34,15 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
   
     // Sets the range and domain for the ordinal scale.
     function _applyOrdinalScale (params, range) {
+      var data = params.x_axis_data || params.data;  // FIXME this hack!
       return this
         .rangeRoundBands(range, params.__.padding)
-        .domain(params.data.map(function(d) { return d[0]; }));
+        .domain(data.map(function(d) { return d[0]; }));
     }
   
     function _applyXScaleV (params) {
       var range = [0, params.w()];
-      if (params.__.parseDate) {
+      if (params.__.date_chart) {
         return _applyTimeScale.call(this, params, range);
       } else {
         return _applyOrdinalScale.call(this, params, range);
@@ -133,10 +129,10 @@ define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
       }  
     }
 
-    function setXScale (orientation, parseDate) {
-      if (orientation == 'vertical' && parseDate) {
+    function setXScale (orientation, date_chart) {
+      if (orientation == 'vertical' && date_chart) {
         return d3.time.scale;
-      } else if (orientation != 'vertical' && parseDate) {
+      } else if (orientation != 'vertical' && date_chart) {
         return new Error('Timescale is only for horizontal graphs.')
       } else if (orientation == 'vertical') {
         return d3.scale.ordinal;

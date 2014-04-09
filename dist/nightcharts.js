@@ -16,31 +16,63 @@ define('draw',['require'],function(require) {
 
 // **The default base configuration module**
 
-define('base_config',['require'],function(require) {
+
+// Data structures:
+//
+// bar:
+// data = [ [ [], [], [], ... [] ], ... ]
+// svg.data( [data] )
+//
+// line:
+// data = [ [ [], [], [], ... [] ], ... ]
+// svg.data( [data] )
+// __.x_axis_data = data[0]  #FIXME
+
+
+define('base_config', [
+  "d3", 
+], function(d3) {
     
     return {
-      duration: 900,  // transition duration
-      colour: 'LightSteelBlue',
-      // layout
+      // layout.
       margin: {top: 20, right: 20, bottom: 40, left: 40},
-      width: 500,
-      height: 400,
-      padding: .1,
-      barOffSet: 4,
-      // axes
+      width: void 0,
+      height: void 0, // if set, height has precedence on ratio
+      ratio: .4,
+      //
+      offset_x: 0,
+      offset_y: 0,
+      //vertical: true,
+      quantitative_scale: 'y',
+      // One of: ordinal, linear, time
+      x_scale: 'ordinal',
+      y_scale: 'linear',
+      // Forces the quantitative scale bounds:
+      // false    ->  min: 0, max: data_max
+      // true     ->  min: data_min, max: data_max
+      // obj      ->  min: obj.min, max: obj.max
+      scale_bounds: '0,max',
+      // axes, apart from `show`, properties match d3's api.
       x_axis: {
+        show: true,
         outerTickSize: 0,
         orient: 'bottom',
         tickValues: void 0,
         tickFormat: null,
       },
       y_axis: {
+        show: true,
         outerTickSize: 0,
         orient: 'left',
         tickValues: void 0,
       },
-      // data
-      max: void 0,         // Max value for the linear scale
+      // if x_scale: 'time'
+      date_type: 'string', // or 'epoc'
+      date_format: '%Y',
+      // false or string: 'month', 'year', etc.
+      // used for extending the timescale on the margins.
+      date_offset: false,
+      duration: 900,  // transition duration
       invert_data: false,  // Data sorting
       categoricalValue: function (d) { return d[0]; },
       quantativeValue: function (d) { return d[1]; },
@@ -50,13 +82,7 @@ define('base_config',['require'],function(require) {
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
-      // is the xAxis a timescale?
-      // false or function: d3.time.format("%Y").parse
-      parseDate: false,
-      parseAxisDate: false,
-      // false or string: 'month', 'year', etc.
-      // used for extending the timescale on the margins.
-      time_offset: false
+      overlapping_charts: { names: [] }
     };
   
 });
@@ -64,8 +90,8 @@ define('base_config',['require'],function(require) {
 
 // **Useful functions that can be shared across modules**
 
-define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
-  
+define('utils/mixins',["d3", "d3_tip"], function(d3, d3_tip) {
+
   function clone (obj) {
     if (null == obj || "object" != typeof obj) return obj;
     var copy = obj.constructor();
@@ -75,29 +101,22 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     return copy;
   }
 
-  function extend (target, source) {
-    var target_clone = clone(target);
+  function extend (target, source, clone_target, not_override) {
+    var clone_target = (typeof clone === "undefined") ? true : clone,
+        target_c = clone_target ? clone(target): target;
     for(prop in source) {
-      target_clone[prop] = source[prop];
+      if (not_override) {
+        target_c[prop] = target_c[prop] ? target_c[prop] : source[prop];
+      } else {
+        target_c[prop] = source[prop];
+      }
     }
-    return target_clone;
+    return target_c;
   }
 
   function isObject (o) {
     return Object.prototype.toString.call(o) === "[object Object]";
   }
-
-  /* Adapted from Stoyan Stafanov */
-  function schonfinkelize(fn) {
-      var slice = Array.prototype.slice,
-          stored_args = slice.call(arguments, 1);
-      return function () {
-          var new_args = slice.call(arguments),
-              args = stored_args.concat(new_args);
-          return fn.apply(null, args);
-      };
-  }
-
 
   // For each attribute in `state` it sets a getter-setter function 
   // on `obj`.
@@ -155,506 +174,658 @@ define('utils/utils',["d3", "d3_tip"], function(d3, d3_tip) {
     return tip;
   }
 
-  return {
-    extend: extend,
-    getset: getset,
-    isObject: isObject,
-    schonfinkelize: schonfinkelize,
-    endall: endall,
-    tip: tip,
-  };
-
-});
-
-
-define('mixins/common_mixins',["d3", "utils/utils"], function(d3, utils) {
-
-    // Sets the range and domain for the linear scale.
-    function _applyLinearScale (params, range) {
-      var max;
-      if (params.__.max) {
-        max = params.__.max;
-      } else {
-        max = d3.max( params.data, function(d) {return parseFloat(d[1]); } );
-      }
-      return this.range(range).domain([0, max]);
-    }
-
-    function _applyTimeScale (params, range) {
-      var data = params.data;
-      return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
-    }
-
-    function _applyTimeScale (params, range) {
-      // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
-      var data = params.data,
-          t1 = data[0][0],
-          t2 = data[data.length - 1][0],
-          offset = params.__.time_offset,
-          t0,
-          t3;
-      if (params.__.time_offset) {
-        t0 = d3.time[offset].offset(t1, -1);
-        t3 = d3.time[offset].offset(t2, +1);
-        return this
-          .domain([t0, t3])
-          .range([t0, t3].map(d3.time.scale()
-            .domain([t1, t2])
-            .range([0, params.w()])));
-      } else {
-        return this.range(range).domain([data[0][0], data[data.length - 1][0]]);
-      }
-    }
-  
-    // Sets the range and domain for the ordinal scale.
-    function _applyOrdinalScale (params, range) {
-      return this
-        .rangeRoundBands(range, params.__.padding)
-        .domain(params.data.map(function(d) { return d[0]; }));
-    }
-  
-    function _applyXScaleV (params) {
-      var range = [0, params.w()];
-      if (params.__.parseDate) {
-        return _applyTimeScale.call(this, params, range);
-      } else {
-        return _applyOrdinalScale.call(this, params, range);
-      }
-    }
-  
-    function _applyXScaleH (params) {
-      var range = [0, params.w()];
-      return _applyLinearScale.call(this, params, range);
-    }
-  
-    function applyXScale (orientation, params) {
-      if (orientation == 'vertical') {
-        return _applyXScaleV.call(this, params);
-      } else {
-        return _applyXScaleH.call(this, params);
-      }
-    }
-  
-    function _applyYScaleV (params) {
-      // Note the inverted range for the y-scale: bigger is up!
-      var range = [params.h(), 0];
-      return _applyLinearScale.call(this, params, range);
-    }
-  
-    function _applyYScaleH (params) {
-      // Note the inverted range for the y-scale: bigger is up!
-      var range = [params.h(), 0];
-      return _applyOrdinalScale.call(this, params, range);
-    }
-  
-    function applyYScale (orientation, params) {
-      if (orientation == 'vertical') {
-        return _applyYScaleV.call(this, params);
-      } else {
-        return _applyYScaleH.call(this, params);
-      }  
-    }
-  
-    function _transitionXAxisV (params) {
-      return this
-        .attr("transform", "translate(0," + params.yScale.range()[0] + ")")
-        .call(params.xAxis);
-    }
-  
-    function _transitionXAxisH (params) {
-      return this.attr("transform", "translate(" + params.__.barOffSet
-        + "," + params.h() + ")").call(params.xAxis);
-    }
-  
-    function transitionXAxis (orientation, params) {
-      if (orientation == 'vertical') {
-        return _transitionXAxisV.call(this, params);
-      } else {
-        return _transitionXAxisH.call(this, params);
-      }  
-    }
-  
-    function _transitionYAxisV (params) {
-      return this.call(params.yAxis)
-        .selectAll("g")
-        .delay(params.delay);
-    }
-  
-    function _transitionYAxisH (params) {
-      return this.call(params.yAxis)
-        .selectAll("g")
-        .delay(params.delay);
-    }
-  
-    function transitionYAxis (orientation, params) {
-      if (orientation == 'vertical') {
-        return _transitionYAxisV.call(this, params);
-      } else {
-        return _transitionYAxisH.call(this, params);
-      }  
-    } 
-
-    function setYScale (orientation) {
-      if (orientation == 'vertical') {
-        return d3.scale.linear;
-      } else {
-        return d3.scale.ordinal;
-      }  
-    }
-
-    function setXScale (orientation, parseDate) {
-      if (orientation == 'vertical' && parseDate) {
-        return d3.time.scale;
-      } else if (orientation != 'vertical' && parseDate) {
-        return new Error('Timescale is only for horizontal graphs.')
-      } else if (orientation == 'vertical') {
-        return d3.scale.ordinal;
-      } else {
-        return d3.scale.linear;
-      }  
-    }
-
-    function setXAxis (x_axis, xScale) {
-      var xAxis = d3.svg.axis().scale(xScale);
-      d3.entries(x_axis).forEach(function(o) {
-        if (o.value !== undefined) {
-          xAxis[o.key](o.value);
-        }
-      });
-      return xAxis;
-    }
-
-    function setYAxis (y_axis, yScale) {
-      var yAxis = d3.svg.axis().scale(yScale);
-      d3.entries(y_axis).forEach(function(o) {
-        if (o.value !== undefined) {
-          yAxis[o.key](o.value);
-        }
-      });
-      return yAxis;
-    }
-
-    return function (orientation, params) {
-      this.applyXScale = applyXScale;
-      this.applyYScale = applyYScale;
-      this.transitionXAxis = transitionXAxis;
-      this.transitionYAxis = transitionYAxis;
-      this.setYScale = setYScale;
-      this.setXScale = setXScale;
-      this.setXAxis = setXAxis;
-      this.setYAxis = setYAxis;
-      return this;
-    };
-
-});
-
-
-define('mixins/bar_mixins',["d3", "utils/utils"], function(d3, utils) {
-
-    function createBarsV (params) {
-      return this.append("rect")
-        .attr("class", "bar")
-        .attr("x", function(d) { return params.xScale(d[0]); })
-        .attr("width", params.xScale.rangeBand())
-        .attr("y", params.h() + params.__.barOffSet)
-        .attr("height", 0);
-    }
-
-    function createTimeBarsV (params) {
-      return this.append("rect")
-        .attr("class", "bar")
-        .attr("x", function(d) { 
-          return params.xScale(d[0]) - params.date_adjust; 
-        })
-        .attr("width", params.bar_width)
-        .attr("y", params.h() + params.__.barOffSet)
-        .attr("height", 0);
-    }
-
-    function createBarsH (params) {
-      return this.append("rect")
-        .attr("class", "bar")
-        .attr("x", params.__.barOffSet)
-        .attr("width", 0)
-        .attr("y", function(d) { return params.yScale(d[0]); })
-        .attr("height", params.yScale.rangeBand());
-    }
-
-    function createBars (orientation, params) {
-      if (orientation == 'vertical' && !params.__.parseDate) {
-        return createBarsV.call(this, params);
-      } else if (orientation == 'vertical' && params.__.parseDate) {
-        return createTimeBarsV.call(this, params);
-      } else {
-        return createBarsH.call(this, params);
-      }
-    }
-
-    function transitionBarsV (params) {
-      return this.delay(params.delay)
-        .attr("x", function(d) { return params.xScale(d[0]); })
-        .attr("y", function(d) { return params.yScale(d[1]); })
-        .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
-    }
-
-    function transitionTimeBarsV (params) {
-      return this.delay(params.delay)
-        .attr("x", function(d) { 
-          return params.xScale(d[0]) - params.date_adjust; 
-        })
-        .attr("y", function(d) { return params.yScale(d[1]); })
-        .attr("height", function(d) { return params.h() - params.yScale(d[1]); });
-    }
-
-    function transitionBarsH (params) {
-      return this.delay(params.delay)
-        .attr("y", function(d) { return params.yScale(d[0]); })
-        .attr("x", params.__.barOffSet)
-        .attr("width", function(d) { 
-          return params.xScale(d[1]) + params.__.barOffSet; 
-        });
-    }
-
-    function transitionBars (orientation, params) {
-      if (orientation == 'vertical' && !params.__.parseDate) {
-        return transitionBarsV.call(this, params);
-      } else if (orientation == 'vertical' && params.__.parseDate) {
-        return transitionTimeBarsV.call(this, params);
-      } else {
-        return transitionBarsH.call(this, params);
-      }
-    }
-
-    return function (orientation, params) {
-      this.createBars = createBars;
-      this.transitionBars = transitionBars;
-      return this;
-    };
-
-});
-
-
-define('mixins/line_mixins',["d3", "utils/utils"], function(d3, utils) {
-
-  function line (params) {
-    return d3.svg.line().x(function(d) {
-        return params.xScale(d[0]);
-      }).y(function(d) {
-        return params.yScale(d[1]);
-      });
+  function getGraphHelperMethod (chart_name) {
+    var name = chart_name.replace(/(?:^|\s)\S/g, 
+      function(a) { return a.toUpperCase(); });
+    return this['set' + name];
   }
 
-  function createLines (params) {
-    return this.append("path")
-      .attr("class", "line")
-      .attr("d", line(params) );
+  function getMinMaxValues (data) {
+    var min = Infinity,
+        max = 0;
+    data.forEach( function (data, i) {
+      var min_p = d3.min( data, function(d) { return parseFloat(d[1]); } ),
+          max_p = d3.max( data, function(d) { return parseFloat(d[1]); } );
+      min = min_p < min ? min_p : min;
+      max = max_p > max ? max_p : max;
+    });
+    return {min: min, max: max};
   }
 
-  function transitionLines (params) {
-    
-  }
-
-  return function (orientation, params) {
-    this.createLines = createLines;
-    this.transitionLines = transitionLines;
+  return function () {
+    this.clone = clone;
+    this.extend = extend;
+    this.isObject = isObject;
+    this.getset = getset;
+    this.endall = endall;
+    this.tip = tip;
+    this.getGraphHelperMethod = getGraphHelperMethod;
+    this.getMinMaxValues = getMinMaxValues;
     return this;
   };
-  
+
+});
+define('mixins/data', [
+  "d3"
+], function (d3) {
+
+  function dataIdentifier (d) {
+    return d[0];
+  }
+
+  function setDelay () {
+    var __ = this.__,
+        duration = __.duration,
+        data = __.data;
+    if (duration == undefined) { throw new Error('__.duration unset')}
+    __.delay = function (d, i) {
+      // FIXME: only referring to the first dataset, 
+      // while setting the delay on all!
+      return i / data[0].length * duration;
+    }
+    return this;
+  };
+
+  function normalizeData () {
+    var data = this.selection.datum(),
+        __ = this.__,
+        parsed_data = [],
+        date_chart = __.x_scale == 'time' ? true : false,
+        date_format = __.date_format,
+        date_type = __.date_type,
+        categoricalValue = __.categoricalValue;
+    data.forEach( function (dataset, index) {
+      if (date_chart) {
+        parsed_data.push(dataset.map(function(d, i) {
+          var x;
+          // The time data is encoded in a string:
+          if (date_chart && date_type == 'string') {
+            x = d3.time.format(date_format)
+              .parse(categoricalValue.call(dataset, d));
+          // The time data is encoded in an epoch number:
+          } else if (date_chart && __.date_type == 'epoch') {
+            x = new Date(categoricalValue.call(dataset, d) * 1000);
+          } 
+          return [x, __.quantativeValue.call(dataset, d)];
+        }));
+      } else {
+        dataset = __.invert_data ? this.clone(dataset).reverse() : dataset;
+        parsed_data.push(dataset.map(function(d, i) {
+          var x = __.categoricalValue.call(dataset, d);
+          return [x, __.quantativeValue.call(dataset, d)];
+        }));
+      }
+    });
+    __.data = parsed_data;
+    return this;
+  }
+
+  return function () {
+    this.dataIdentifier = dataIdentifier;
+    this.setDelay = setDelay;
+    this.normalizeData = normalizeData;
+    return this;
+  };
+
+});
+
+
+define('mixins/layout', [
+  "d3"
+], function (d3) {
+
+  // TODO: unit test.
+  function setDimensions () {
+    var __ = this.__;
+    if ( __.width === undefined ) {
+      __.width  = +this.selection.style('width').replace('px', '');
+      __.height = __.height || __.width * __.ratio;
+    } else if ( __.width && __.height === undefined) {
+      __.height = __.width * __.ratio;
+    }
+    this.setW();
+    this.setH();
+    return this;
+  }
+
+  function setW () {
+    var __ = this.__;
+    __.w   = __.width - __.margin.right - __.margin.left;
+    return this;
+  };
+      
+  function setH () {
+    var __ = this.__;
+    __.h   = __.height - __.margin.top - __.margin.bottom;
+    return this; 
+  };
+
+  return function () {
+    this.setDimensions = setDimensions;
+    this.setW = setW;
+    this.setH = setH;
+    return this;
+  };
+
+});
+
+define('mixins/scale', [
+  "d3",
+  "utils/mixins",
+], function (d3, utils_mixins) {
+
+  function _getRange (axis, __) {
+    if ( axis == 'x') {
+      return [0, __.w];
+    } else if ( axis == 'y') {
+      return [__.h, 0];
+    }
+  }
+
+  // It assumes the data is correctly sorted.
+  // TODO: Guard against axis argument == null or undefined
+  function _getDomain (data, axis) {
+    var d0 = Infinity, 
+        d1 = 0, 
+        index = axis == 'x' ? 0 : 1;
+    data.forEach( function (dataset, i) {
+      if (dataset[0][index] < d0) {
+        d0 = dataset[0][index];
+      }
+      if (dataset[dataset.length - 1][index] > d1) {
+        d1 = dataset[dataset.length - 1][index];
+      }
+    });
+    return [d0, d1];
+  }
+
+  function _setScale (scale_type) {
+    switch (scale_type) {
+      case undefined:
+        return;
+      case 'ordinal':
+        return d3.scale.ordinal;
+      case 'linear':
+        return d3.scale.linear;
+      case 'time':
+        return d3.time.scale;
+      default:
+        throw new Error('scale_type `'
+          + scale_type
+          + '` is not supported. Supported types are: ordinal, linear, time' );
+    }
+  }
+
+  function setScales () {
+    var __ = this.__;
+    __.xScale = this._setScale(__.x_scale)();
+    __.yScale = this._setScale(__.y_scale)();
+    return this;
+  }
+
+  //TODO: throw on wrong input
+  function _parseScaleBounds (bounds, __) {
+    var min_max = getMinMaxValues(__.data);
+    bounds = bounds.split(',');
+    if (bounds[0] == 'min') { 
+      bounds[0] = min_max.min; 
+    } else {
+      bounds[0] = +bounds[0];
+    }
+    if (bounds[1] == 'max') {
+      bounds[1] = min_max.max; 
+    } else {
+      bounds[1] = +bounds[1];
+    }
+    return bounds;
+  }
+
+  // Sets the range and domain for the linear scale.
+  function _applyLinearScale (range, __) {
+    var scale_bounds = __.scale_bounds,
+        min_max = _parseScaleBounds(scale_bounds, __);  
+    return this.range(range).domain(min_max);
+  }
+
+  function _applyTimeScale (range, __) {
+    // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
+    var data = __.data,
+        domain = _getDomain(data, 'x'),
+        t1 = domain[0],
+        t2 = domain[1],
+        offset = __.date_offset,
+        t0,
+        t3;
+    if (__.date_offset) {
+      t0 = d3.time[offset].offset(t1, -1);
+      t3 = d3.time[offset].offset(t2, +1);
+      return this
+        .domain([t0, t3])
+        .range([t0, t3].map(d3.time.scale()
+          .domain([t1, t2])
+          .range([0, __.w])));
+    } else {
+      return this.range(range).domain(domain);
+    }
+  }
+
+  // Sets the range and domain for the ordinal scale.
+  function _applyOrdinalScale (range, __) {
+    var data = __.x_axis_data || __.data;  // FIXME this hack!
+    return this
+      .rangeRoundBands(range, __.padding)
+      .domain( __.data[0].map( function(d) { return d[0]; } ) );
+  }
+
+  function _applyScale (axis, scale_type, __) {
+    var range = _getRange(axis, __);
+    switch (scale_type) {
+      case 'ordinal':
+        return _applyOrdinalScale.call(this, range, __);
+      case 'linear':
+        return _applyLinearScale.call(this, range, __);
+      case 'time':
+        return _applyTimeScale.call(this, range, __);
+      case undefined:
+        return new Error('scale cannot be undefined');
+      default:
+        throw new Error('scale_type ' 
+                         + scale_type 
+                         + ' not supported. Is it misspelled?' );
+    }
+  }
+
+  function applyScales () {
+    var __ = this.__;
+    this.applyScale.call( __.xScale, 'x', __.x_scale, __ );
+    this.applyScale.call( __.yScale, 'y', __.y_scale, __ );
+    return this;
+  }
+
+  return function () {
+
+    this.setScales = setScales;
+    this.applyScales = applyScales;
+    this.applyScale = _applyScale;
+    // private methods, exposed for testing
+    this._setScale = _setScale;
+    this._applyLinearScale = _applyLinearScale;
+    this._getRange = _getRange;
+    return this;
+  };
+
+});
+
+
+define('mixins/axis', [
+  "d3"
+], function (d3) {
+
+  function _setProps (axis_conf, scale) { 
+    if ( !axis_conf.show ) { return; }
+    var axis = d3.svg.axis().scale(scale);
+    d3.entries(axis_conf).forEach(function(o) {
+      if ( o.value !== undefined && o.key !== 'show' ) {
+        axis[o.key](o.value);
+      }
+    });
+    return axis;
+  }
+
+  function setAxes () {
+    var __ = this.__;
+    __.xAxis = this._setProps(__.x_axis, __.xScale);
+    __.yAxis = this._setProps(__.y_axis, __.yScale);
+    return this;
+  }
+
+  function _transitionXAxisV (__) {
+    return this
+      .attr("transform", "translate(" + __.offset_x + "," + __.yScale.range()[0] + ")")
+      .call(__.xAxis);
+  }
+
+  function _transitionXAxisH (__) {
+    return this
+      .attr("transform", "translate(" + __.offset_x + "," + __.h + ")")
+      .call(__.xAxis);
+  }
+
+  function _transitionXAxis (__) {
+    if ( !__.x_axis.show ) { return; }
+    if (__.quantitative_scale == 'y') {
+      return _transitionXAxisV.call(this, __);
+    } else if (__.quantitative_scale == 'x') {
+      return _transitionXAxisH.call(this, __);
+    } else {
+      throw new Error('quantitative_scale must be one of: x, y');
+    } 
+  }
+
+  function _transitionYAxis (__) {
+    if ( !__.y_axis.show ) { return; }
+    return this
+      .attr("transform", "translate(0,-" + __.offset_y + ")")
+      .call(__.yAxis)
+      .selectAll("g")
+      .delay( __.delay );
+  }
+
+  function transitionAxis (axis, __) {
+    switch (axis) {
+      case 'x':
+        return _transitionXAxis.call(this, __);
+      case 'y':
+        return _transitionYAxis.call(this, __);
+      default:
+        throw new Error('axis must be one of: x, y. Not ' + axis );
+    } 
+  } 
+
+  return function () {
+    this.setAxes = setAxes;
+    this._setProps = _setProps;
+    this.transitionAxis = transitionAxis;
+    return this;
+  };
+
+});
+define('mixins/chart', [
+  "d3"
+], function (d3) {
+
+  function setChart (chart_class) {
+
+    //console.log(selection[0].tagName.toLowerCase())
+    var self = this,
+        __   = self.__;
+
+    // Select the svg element, if it exists.
+    self.svg = self.selection.selectAll("svg").data([__.data]);
+    // Otherwise, create the skeletal chart.
+    self.gEnter = self.svg.enter().append("svg")
+      .append("g");
+    // Initializing the tooltip.
+    if ( __.tooltip ) {
+      self.tip = self.tip( __.tooltip );
+      self.gEnter.call(self.tip);
+    }
+   
+    self.gEnter.append("g").attr("class", chart_class);
+    //TODO: we need to handle bar offsets and others?
+
+    __.overlapping_charts.names.forEach( function (chart_name) {
+      self.gEnter.append("g").attr("class", chart_name);
+    });
+
+    self.gEnter.append("g").attr("class", "x axis");
+    self.gEnter.append("g").attr("class", "y axis");
+     
+    // Update the outer dimensions.
+    self.svg.attr("width", __.width)
+      .attr("height", __.height);
+
+    // Update the inner dimensions.
+    self.g = self.svg.select("g")
+      .attr("transform", "translate(" + 
+      __.margin.left + "," + __.margin.top + ")");
+
+    // Transitions root.
+    self.transition = self.g.transition().duration(__.duration);
+
+    // Update the y axis.
+    self.transitionAxis.call(
+      self.transition.selectAll('.y.axis'), 'y', __);
+
+    // Update the x axis.
+    self.transitionAxis.call(
+      self.transition.selectAll('.x.axis'), 'x', __);
+
+    return self;
+  };
+
+  return function () {
+    this.setChart = setChart;
+    return this;
+  };
+
 });
 
 
 // **The default configuration module for the bar.bar module**
 
-define('bar/config',[
-    "base_config",
-    "utils/utils",
-  ], function(base_config, utils) {
+define('bar/config', [
+  "base_config",
+  "utils/mixins",
+], function(base_config, utils_mixins) {
     
   var config = {
-    orientation: 'vertical',
-  };
+        orientation: 'vertical',
+        padding: .1
+      },
+      utils = utils_mixins();
 
   return utils.extend(base_config, config);
   
 });
 
 
+define('bar/mixins',["d3"], function(d3) {
+
+    function _getBarOrientation (__) {
+      if ( (__.x_scale == 'ordinal' || __.x_scale == 'time') &&
+            __.y_scale == 'linear') {
+        return 'vertical';
+      } else if (__.x_scale == 'linear' && __.y_scale == 'ordinal') {
+        return 'horizontal';
+      } else {
+        throw new Error('x_scale-y_scale wrong options combination');
+      }
+    }
+
+    function _createVerticalBars (__) {
+      return this.append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return __.xScale(d[0]); })
+        .attr("width", __.xScale.rangeBand())
+        .attr("y", __.h)
+        .attr("height", 0);
+    }
+
+    function _createTimeBars (__) {
+      return this.append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) {
+          return __.xScale(d[0]) - __.bar_width / 2;
+        })
+        .attr("width", __.bar_width)
+        //attention TODO: this gets then overridden by the transition
+        .attr("y", __.h) 
+        .attr("height", 0);
+    }
+
+    function _createHorizontalBars (__) {
+      return this.append("rect")
+        .attr("class", "bar")
+        .attr("width", 0)
+        .attr("height", __.yScale.rangeBand());
+    }
+
+    function createBars (__) {
+      var orientation = _getBarOrientation(__);
+      if (orientation == 'vertical' && __.x_scale !== 'time') {
+        return _createVerticalBars.call(this, __);
+      } else if (orientation == 'vertical' && __.x_scale == 'time') {
+        return _createTimeBars.call(this, __);
+      } else if (orientation == 'horizontal') {
+        return _createHorizontalBars.call(this, __);
+      } else {
+        throw new Error("orientation-x_scale wrong combination");
+      }
+    }
+
+    function _transitionVerticalBars (__) {
+      return this.delay(__.delay)
+        .attr("x", function(d) { return __.xScale(d[0]) + __.offset_x; })
+        .attr("y", function(d) { return __.yScale(d[1]) - __.offset_y; })
+        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+    }
+
+    function _transitionTimeBars (__) {
+      return this.delay(__.delay)
+        .attr("x", function(d) { 
+          return __.xScale(d[0]) + __.offset_x - __.bar_width / 2;
+        })
+        .attr("y", function(d) { return __.yScale(d[1]) - __.offset_y; })
+        .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+    }
+
+    function _transitionHorizontalBars (__) {
+      return this.delay(__.delay)
+        .attr("y", function(d) { return __.yScale(d[0]) - __.offset_y; })
+        .attr("x", __.offset_x)
+        .attr("width", function(d) { 
+          return __.xScale(d[1]) + __.offset_x; 
+        });
+    }
+
+    function transitionBars (orientation, __) {
+      var orientation = _getBarOrientation(__);
+      if (orientation == 'vertical' && __.x_scale !== 'time') {
+        return _transitionVerticalBars.call(this, __);
+      } else if (orientation == 'vertical' && __.x_scale == 'time') {
+        return _transitionTimeBars.call(this, __);
+      } else if (orientation == 'horizontal') {
+        return _transitionHorizontalBars.call(this, __);
+      } else {
+        throw new Error("orientation-x_scale wrong combination");
+      }
+    }
+
+    function setBars () {
+      var self = this,
+          __ = this.__;
+
+      __.data.forEach( function (data, i) {
+        var bars = self.g.select('.bars').selectAll(".bar")
+              .data(data, self.dataIdentifier),
+            ov_options = __.overlapping_charts.options,
+            ov_bar_options = ov_options ? ov_options.bars : void 0;
+  
+        // Exit phase (pushes out old bars before new ones come in).
+        bars.exit()
+          .transition().duration(__.duration).style('opacity', 0).remove();
+  
+        self.createBars.call(bars.enter(), __)
+          .on('click', __.handleClick);
+    
+        // And transition them.
+        self.transitionBars
+          .call(self.transition.selectAll('.bar'), __.orientation, __)
+          .call(self.endall, data, __.handleTransitionEnd);
+    
+        if (__.tooltip) {
+          bars
+           .on('mouseover', self.tip.show)
+           .on('mouseout', self.tip.hide);
+        }
+      });
+
+    }
+
+    return function (orientation, __) {
+      this.setBars = setBars;
+      this.transitionBars = transitionBars;
+      this.createBars = createBars;
+      return this;
+    };
+
+});
+
+
 // **The bar.bar module**
 
 define('bar/bar',[
-    "d3", 
-    "utils/utils",
-    "bar/config", 
-    "mixins/common_mixins",
-    "mixins/bar_mixins",
-  ], function(d3, utils, default_config, common_mixins, bar_mixins) {
+  "d3", 
+  "utils/mixins",
+  "bar/config", 
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "bar/mixins",
+], function(
+  d3, 
+  utils_mixins, 
+  default_config, 
+  data_mixins,
+  layout_mixins,
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  bar_mixins
+) {
   
   return function (user_config) {
 
-    var config = user_config || {}
-      , __
-      , w
-      , h
-      , xScale
-      , yScale
-      , xAxis
-      , yAxis;
-
-    __ = utils.extend(default_config, config);
-
-    function dataIdentifier (d) {
-      return d[0];
-    }
+    var config = user_config || {},
+        utils  = utils_mixins(),
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config);
 
     function Bar (selection) {
 
       var self = this instanceof Bar
                ? this
-               : new Bar(selection);
+               : new Bar(selection),
+          has_timescale = __.x_scale == 'time',
+          bars;
 
-      w = function () { return __.width - __.margin.right - __.margin.left; };
-      h = function () { return __.height - __.margin.top - __.margin.bottom; };
-  
-      // Scales are functions that map from an input domain to an output range.
-      // Presently no assumption is made about the chart orientation.
-      xScale = self.setXScale(__.orientation, __.parseDate)();
-      yScale = self.setYScale(__.orientation)();
-  
-      // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
-      // Presently no assumption is made about the chart orientation.
-      xAxis = self.setXAxis(__.x_axis, xScale);
-      yAxis = self.setYAxis(__.y_axis, yScale);
-      
-      selection.each( function (dat) {
+      self.__        = __;
+      self.selection = selection;
 
-        var data
-          , tooltip = __.tooltip
-          , tip
-          , svg
-          , gEnter
-          , g
-          , bars
-          , transition
-          , params;
+      self.normalizeData();
+      self.setDimensions();
 
-        // data structure:
-        // 0: name
-        // 1: value
-        data = dat.map(function(d, i) {
-          var x;
-          if (__.parseDate) {
-            x = __.parseDate(__.categoricalValue.call(dat, d));
-          } else {
-            x = __.categoricalValue.call(dat, d);
-          }
-          return [
-            x, 
-            __.quantativeValue.call(dat, d)
-          ];
-        });
-        if (__.invert_data) {
-          data = data.reverse();
-        }
+      if (has_timescale) { self.adjustDimensionsToTimeScale(); }
 
-        function delay (d, i) {
-          // Attention, delay can not be longer of transition time! Test!
-          return i / data.length * __.duration;
-        }
+      self.setScales();
+      self.setAxes();
+      self.setDelay();
+      self.applyScales();
+      self.setChart('bars');
+      self.setBars();
 
-        params = {
-          data: data,
-          __: __,
-          h: h,
-          w: w,
-          yScale: yScale,
-          xScale: xScale,
-          xAxis: xAxis,
-          yAxis: yAxis,
-          delay: delay,
-          date_adjust: (w()/data.length)/2
-        }
+//      __.overlapping_charts.names.forEach( function (chart_name) {
+//        utils.getScaffoldingMethod.call(self, chart_name).call(self, __);
+//      });
 
-        if (__.parseDate) {
-          params.bar_width = (w() / data.length) - .5;
-        }
-
-        self.applyXScale.call(xScale, __.orientation, params);
-        self.applyYScale.call(yScale, __.orientation, params); 
-
-        // Select the svg element, if it exists.
-        svg = selection.selectAll("svg").data([data]);
-
-        // Otherwise, create the skeletal chart.
-        gEnter = svg.enter().append("svg").append("g");
-        // Initializing the tooltip.
-        if (tooltip) {
-          tip = utils.tip(tooltip);
-          gEnter.call(tip);
-        }
-        gEnter.append("g").attr("class", "bars");
-        gEnter.append("g").attr("class", "x axis");
-        if (__.parseDate) {
-          gEnter.append("g").attr("class", "y axis")
-           .attr("transform", "translate(-" + (params.date_adjust + 5) + ",0)");
-        } else {
-          gEnter.append("g").attr("class", "y axis");
-        }
-
-        // Update the outer dimensions.
-        svg.attr("width", __.width)
-          .attr("height", __.height);
-
-        // Update the inner dimensions.
-        g = svg.select("g")
-          .attr("transform", "translate(" + 
-          __.margin.left + "," + __.margin.top + ")");
-
-        // Transitions root.
-        transition = g.transition().duration(__.duration)
-        
-        // Update the y axis.
-        self.transitionYAxis.call(
-          transition.selectAll('.y.axis'), __.orientation, params);
-
-        // Update the x axis.
-        self.transitionXAxis.call(
-          transition.selectAll('.x.axis'), __.orientation, params);
-
-        // Select the bar elements, if they exists.
-        bars = g.select(".bars").selectAll(".bar")
-          .data(data, dataIdentifier);
-
-        // Exit phase (let us push out old bars before the new ones come in).
-        bars.exit()
-          .transition().duration(__.duration).style('opacity', 0).remove();
-
-        // Otherwise, create them.
-        bars = self.createBars.call(bars.enter(), __.orientation, params)
-          .on('click', __.handleClick);
-
-        if (tooltip) {
-          bars
-           .on('mouseover', tip.show)
-           .on('mouseout', tip.hide);
-        }
-          
-        // And transition them.
-        self.transitionBars
-          .call(transition.selectAll('.bar'), __.orientation, params)
-          .call(utils.endall, data, __.handleTransitionEnd);
-
-        return selection;
-
-      });
-
+      return selection;
     }
 
-    utils.getset(Bar, __);
-    common_mixins.call(Bar.prototype);
+    getset(Bar, __);
+    utils_mixins.call(Bar.prototype);
+    data_mixins.call(Bar.prototype);
+    layout_mixins.call(Bar.prototype);
+    scale_mixins.call(Bar.prototype);
+    axis_mixins.call(Bar.prototype);
+    chart_mixins.call(Bar.prototype);
     bar_mixins.call(Bar.prototype);
 
-    return Bar;
+    Bar.prototype.adjustDimensionsToTimeScale = function () {
+      __.bar_width = (__.w / __.data[0].length) * .9;
+      __.width += __.bar_width + __.offset_x; //FIXME: this should be smarter!
+      offset_x = __.offset_x == 0 ? __.bar_width * .6 : __.offset_x;
+      __.margin = utils.extend(__.margin, {
+          left: __.margin.left + offset_x,
+          right: __.margin.right + offset_x
+      });
+      return this;
+    }
 
+    return Bar;
   }
 
 });
@@ -663,191 +834,305 @@ define('bar/bar',[
 // **The default configuration module for the line.line module**
 
 define('line/config',[
-    "base_config",
-    "utils/utils",
-  ], function(base_config, utils) {
+  "d3", 
+  "base_config",
+  "utils/mixins",
+], function(d3, base_config, utils_mixins) {
     
   var config = {
-    date_adjust: 5
-  };
+        x_scale: 'time',
+      },
+      utils = utils_mixins();
 
   return utils.extend(base_config, config);
   
 });
 
 
+define('line/mixins', ["d3"], function (d3) {
+
+  function setLines () {
+    var self = this,
+          __ = this.__;
+
+    // Select the line elements, if they exists.
+    self.lines_g = self.g.select('g.lines').selectAll(".lines")
+      .data(__.data, self.dataIdentifier);
+
+    // Exit phase (let us push out old lines before the new ones come in).
+    self.lines_g.exit()
+      .transition().duration(__.duration).style('opacity', 0).remove();
+
+    // Otherwise, create them.
+    self.lines_g.enter().append("g").each( function (data, i) {
+      var lines = d3.select(this).selectAll(".line")
+            .data([data], self.dataIdentifier),
+          ov_options = __.overlapping_charts.options,
+          ov_line_options = ov_options ? ov_options.bars : void 0;
+
+      // Exit phase (let us push out old lines before the new ones come in).
+      lines.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();      
+
+      lines.enter().append("path")
+        .attr("class", "line")
+        .attr("d", self.line(__) )
+        .on('click', __.handleClick);
+      
+      if (__.tooltip) {
+        lines
+         .on('mouseover', self.tip.show)
+         .on('mouseout', self.tip.hide);
+      }
+        
+      //TODO
+      //And transition them.
+      //self.transitionLines
+      //  .call(transition.selectAll('.line'), 'vertical', params)
+      //  .call(utils.endall, data, __.handleTransitionEnd);
+
+    });
+
+    return this;
+  }
+
+  return function () {
+    this.setLines = setLines;
+    return this;
+  };
+
+});
+
+
+define('circle/mixins', ["d3"], function (d3, utils) {
+
+  function setCircles () {
+    var self = this,
+          __ = this.__;
+
+    // Select the circle elements, if they exists.
+    self.circles_g = self.g.select('g.circles').selectAll(".circles")
+      .data(__.data, self.dataIdentifier);
+
+    // Exit phase (let us push out old circles before the new ones come in).
+    self.circles_g.exit()
+      .transition().duration(__.duration).style('opacity', 0).remove();
+
+    // Otherwise, create them.
+    self.circles_g.enter().append("g").each( function (data, i) {
+      var circles = d3.select(this).selectAll(".circle")
+            .data(data, self.dataIdentifier),
+          tip,
+          ov_options = __.overlapping_charts.options,
+          ov_circle_options = ov_options ? ov_options.circles : void 0;
+
+      // Exit phase (let us push out old circles before the new ones come in).
+      circles.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();
+
+      // Otherwise, create them.
+      circles.enter().append("circle")
+        .attr("class", "dot")
+        .attr("r", ov_circle_options && ov_circle_options.r ? ov_circle_options.r : 4)
+        .attr("cx", function(d) { return __.xScale(d[0]); })
+        .attr("cy", function(d) { return __.yScale(d[1]); })
+        // TODO: this will need a fix if is an overlapping chart!
+        .on('click', __.handleClick); 
+
+      // Tooltips.
+      if (ov_circle_options && ov_circle_options.tooltip) {
+        tip = self.tip( ov_circle_options.tooltip );
+        self.gEnter.call(tip);
+      }
+      if (__.tooltip || ov_circle_options && ov_circle_options.tooltip) {
+        tip = tip || self.tip;
+        circles
+         .on('mouseover', tip.show)
+         .on('mouseout', tip.hide);
+      }
+
+    });
+    
+    //TODO
+    //And transition them.
+    //self.transitionCircles
+    //  .call(transition.selectAll('.circle'), 'vertical', params)
+    //  .call(utils.endall, data, __.handleTransitionEnd);
+
+    return this;
+  }
+
+  return function () {
+    this.setCircles = setCircles;
+    return this;
+  };
+
+});
 // **The line.line module**
 
 define('line/line',[
-    "d3", 
-    "utils/utils",
-    "line/config", 
-    "mixins/common_mixins",
-    "mixins/line_mixins",
-  ], function(d3, utils, default_config, common_mixins, line_mixins) {
+  "d3", 
+  "utils/mixins",
+  "line/config", 
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "line/mixins",
+  "circle/mixins",
+], function(
+  d3, 
+  utils_mixins, 
+  default_config, 
+  data_mixins,
+  layout_mixins,
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  line_mixins,
+  circle_mixins
+) {
   
   return function (user_config) {
 
-    var config = user_config || {}
-      , __
-      , w
-      , h
-      , xScale
-      , yScale
-      , xAxis
-      , yAxis
-      , line;
-
-    __ = utils.extend(default_config, config);
-
-    function dataIdentifier (d) {
-      return d[0];
-    }
+    var config = user_config || {},
+        utils  = utils_mixins(),
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config);
 
     function Line (selection) {
 
       var self = this instanceof Line
                ? this
-               : new Line(selection);
+               : new Line(selection),
+          has_timescale = __.x_scale == 'time',
+          lines;
 
-      w = function () { return __.width - __.margin.right - __.margin.left; };
-      h = function () { return __.height - __.margin.top - __.margin.bottom; };
-  
-      // Scales are functions that map from an input domain to an output range.
-      // Only vertical line graphs make sense.
-      xScale = self.setXScale('vertical', __.parseDate)();
-      yScale = self.setYScale('vertical')();
-  
-      // Axes, see: [SVG-Axes](https://github.com/mbostock/d3/wiki/SVG-Axes)
-      xAxis = self.setXAxis(__.x_axis, xScale);
-      yAxis = self.setYAxis(__.y_axis, yScale);
-      
-      selection.each( function (dat) {
+      self.__ = __;
+      self.selection = selection;
 
-        var data
-          , tooltip = __.tooltip
-          , tip
-          , svg
-          , gEnter
-          , g
-          , lines
-          , transition
-          , params;
+      self.normalizeData();
+      self.setDimensions();
+      self.setScales();
+      self.setAxes();
+      self.setDelay();
+      self.applyScales();
+      self.setChart('lines');
+      self.setLines();
 
-        // data structure:
-        // 0: name
-        // 1: value
-        data = dat.map(function(d, i) {
-          var x;
-          if (__.parseDate) {
-            x = __.parseDate(__.categoricalValue.call(dat, d));
-          } else {
-            x = __.categoricalValue.call(dat, d);
-          }
-          return [
-            x, 
-            __.quantativeValue.call(dat, d)
-          ];
-        });
-        if (__.invert_data) {
-          data = data.reverse();
-        }
-
-        function delay (d, i) {
-          // Attention, delay can not be longer of transition time! Test!
-          return i / data.length * __.duration;
-        }
-
-        params = {
-          data: data,
-          __: __,
-          h: h,
-          w: w,
-          yScale: yScale,
-          xScale: xScale,
-          xAxis: xAxis,
-          yAxis: yAxis,
-          delay: delay,
-        }
-
-        self.applyXScale.call(xScale, 'vertical', params);
-        self.applyYScale.call(yScale, 'vertical', params);
-
-        // Select the svg element, if it exists.
-        svg = selection.selectAll("svg").data([data]);
-
-        // Otherwise, create the skeletal chart.
-        gEnter = svg.enter().append("svg").append("g");
-        // Initializing the tooltip.
-        if (tooltip) {
-          tip = utils.tip(tooltip);
-          gEnter.call(tip);
-        }
-        gEnter.append("g").attr("class", "lines");
-        gEnter.append("g").attr("class", "x axis");
-        if (__.parseDate) {
-          gEnter.append("g").attr("class", "y axis")
-           .attr("transform", "translate(-" + (__.date_adjust) + ",0)");
-        } else {
-          gEnter.append("g").attr("class", "y axis");
-        }
-
-        // Update the outer dimensions.
-        svg.attr("width", __.width)
-          .attr("height", __.height);
-
-        // Update the inner dimensions.
-        g = svg.select("g")
-          .attr("transform", "translate(" + 
-          __.margin.left + "," + __.margin.top + ")");
-
-        // Transitions root.
-        transition = g.transition().duration(__.duration)
-        
-        // Update the y axis.
-        self.transitionYAxis.call(
-          transition.selectAll('.y.axis'), 'vertical', params);
-
-        // Update the x axis.
-        self.transitionXAxis.call(
-          transition.selectAll('.x.axis'), 'vertical', params);
-
-        // Select the line elements, if they exists.
-        lines = g.select(".lines").selectAll(".line")
-          .data([data], dataIdentifier);
-
-        // Exit phase (let us push out old lines before the new ones come in).
-        lines.exit()
-          .transition().duration(__.duration).style('opacity', 0).remove();
-
-        // Otherwise, create them.
-        lines = self.createLines.call(lines.enter(), params)
-          .on('click', __.handleClick);
-
-        if (tooltip) {
-          lines
-           .on('mouseover', tip.show)
-           .on('mouseout', tip.hide);
-        }
-          
-        // TODO
-        //// And transition them.
-        //self.transitionLines
-        //  .call(transition.selectAll('.line'), 'vertical', params)
-        //  .call(utils.endall, data, __.handleTransitionEnd);
-
-        return selection;
-
+      __.overlapping_charts.names.forEach( function (chart_name) {
+        utils.getGraphHelperMethod.call(self, chart_name).call(self, __);
       });
 
+      return selection;
     }
 
-    utils.getset(Line, __);
-    common_mixins.call(Line.prototype);
+    getset(Line, __);
+    utils_mixins.call(Line.prototype);
+    data_mixins.call(Line.prototype);
+    layout_mixins.call(Line.prototype);
+    scale_mixins.call(Line.prototype);
+    axis_mixins.call(Line.prototype);
+    chart_mixins.call(Line.prototype);
     line_mixins.call(Line.prototype);
+    circle_mixins.call(Line.prototype);
+
+    Line.prototype.line = function (__) {
+      return d3.svg.line().x(function(d, i) {
+        return __.xScale(d[0]);
+      }).y(function(d, i) {
+        return __.yScale(d[1]);
+      });
+    }
 
     return Line;
+  }
 
+});
+
+
+// **The default configuration module for the point.point module**
+
+define('circle/config', [
+  "base_config",
+  "utils/mixins",
+], function(base_config, utils_mixins) {
+    
+  var config = {},
+      utils = utils_mixins();
+
+  return utils.extend(base_config, config);
+  
+});
+
+
+// **The circle.circle module**
+
+define('circle/circle',[
+  "d3", 
+  "utils/mixins",
+  "circle/config", 
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "circle/mixins",
+], function(
+  d3, 
+  utils_mixins, 
+  default_config, 
+  data_mixins,
+  layout_mixins,
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  circle_mixins
+) {
+  
+  return function (user_config) {
+
+    var config = user_config || {},
+        utils  = utils_mixins(),
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config);
+
+    function Circle (selection) {
+
+      var self = this instanceof Circle
+               ? this
+               : new Circle(selection),
+          has_timescale = __.x_scale == 'time',
+          circles;
+
+      self.__ = __;
+      self.selection = selection;
+
+      self.normalizeData();
+      self.setDimensions();
+      self.setScales();
+      self.setAxes();
+      self.setDelay();
+      self.applyScales();
+      self.setChart('circles');
+      self.setCircles();
+
+      return selection;
+    }
+
+    getset(Line, __);
+    utils_mixins.call(Circle.prototype);
+    data_mixins.call(Circle.prototype);
+    layout_mixins.call(Circle.prototype);
+    scale_mixins.call(Circle.prototype);
+    axis_mixins.call(Circle.prototype);
+    chart_mixins.call(Circle.prototype);
+    circle_mixins.call(Circle.prototype);
+
+    return Circle;
   }
 
 });
@@ -947,13 +1232,14 @@ define('frame/state_machine',['require'],function(require) {
 
 define('frame/frame',[
   'd3',
-  'utils/utils',
+  'utils/mixins',
   'frame/states',
   'frame/state_machine'
-], function(d3, utils, states, StateMachine) {
+], function(d3, utils_mixins, states, StateMachine) {
 
   var Frame = function (conf) {
-    var self = this;
+    var self  = this,
+        utils = utils_mixins();
     
     this.initial_frame = this.frame = conf.frame;
     this.old_frame =   void 0;
@@ -1131,18 +1417,48 @@ define('chart',[
   "d3_tip",
   "draw",
   "base_config",
-  "utils/utils",
-  "mixins/common_mixins",
-  "mixins/bar_mixins",
-  "mixins/line_mixins",
-  "bar/config", 
+  "utils/mixins",
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "bar/config",
+  "bar/mixins", 
   "bar/bar",
   "line/config",
+  "line/mixins",
   "line/line",
+  "circle/config",
+  "circle/mixins",
+  "circle/circle",
   "frame/states",
   "frame/state_machine",
   "frame/frame"
-], function(d3, d3_tip, draw, base_config, utils, common_mixins, bar_mixins, line_mixins, bar_config, bar, line_config, line, states, StateMachine, Frame) {
+], function(
+  d3, 
+  d3_tip,
+  draw, 
+  base_config, 
+  utils_mixins, 
+  data_mixins, 
+  layout_mixins, 
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  bar_config,
+  bar_mixins,
+  Bar,
+  line_config,
+  line_mixins,
+  Line,
+  circle_config,
+  circle_mixins,
+  Circle,
+  states, 
+  StateMachine, 
+  Frame
+) {
 
   d3.d3_tip = d3_tip;
 
@@ -1150,14 +1466,21 @@ define('chart',[
     d3: d3,
     draw: draw,
     base_config: base_config,
-    utils: utils,
-    common_mixins: common_mixins,
-    bar_mixins: bar_mixins,
-    line_mixins: line_mixins,
+    utils_mixins: utils_mixins,
+    data_mixins: data_mixins,
+    layout_mixins: layout_mixins,
+    scale_mixins: scale_mixins,
+    axis_mixins: axis_mixins,
+    chart_mixins: chart_mixins,
     bar_config: bar_config,
-    bar: bar,
+    bar_mixins: bar_mixins,
+    Bar: Bar,
     line_config: line_config,
-    line: line,
+    line_mixins: line_mixins,
+    Line: Line,
+    circle_config: circle_config,
+    circle_mixins: circle_mixins,
+    Circle: Circle,
     Frame: Frame,
     states: states, 
     StateMachine: StateMachine,
