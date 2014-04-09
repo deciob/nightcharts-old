@@ -14,7 +14,7 @@ define('line/mixins', ["d3"], function (d3) {
 
     // Otherwise, create them.
     self.lines_g.enter().append("g").each( function (data, i) {
-      var lines = d3.select(this).selectAll(".bar")
+      var lines = d3.select(this).selectAll(".line")
             .data([data], self.dataIdentifier),
           ov_options = __.overlapping_charts.options,
           ov_line_options = ov_options ? ov_options.bars : void 0;

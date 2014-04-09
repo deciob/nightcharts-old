@@ -10044,6 +10044,9 @@ define('base_config', [
       width: void 0,
       height: void 0, // if set, height has precedence on ratio
       ratio: .4,
+      //
+      offset_x: 0,
+      offset_y: 0,
       //vertical: true,
       quantitative_scale: 'y',
       // One of: ordinal, linear, time
@@ -10068,7 +10071,6 @@ define('base_config', [
         orient: 'left',
         tickValues: void 0,
       },
-      y_axis_offset: 0,
       // if x_scale: 'time'
       date_type: 'string', // or 'epoc'
       date_format: '%Y',
@@ -10490,13 +10492,12 @@ define('mixins/axis', [
 
   function _transitionXAxisH (__) {
     return this
-      .attr("transform", "translate(" + 10 + "," + __.h + ")")
+      .attr("transform", "translate(" + 100 + "," + __.h + ")")
       .call(__.xAxis);
   }
 
   function _transitionXAxis (__) {
     if ( !__.x_axis.show ) { return; }
-    __.quantitative_scale //?????????????
     if (__.quantitative_scale == 'y') {
       return _transitionXAxisV.call(this, __);
     } else if (__.quantitative_scale == 'x') {
@@ -10560,9 +10561,10 @@ define('mixins/chart', [
       self.gEnter.append("g").attr("class", chart_name);
     });
 
-    self.gEnter.append("g").attr("class", "x axis");
+    self.gEnter.append("g").attr("class", "x axis")
+     .attr("transform", "translate(" + (__.offset_x) + ",0)");
     self.gEnter.append("g").attr("class", "y axis")
-     .attr("transform", "translate(-" + (__.y_axis_offset) + ",0)");
+     .attr("transform", "translate(0," - (__.offset_y) + "0)");
      
     // Update the outer dimensions.
     self.svg.attr("width", __.width)
@@ -10604,8 +10606,7 @@ define('bar/config', [
     
   var config = {
         orientation: 'vertical',
-        padding: .1,    
-        barOffSet: 4,
+        padding: .1
       },
       utils = utils_mixins();
 
@@ -10632,7 +10633,7 @@ define('bar/mixins',["d3"], function(d3) {
         .attr("class", "bar")
         .attr("x", function(d) { return __.xScale(d[0]); })
         .attr("width", __.xScale.rangeBand())
-        .attr("y", __.h + __.barOffSet)
+        .attr("y", __.h + __.offset_y)
         .attr("height", 0);
     }
 
@@ -10644,14 +10645,14 @@ define('bar/mixins',["d3"], function(d3) {
         })
         .attr("width", __.bar_width)
         //attention TODO: this get then overridden by the transition
-        .attr("y", __.h + __.barOffSet) 
+        .attr("y", __.h + __.offset_y) 
         .attr("height", 0);
     }
 
     function _createHorizontalBars (__) {
       return this.append("rect")
         .attr("class", "bar")
-        .attr("x", __.barOffSet)
+        .attr("x", __.offset_x)
         .attr("width", 0)
         .attr("y", function(d) { return __.yScale(d[0]); })
         .attr("height", __.yScale.rangeBand());
@@ -10689,9 +10690,9 @@ define('bar/mixins',["d3"], function(d3) {
     function _transitionHorizontalBars (__) {
       return this.delay(__.delay)
         .attr("y", function(d) { return __.yScale(d[0]); })
-        .attr("x", __.barOffSet)
+        .attr("x", __.offset_x)
         .attr("width", function(d) { 
-          return __.xScale(d[1]) + __.barOffSet; 
+          return __.xScale(d[1]) + __.offset_x; 
         });
     }
 
@@ -10823,10 +10824,10 @@ define('bar/bar',[
     Bar.prototype.adjustDimensionsToTimeScale = function () {
       __.bar_width = (__.w / __.data[0].length) * .9;
       __.width += __.bar_width; //FIXME: this should be smarter!
-      __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
+      __.offset_x = __.offset_x == 0 ? __.bar_width * .6 : __.offset_x;
       __.margin = utils.extend(__.margin, {
-          left: __.margin.left + __.y_axis_offset,
-          right: __.margin.right + __.y_axis_offset
+          left: __.margin.left + __.offset_x,
+          right: __.margin.right + __.offset_x
       });
       return this;
     }

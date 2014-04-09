@@ -7,8 +7,7 @@ define('bar/config', [
     
   var config = {
         orientation: 'vertical',
-        padding: .1,    
-        barOffSet: 4,
+        padding: .1
       },
       utils = utils_mixins();
 

@@ -23,6 +23,9 @@ define('base_config', [
       width: void 0,
       height: void 0, // if set, height has precedence on ratio
       ratio: .4,
+      //
+      offset_x: 0,
+      offset_y: 0,
       //vertical: true,
       quantitative_scale: 'y',
       // One of: ordinal, linear, time
@@ -47,7 +50,6 @@ define('base_config', [
         orient: 'left',
         tickValues: void 0,
       },
-      y_axis_offset: 0,
       // if x_scale: 'time'
       date_type: 'string', // or 'epoc'
       date_format: '%Y',

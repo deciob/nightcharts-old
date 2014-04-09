@@ -71,11 +71,11 @@ define('bar/bar',[
 
     Bar.prototype.adjustDimensionsToTimeScale = function () {
       __.bar_width = (__.w / __.data[0].length) * .9;
-      __.width += __.bar_width; //FIXME: this should be smarter!
-      __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
+      __.width += __.bar_width + __.offset_x; //FIXME: this should be smarter!
+      offset_x = __.offset_x == 0 ? __.bar_width * .6 : __.offset_x;
       __.margin = utils.extend(__.margin, {
-          left: __.margin.left + __.y_axis_offset,
-          right: __.margin.right + __.y_axis_offset
+          left: __.margin.left + offset_x,
+          right: __.margin.right + offset_x
       });
       return this;
     }

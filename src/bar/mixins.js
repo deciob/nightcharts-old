@@ -16,26 +16,26 @@ define('bar/mixins',["d3"], function(d3) {
         .attr("class", "bar")
         .attr("x", function(d) { return __.xScale(d[0]); })
         .attr("width", __.xScale.rangeBand())
-        .attr("y", __.h + __.barOffSet)
+        .attr("y", __.h)
         .attr("height", 0);
     }
 
     function _createTimeBars (__) {
       return this.append("rect")
         .attr("class", "bar")
-        .attr("x", function(d) { 
+        .attr("x", function(d) {
           return __.xScale(d[0]) - __.bar_width / 2;
         })
         .attr("width", __.bar_width)
         //attention TODO: this get then overridden by the transition
-        .attr("y", __.h + __.barOffSet) 
+        .attr("y", __.h) 
         .attr("height", 0);
     }
 
     function _createHorizontalBars (__) {
       return this.append("rect")
         .attr("class", "bar")
-        .attr("x", __.barOffSet)
+        .attr("x")
         .attr("width", 0)
         .attr("y", function(d) { return __.yScale(d[0]); })
         .attr("height", __.yScale.rangeBand());
@@ -56,26 +56,26 @@ define('bar/mixins',["d3"], function(d3) {
 
     function _transitionVerticalBars (__) {
       return this.delay(__.delay)
-        .attr("x", function(d) { return __.xScale(d[0]); })
-        .attr("y", function(d) { return __.yScale(d[1]); })
+        .attr("x", function(d) { return __.xScale(d[0]) + __.offset_x; })
+        .attr("y", function(d) { return __.yScale(d[1]) - __.offset_y; })
         .attr("height", function(d) { return __.h - __.yScale(d[1]); });
     }
 
     function _transitionTimeBars (__) {
       return this.delay(__.delay)
         .attr("x", function(d) { 
-          return __.xScale(d[0]) - __.bar_width / 2;
+          return __.xScale(d[0]) + __.offset_x - __.bar_width / 2;
         })
-        .attr("y", function(d) { return __.yScale(d[1]); })
+        .attr("y", function(d) { return __.yScale(d[1]) - __.offset_y; })
         .attr("height", function(d) { return __.h - __.yScale(d[1]); });
     }
 
     function _transitionHorizontalBars (__) {
       return this.delay(__.delay)
-        .attr("y", function(d) { return __.yScale(d[0]); })
-        .attr("x", __.barOffSet)
+        .attr("y", function(d) { return __.yScale(d[0]) - __.offset_y; })
+        .attr("x", __.offset_x)
         .attr("width", function(d) { 
-          return __.xScale(d[1]) + __.barOffSet; 
+          return __.xScale(d[1]) + __.offset_x; 
         });
     }
 

@@ -22,13 +22,13 @@ define('mixins/axis', [
 
   function _transitionXAxisV (__) {
     return this
-      .attr("transform", "translate(0," + __.yScale.range()[0] + ")")
+      .attr("transform", "translate(" + __.offset_x + "," + __.yScale.range()[0] + ")")
       .call(__.xAxis);
   }
 
   function _transitionXAxisH (__) {
     return this
-      .attr("transform", "translate(" + 10 + "," + __.h + ")")
+      .attr("transform", "translate(" + __.offset_x + "," + __.h + ")")
       .call(__.xAxis);
   }
 
@@ -45,7 +45,9 @@ define('mixins/axis', [
 
   function _transitionYAxis (__) {
     if ( !__.y_axis.show ) { return; }
-    return this.call(__.yAxis)
+    return this
+      .attr("transform", "translate(0,-" + __.offset_y + ")")
+      .call(__.yAxis)
       .selectAll("g")
       .delay( __.delay );
   }

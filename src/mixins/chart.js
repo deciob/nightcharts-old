@@ -27,8 +27,7 @@ define('mixins/chart', [
     });
 
     self.gEnter.append("g").attr("class", "x axis");
-    self.gEnter.append("g").attr("class", "y axis")
-     .attr("transform", "translate(-" + (__.y_axis_offset) + ",0)");
+    self.gEnter.append("g").attr("class", "y axis");
      
     // Update the outer dimensions.
     self.svg.attr("width", __.width)
