@@ -34,7 +34,6 @@ define('mixins/axis', [
 
   function _transitionXAxis (__) {
     if ( !__.x_axis.show ) { return; }
-    __.quantitative_scale //?????????????
     if (__.quantitative_scale == 'y') {
       return _transitionXAxisV.call(this, __);
     } else if (__.quantitative_scale == 'x') {

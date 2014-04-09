@@ -491,7 +491,6 @@ define('mixins/axis', [
 
   function _transitionXAxis (__) {
     if ( !__.x_axis.show ) { return; }
-    __.quantitative_scale //?????????????
     if (__.quantitative_scale == 'y') {
       return _transitionXAxisV.call(this, __);
     } else if (__.quantitative_scale == 'x') {
@@ -707,18 +706,8 @@ define('bar/mixins',["d3"], function(d3) {
       var self = this,
           __ = this.__;
 
-//      // Select the bar elements, if they exists.
-//      self.bars_g = self.g.selectAll(".bars")
-//        .data(__.data, self.dataIdentifier);
-//
-//      // Exit phase (pushes out old bar groups before new ones come in).
-//      self.bars_g.exit()
-//        .transition().duration(__.duration).style('opacity', 0).remove();
-  
-      // Otherwise, create them.
-      //self.bars_g = self.g.append("g")
       __.data.forEach( function (data, i) {
-        var bars = self.g.selectAll(".bar")
+        var bars = self.g.select('.bars').selectAll(".bar")
               .data(data, self.dataIdentifier),
             ov_options = __.overlapping_charts.options,
             ov_bar_options = ov_options ? ov_options.bars : void 0;

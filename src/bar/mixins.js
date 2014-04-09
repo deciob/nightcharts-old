@@ -97,7 +97,7 @@ define('bar/mixins',["d3"], function(d3) {
           __ = this.__;
 
       __.data.forEach( function (data, i) {
-        var bars = self.g.selectAll(".bar")
+        var bars = self.g.select('.bars').selectAll(".bar")
               .data(data, self.dataIdentifier),
             ov_options = __.overlapping_charts.options,
             ov_bar_options = ov_options ? ov_options.bars : void 0;
