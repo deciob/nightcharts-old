@@ -42,7 +42,7 @@ define('mixins/data', [
           return [x, __.quantativeValue.call(dataset, d)];
         }));
       } else {
-        dataset = __.invert_data ? dataset.reverse() : dataset;
+        dataset = __.invert_data ? this.clone(dataset).reverse() : dataset;
         parsed_data.push(dataset.map(function(d, i) {
           var x = __.categoricalValue.call(dataset, d);
           return [x, __.quantativeValue.call(dataset, d)];

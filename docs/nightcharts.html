@@ -103,7 +103,7 @@ __.x_axis_data = data[0]  #FIXME</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>      offset_x: <span class="number">0</span>,
-      offset_y: <span class="number">0</span>, <span class="comment">// FIXME!!!</span></pre></div></div>
+      offset_y: <span class="number">0</span>,</pre></div></div>
             
         </li>
         
@@ -499,7 +499,7 @@ while setting the delay on all!</p>
           <span class="keyword">return</span> [x, __.quantativeValue.call(dataset, d)];
         }));
       } <span class="keyword">else</span> {
-        dataset = __.invert_data ? dataset.reverse() : dataset;
+        dataset = __.invert_data ? <span class="keyword">this</span>.clone(dataset).reverse() : dataset;
         parsed_data.push(dataset.map(<span class="function"><span class="keyword">function</span><span class="params">(d, i)</span> {</span>
           <span class="keyword">var</span> x = __.categoricalValue.call(dataset, d);
           <span class="keyword">return</span> [x, __.quantativeValue.call(dataset, d)];
@@ -1117,7 +1117,7 @@ define(<span class="string">'bar/mixins'</span>,[<span class="string">"d3"</span
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
-              <p>attention TODO: this get then overridden by the transition</p>
+              <p>attention TODO: this gets then overridden by the transition</p>
 
             </div>
             
@@ -1128,9 +1128,7 @@ define(<span class="string">'bar/mixins'</span>,[<span class="string">"d3"</span
     <span class="function"><span class="keyword">function</span> <span class="title">_createHorizontalBars</span> <span class="params">(__)</span> {</span>
       <span class="keyword">return</span> <span class="keyword">this</span>.append(<span class="string">"rect"</span>)
         .attr(<span class="string">"class"</span>, <span class="string">"bar"</span>)
-        .attr(<span class="string">"x"</span>)
         .attr(<span class="string">"width"</span>, <span class="number">0</span>)
-        .attr(<span class="string">"y"</span>, <span class="function"><span class="keyword">function</span><span class="params">(d)</span> {</span> <span class="keyword">return</span> __.yScale(d[<span class="number">0</span>]); })
         .attr(<span class="string">"height"</span>, __.yScale.rangeBand());
     }
 

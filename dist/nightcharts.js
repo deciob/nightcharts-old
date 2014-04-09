@@ -41,7 +41,7 @@ define('base_config', [
       ratio: .4,
       //
       offset_x: 0,
-      offset_y: 0, // FIXME!!!
+      offset_y: 0,
       //vertical: true,
       quantitative_scale: 'y',
       // One of: ordinal, linear, time
@@ -249,7 +249,7 @@ define('mixins/data', [
           return [x, __.quantativeValue.call(dataset, d)];
         }));
       } else {
-        dataset = __.invert_data ? dataset.reverse() : dataset;
+        dataset = __.invert_data ? this.clone(dataset).reverse() : dataset;
         parsed_data.push(dataset.map(function(d, i) {
           var x = __.categoricalValue.call(dataset, d);
           return [x, __.quantativeValue.call(dataset, d)];
@@ -639,7 +639,7 @@ define('bar/mixins',["d3"], function(d3) {
           return __.xScale(d[0]) - __.bar_width / 2;
         })
         .attr("width", __.bar_width)
-        //attention TODO: this get then overridden by the transition
+        //attention TODO: this gets then overridden by the transition
         .attr("y", __.h) 
         .attr("height", 0);
     }
@@ -647,9 +647,7 @@ define('bar/mixins',["d3"], function(d3) {
     function _createHorizontalBars (__) {
       return this.append("rect")
         .attr("class", "bar")
-        .attr("x")
         .attr("width", 0)
-        .attr("y", function(d) { return __.yScale(d[0]); })
         .attr("height", __.yScale.rangeBand());
     }
 
