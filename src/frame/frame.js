@@ -12,9 +12,9 @@ define([
         utils = utils_mixins();
     
     this.initial_frame = this.frame = conf.frame;
-    this.old_frame =   void 0;
+    this.old_frame = void 0;
     this.current_timeout = void 0;
-    this.drawChart = conf.drawChart;
+    this.draw_dispatch = conf.draw_dispatch;
     this.delta = conf.delta;
     this.step = conf.step;
     this.data = conf.data;
@@ -31,9 +31,6 @@ define([
       'at_beginning_of_transition'
     );
     
-    // Initial frame. The chart is rendered for the first time.
-    this.drawChart(this.data[this.frame]);
-
     // Fired when all the chart related transitions within a frame are 
     // terminated.
     // It is the only dispatch event that does not have a state_machine 
@@ -67,8 +64,8 @@ define([
     clearTimeout(this.current_timeout);
     if (this.data[this.frame]) {
       this.current_timeout = setTimeout( function () {
-        // Re-render the chart
-        self.drawChart(self.data[self.frame]);
+        // Fire the draw event
+        self.draw_dispatch.draw.call(self, self.data[self.frame]);
       }, self.step);
     } else {
       // When no data is left to consume, let us stop the running frames!

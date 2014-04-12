@@ -10087,7 +10087,8 @@ define('base_config', [
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
-      overlapping_charts: { names: [] }
+      overlapping_charts: { names: [] },
+      draw_dispatch: function () { return d3.dispatch('draw'); }
     };
   
 });
@@ -11249,7 +11250,8 @@ define('frame/frame',[
     this.initial_frame = this.frame = conf.frame;
     this.old_frame =   void 0;
     this.current_timeout = void 0;
-    this.drawChart = conf.drawChart;
+    this.draw_dispatch = conf.draw_dispatch;
+    ////this.drawChart = conf.drawChart;
     this.delta = conf.delta;
     this.step = conf.step;
     this.data = conf.data;
@@ -11267,7 +11269,7 @@ define('frame/frame',[
     );
     
     // Initial frame. The chart is rendered for the first time.
-    this.drawChart(this.data[this.frame]);
+    ////this.drawChart(this.data[this.frame]);
 
     // Fired when all the chart related transitions within a frame are 
     // terminated.
@@ -11303,7 +11305,8 @@ define('frame/frame',[
     if (this.data[this.frame]) {
       this.current_timeout = setTimeout( function () {
         // Re-render the chart
-        self.drawChart(self.data[self.frame]);
+        //self.drawChart(self.data[self.frame]);
+        self.draw_dispatch.draw.call(self, self.data[self.frame]);
       }, self.step);
     } else {
       // When no data is left to consume, let us stop the running frames!

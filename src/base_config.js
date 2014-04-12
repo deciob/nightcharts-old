@@ -66,7 +66,8 @@ define('base_config', [
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
-      overlapping_charts: { names: [] }
+      overlapping_charts: { names: [] },
+      drawDispatch: d3.dispatch('draw')
     };
   
 });

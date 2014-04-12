@@ -248,7 +248,8 @@ can pass boolean or object with d3-tip configuration.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>      tooltip: <span class="literal">false</span>,
-      overlapping_charts: { names: [] }
+      overlapping_charts: { names: [] },
+      draw_dispatch: <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> d3.dispatch(<span class="string">'draw'</span>); }
     };
   
 });</pre></div></div>
@@ -2006,8 +2007,22 @@ Name-spaced, might add other states if needed.</p>
     <span class="keyword">this</span>.initial_frame = <span class="keyword">this</span>.frame = conf.frame;
     <span class="keyword">this</span>.old_frame =   <span class="keyword">void</span> <span class="number">0</span>;
     <span class="keyword">this</span>.current_timeout = <span class="keyword">void</span> <span class="number">0</span>;
-    <span class="keyword">this</span>.drawChart = conf.drawChart;
-    <span class="keyword">this</span>.delta = conf.delta;
+    <span class="keyword">this</span>.draw_dispatch = conf.draw_dispatch;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>//this.drawChart = conf.drawChart;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.delta = conf.delta;
     <span class="keyword">this</span>.step = conf.step;
     <span class="keyword">this</span>.data = conf.data;
 
@@ -2026,28 +2041,15 @@ Name-spaced, might add other states if needed.</p>
         </li>
         
         
-        <li id="section-64">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
-              </div>
-              <p>Initial frame. The chart is rendered for the first time.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.drawChart(<span class="keyword">this</span>.data[<span class="keyword">this</span>.frame]);</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-65">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-65">&#182;</a>
               </div>
-              <p>Fired when all the chart related transitions within a frame are 
+              <p>Initial frame. The chart is rendered for the first time.
+//this.drawChart(this.data[this.frame]);</p>
+<p>Fired when all the chart related transitions within a frame are 
 terminated.
 It is the only dispatch event that does not have a state_machine 
 equivalent event.
@@ -2092,11 +2094,12 @@ followed by an optional namespace, such as &#39;click.foo&#39; and &#39;click.ba
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-66">&#182;</a>
               </div>
-              <p>Re-render the chart</p>
+              <p>Re-render the chart
+self.drawChart(self.data[self.frame]);</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        self.drawChart(self.data[self.frame]);
+            <div class="content"><div class='highlight'><pre>        self.draw_dispatch.draw.call(self, self.data[self.frame]);
       }, self.step);
     } <span class="keyword">else</span> {</pre></div></div>
             
