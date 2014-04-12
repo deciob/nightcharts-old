@@ -18,6 +18,7 @@ define([
   "circle/config",
   "circle/mixins",
   "circle/circle",
+  "frame/config",
   "frame/states",
   "frame/state_machine",
   "frame/frame"
@@ -41,6 +42,7 @@ define([
   circle_config,
   circle_mixins,
   Circle,
+  frame_config,
   states, 
   StateMachine, 
   Frame
@@ -67,6 +69,7 @@ define([
     circle_config: circle_config,
     circle_mixins: circle_mixins,
     Circle: Circle,
+    frame_config: frame_config,
     Frame: Frame,
     states: states, 
     StateMachine: StateMachine,
