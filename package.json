@@ -27,7 +27,7 @@
 	"devDependencies": {
 		"serv": "",
 		"bower": "",
-		"cram": "~0.7"
+		"cram": "~0.8.2"
 	},
 	"scripts": {
 		"start": "serv --port 8000",

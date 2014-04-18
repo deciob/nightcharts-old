@@ -1,6 +1,6 @@
 {
 	"name": "rest",
-	"version": "1.0.0",
+	"version": "1.0.3",
 	"description": "RESTful HTTP client library",
 	"keywords": ["rest", "http", "client", "rest-template", "spring", "cujojs"],
 	"licenses": [
@@ -17,14 +17,18 @@
 	"maintainers": [
 		{
 			"name": "Scott Andrews",
-			"email": "sandrews@gopivotal.com",
+			"email": "scothis@gmail.com",
 			"web": "http://twitter.com/scothis"
 		}
 	],
 	"contributors": [
 		{
 			"name": "Jeremy Grelle",
-			"email": "jgrelle@gopivotal.com"
+			"email": "jeremy.grelle@gmail.com"
+		},
+		{
+			"name": "John Hann",
+			"web": "http://unscriptable.com"
 		}
 	],
 	"dependencies": {

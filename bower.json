@@ -2,7 +2,7 @@
 	"name": "my-awesome-cujoJS-app",
 	"version": "0.3.0",
 	"dependencies": {
-		"curl": "~0.8",
+		"curl": "~0.8.9",
 		"wire": "~0.10",
 		"cola": "~0.1",
 		"when": "~2",

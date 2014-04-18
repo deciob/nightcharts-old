@@ -29,6 +29,8 @@ define([
       var fd = [ formatted_data[1].map(function(d) {
         return [d[0]+', 2012', d[1]] }) ];
 
+      console.log(fd);
+
       
       var tooltip_format = d3.time.format("%b, %Y");
       var tooltip_conf = {
@@ -40,7 +42,7 @@ define([
       }
 
       linechart = chart.Line()
-        .y_axis_offset(6)
+        //.offset_x(200)
         .duration(0)
         .date_format('%b, %Y')
         .overlapping_charts({ 
@@ -48,6 +50,8 @@ define([
           options: { circles: { tooltip: tooltip_conf } }
         })
         .x_axis({tickFormat: d3.time.format("%b")});
+
+
       chart.draw(linechart, selection, fd);
 
     });

@@ -21,7 +21,8 @@ define([
       });
 
       barchart = chart.Bar()
-        .margin({left: 50, bottom: 25})
+        //.margin({left: 50, bottom: 25})
+        .offset_x(35)
         .duration(0)
         .x_scale('time')
         .date_type('string') // or 'epoc'

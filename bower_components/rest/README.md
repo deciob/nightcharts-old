@@ -102,11 +102,11 @@ Let's take the previous example and configure the client using a wire.js specifi
 			{ module: 'rest/interceptor/errorCode', config: { code: 500 } }
 		]
 	},
-	plugins: [{ module: 'rest/wire' }]
+	$plugins: [{ module: 'rest/wire' }]
 }
 ```
 
-There are a couple things to notice.  First is the 'plugins' section, by declaring the `rest/wire` module, the `rest` factory becomes available within the specification.  The second thing to notice is that we no longer need to individually `require()` interceptor modules; wire.js is smart enough to automatically fetch the modules.  The interceptors are then chained together in the order they are defined and provided with the corresponding config object, if it's defined.  The resulting client can then be injected into any other object using standard wire.js facilities.
+There are a couple things to notice.  First is the '$plugins' section, by declaring the `rest/wire` module, the `rest` factory becomes available within the specification.  The second thing to notice is that we no longer need to individually `require()` interceptor modules; wire.js is smart enough to automatically fetch the modules.  The interceptors are then chained together in the order they are defined and provided with the corresponding config object, if it's defined.  The resulting client can then be injected into any other object using standard wire.js facilities.
 
 
 ### Custom MIME Converters: ###
@@ -211,8 +211,9 @@ Feature requests are also welcome.
 Contributors
 ------------
 
-- Scott Andrews <sandrews@gopivotal.com>
-- Jeremy Grelle <jgrelle@gopivotal.com>
+- Scott Andrews <scothis@gmail.com>
+- Jeremy Grelle <jeremy.grelle@gmail.com>
+- John Hann <john@unscriptable.com>
 
 Please see CONTRIBUTING.md for details on how to contribute to this project.
 
@@ -220,13 +221,25 @@ Please see CONTRIBUTING.md for details on how to contribute to this project.
 Copyright
 ---------
 
-Copyright 2012-2013 the original author or authors
+Copyright 2012-2014 the original author or authors
 
 rest.js is made available under the MIT license.  See LICENSE.txt for details.
 
 
 Change Log
 ----------
+
+1.0.3
+- add moduleType for bower (node and amd). Thanks @briancavalier
+- doc polish. Thanks @gogamoga
+
+1.0.2
+- restore client.chain() to the default client
+
+1.0.1
+- handle exceptions thrown from MIME converters
+- allow overriding the default client
+- allow AMD loaders to load node client. Useful when using an AMD loader with Node. Thanks @unscriptable
 
 1.0.0
 - JSON HAL mime serializer for application/hal+json

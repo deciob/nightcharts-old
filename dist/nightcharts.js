@@ -1,13 +1,12 @@
-
 define('draw',['require'],function(require) {
   
 
-  return function (Chart, selection, data) {
+  return function (Chart, selection, data, old_frame_identifier) {
     if (data) {
-      return new Chart(selection.datum(data));
+      return new Chart(selection.datum(data), old_frame_identifier);
     }
-    return function (data) {
-      return new Chart(selection.datum(data));
+    return function (data, old_frame_identifier) {
+      return new Chart(selection.datum(data), old_frame_identifier);
     }
   }
 
@@ -39,6 +38,9 @@ define('base_config', [
       width: void 0,
       height: void 0, // if set, height has precedence on ratio
       ratio: .4,
+      //
+      offset_x: 0,
+      offset_y: 0,
       //vertical: true,
       quantitative_scale: 'y',
       // One of: ordinal, linear, time
@@ -63,7 +65,6 @@ define('base_config', [
         orient: 'left',
         tickValues: void 0,
       },
-      y_axis_offset: 0,
       // if x_scale: 'time'
       date_type: 'string', // or 'epoc'
       date_format: '%Y',
@@ -71,6 +72,7 @@ define('base_config', [
       // used for extending the timescale on the margins.
       date_offset: false,
       duration: 900,  // transition duration
+      delay: 100,  // transition delay
       invert_data: false,  // Data sorting
       categoricalValue: function (d) { return d[0]; },
       quantativeValue: function (d) { return d[1]; },
@@ -80,7 +82,8 @@ define('base_config', [
       // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
       // can pass boolean or object with d3-tip configuration.
       tooltip: false,
-      overlapping_charts: { names: [] }
+      overlapping_charts: { names: [] },
+      drawDispatch: d3.dispatch('draw')
     };
   
 });
@@ -247,7 +250,7 @@ define('mixins/data', [
           return [x, __.quantativeValue.call(dataset, d)];
         }));
       } else {
-        dataset = __.invert_data ? dataset.reverse() : dataset;
+        dataset = __.invert_data ? this.clone(dataset).reverse() : dataset;
         parsed_data.push(dataset.map(function(d, i) {
           var x = __.categoricalValue.call(dataset, d);
           return [x, __.quantativeValue.call(dataset, d)];
@@ -479,19 +482,18 @@ define('mixins/axis', [
 
   function _transitionXAxisV (__) {
     return this
-      .attr("transform", "translate(0," + __.yScale.range()[0] + ")")
+      .attr("transform", "translate(" + __.offset_x + "," + __.yScale.range()[0] + ")")
       .call(__.xAxis);
   }
 
   function _transitionXAxisH (__) {
     return this
-      .attr("transform", "translate(" + 10 + "," + __.h + ")")
+      .attr("transform", "translate(" + __.offset_x + "," + __.h + ")")
       .call(__.xAxis);
   }
 
   function _transitionXAxis (__) {
     if ( !__.x_axis.show ) { return; }
-    __.quantitative_scale //?????????????
     if (__.quantitative_scale == 'y') {
       return _transitionXAxisV.call(this, __);
     } else if (__.quantitative_scale == 'x') {
@@ -503,7 +505,9 @@ define('mixins/axis', [
 
   function _transitionYAxis (__) {
     if ( !__.y_axis.show ) { return; }
-    return this.call(__.yAxis)
+    return this
+      .attr("transform", "translate(0,-" + __.offset_y + ")")
+      .call(__.yAxis)
       .selectAll("g")
       .delay( __.delay );
   }
@@ -556,8 +560,7 @@ define('mixins/chart', [
     });
 
     self.gEnter.append("g").attr("class", "x axis");
-    self.gEnter.append("g").attr("class", "y axis")
-     .attr("transform", "translate(-" + (__.y_axis_offset) + ",0)");
+    self.gEnter.append("g").attr("class", "y axis");
      
     // Update the outer dimensions.
     self.svg.attr("width", __.width)
@@ -599,8 +602,7 @@ define('bar/config', [
     
   var config = {
         orientation: 'vertical',
-        padding: .1,    
-        barOffSet: 4,
+        padding: .1
       },
       utils = utils_mixins();
 
@@ -627,28 +629,26 @@ define('bar/mixins',["d3"], function(d3) {
         .attr("class", "bar")
         .attr("x", function(d) { return __.xScale(d[0]); })
         .attr("width", __.xScale.rangeBand())
-        .attr("y", __.h + __.barOffSet)
+        .attr("y", __.h)
         .attr("height", 0);
     }
 
     function _createTimeBars (__) {
       return this.append("rect")
         .attr("class", "bar")
-        .attr("x", function(d) { 
+        .attr("x", function(d) {
           return __.xScale(d[0]) - __.bar_width / 2;
         })
         .attr("width", __.bar_width)
-        //attention TODO: this get then overridden by the transition
-        .attr("y", __.h + __.barOffSet) 
+        //attention TODO: this gets then overridden by the transition
+        .attr("y", __.h) 
         .attr("height", 0);
     }
 
     function _createHorizontalBars (__) {
       return this.append("rect")
         .attr("class", "bar")
-        .attr("x", __.barOffSet)
         .attr("width", 0)
-        .attr("y", function(d) { return __.yScale(d[0]); })
         .attr("height", __.yScale.rangeBand());
     }
 
@@ -667,26 +667,26 @@ define('bar/mixins',["d3"], function(d3) {
 
     function _transitionVerticalBars (__) {
       return this.delay(__.delay)
-        .attr("x", function(d) { return __.xScale(d[0]); })
-        .attr("y", function(d) { return __.yScale(d[1]); })
+        .attr("x", function(d) { return __.xScale(d[0]) + __.offset_x; })
+        .attr("y", function(d) { return __.yScale(d[1]) - __.offset_y; })
         .attr("height", function(d) { return __.h - __.yScale(d[1]); });
     }
 
     function _transitionTimeBars (__) {
       return this.delay(__.delay)
         .attr("x", function(d) { 
-          return __.xScale(d[0]) - __.bar_width / 2;
+          return __.xScale(d[0]) + __.offset_x - __.bar_width / 2;
         })
-        .attr("y", function(d) { return __.yScale(d[1]); })
+        .attr("y", function(d) { return __.yScale(d[1]) - __.offset_y; })
         .attr("height", function(d) { return __.h - __.yScale(d[1]); });
     }
 
     function _transitionHorizontalBars (__) {
       return this.delay(__.delay)
-        .attr("y", function(d) { return __.yScale(d[0]); })
-        .attr("x", __.barOffSet)
+        .attr("y", function(d) { return __.yScale(d[0]) - __.offset_y; })
+        .attr("x", __.offset_x)
         .attr("width", function(d) { 
-          return __.xScale(d[1]) + __.barOffSet; 
+          return __.xScale(d[1]) + __.offset_x; 
         });
     }
 
@@ -707,17 +707,8 @@ define('bar/mixins',["d3"], function(d3) {
       var self = this,
           __ = this.__;
 
-      // Select the bar elements, if they exists.
-      self.bars_g = self.g.select("g.bars").selectAll(".bars")
-        .data(__.data, self.dataIdentifier);
-
-      // Exit phase (pushes out old bar groups before new ones come in).
-      self.bars_g.exit()
-        .transition().duration(__.duration).style('opacity', 0).remove();
-  
-      // Otherwise, create them.
-      self.bars_g.enter().append("g").each( function (data, i) {
-        var bars = d3.select(this).selectAll(".bar")
+      __.data.forEach( function (data, i) {
+        var bars = self.g.select('.bars').selectAll(".bar")
               .data(data, self.dataIdentifier),
             ov_options = __.overlapping_charts.options,
             ov_bar_options = ov_options ? ov_options.bars : void 0;
@@ -826,11 +817,11 @@ define('bar/bar',[
 
     Bar.prototype.adjustDimensionsToTimeScale = function () {
       __.bar_width = (__.w / __.data[0].length) * .9;
-      __.width += __.bar_width; //FIXME: this should be smarter!
-      __.y_axis_offset = __.y_axis_offset == 0 ? __.bar_width * .6 : __.y_axis_offset;
+      __.width += __.bar_width + __.offset_x; //FIXME: this should be smarter!
+      offset_x = __.offset_x == 0 ? __.bar_width * .6 : __.offset_x;
       __.margin = utils.extend(__.margin, {
-          left: __.margin.left + __.y_axis_offset,
-          right: __.margin.right + __.y_axis_offset
+          left: __.margin.left + offset_x,
+          right: __.margin.right + offset_x
       });
       return this;
     }
@@ -861,47 +852,99 @@ define('line/config',[
 
 define('line/mixins', ["d3"], function (d3) {
 
+  function tweenDash() {
+    var l = this.getTotalLength(),
+        i = d3.interpolateString("0," + l, l + "," + l);
+    return function(t) { 
+      return i(t); };
+  }
+
+  function transitionLine (selection, data) {
+
+    var self = this,
+        __ = this.__,
+        back_line = d3.select(selection).select('.line.back'),
+        front_line = d3.select(selection).select('.line.front'),
+        back_line_path, 
+        front_line_path;
+
+    console.log('@@@@@', selection, data);
+
+    front_line_path = front_line.selectAll(".line.front.path")
+      .data([data], function(d) {
+        //console.log(d[0], '@@');
+        return d.length;});
+
+    front_line_path.exit().transition().remove();
+  
+    front_line_path.enter().append("path")
+      .attr("class", "line front path")
+      .attr("d", function (d) {
+        return self.line(__)(d);})    
+      .style("stroke", 'none')
+      .transition()
+      .delay(__.delay)
+      .style("stroke", '#05426C')
+      .duration(__.duration)
+      .attrTween("stroke-dasharray", tweenDash)
+      .call(self.endall, [data], __.handleTransitionEnd);
+      //.each("end", function() { 
+      //  self.endall.call(this, data, __.handleTransitionEnd); 
+      //});
+  
+  }
+
   function setLines () {
     var self = this,
           __ = this.__;
 
-    // Select the line elements, if they exists.
-    self.lines_g = self.g.select('g.lines').selectAll(".lines")
-      .data(__.data, self.dataIdentifier);
-
+    var lines = self.g.select('.lines').selectAll(".line")
+          // data is an array, each element one line.
+          .data(__.data, self.dataIdentifier),
+        line_g, line_g_back, line_g_front,
+        ov_options = __.overlapping_charts.options,
+        ov_line_options = ov_options ? ov_options.lines : void 0;
+  
     // Exit phase (let us push out old lines before the new ones come in).
-    self.lines_g.exit()
+    lines.exit()
       .transition().duration(__.duration).style('opacity', 0).remove();
 
-    // Otherwise, create them.
-    self.lines_g.enter().append("g").each( function (data, i) {
-      var lines = d3.select(this).selectAll(".bar")
-            .data([data], self.dataIdentifier),
-          ov_options = __.overlapping_charts.options,
-          ov_line_options = ov_options ? ov_options.bars : void 0;
-
-      // Exit phase (let us push out old lines before the new ones come in).
-      lines.exit()
-        .transition().duration(__.duration).style('opacity', 0).remove();      
-
-      lines.enter().append("path")
-        .attr("class", "line")
-        .attr("d", self.line(__) )
-        .on('click', __.handleClick);
+    
+    // this should end my line or piece of line, all depends from the data,
+    // if the data only represents a fraction of the line then the charting
+    // function needs to be called again.
+    line_g = lines.enter().append("g")
+      .attr("class", "line");
+    line_g.append('g')
+      .attr("class", "line back");
+    line_g.append('g')
+      .attr("class", "line front")
+    line_g.each(function (d, i) { 
+        //console.log('lines.enter().append("g")', d);
+        return transitionLine.call(self, this, d) });
+  
+    //lines.enter().append("path")
+    //  .attr("class", "line")
+    //  //.attr("d", self.line(__) )
+    //  .on('click', __.handleClick)
+    //  .transition()
+    //  .duration(5000)
+    //  .ease("linear")
+    //  .attr("d", self.line(__) );
+    //
+    //if (__.tooltip) {
+    //  lines
+    //   .on('mouseover', self.tip.show)
+    //   .on('mouseout', self.tip.hide);
+    //}
       
-      if (__.tooltip) {
-        lines
-         .on('mouseover', self.tip.show)
-         .on('mouseout', self.tip.hide);
-      }
-        
-      //TODO
-      //And transition them.
-      //self.transitionLines
-      //  .call(transition.selectAll('.line'), 'vertical', params)
-      //  .call(utils.endall, data, __.handleTransitionEnd);
+    //TODO
+    //And transition them.
+    //self.transitionLines
+    //  .call(transition.selectAll('.line'), 'vertical', params)
+    //  .call(utils.endall, data, __.handleTransitionEnd);
 
-    });
+
 
     return this;
   }
@@ -1012,7 +1055,7 @@ define('line/line',[
         getset = utils.getset,
         __     = extend(default_config, config);
 
-    function Line (selection) {
+    function Line (selection, old_frame_identifier) {
 
       var self = this instanceof Line
                ? this
@@ -1021,6 +1064,7 @@ define('line/line',[
           lines;
 
       self.__ = __;
+      __.old_frame_identifier = old_frame_identifier || void 0;
       self.selection = selection;
 
       self.normalizeData();
@@ -1148,6 +1192,302 @@ define('circle/circle',[
 });
 
 
+define('frame/config', [], function() {
+    
+  return {
+
+    initial_frame: void 0,
+    old_frame: void 0,
+    current_timeout: void 0,
+    draw_dispatch: void 0,
+    delta: 1,
+    step: 500,
+    data: {},
+
+  };
+
+});
+// **frame.states module**
+
+// Used by the *frame.state_machine* module.
+// Name-spaced, might add other states if needed.
+
+define('frame/states',['require'],function(require) {
+
+  var transition_states = [
+    {
+      'name': 'in_pause',
+      'initial': true,
+      'events': {
+        'start': 'in_transition_start',
+        'next': 'in_transition_next',
+        'prev': 'in_transition_prev',
+        'jump': 'in_transition_jump',
+        'reset': 'in_transition_reset'
+      }
+    },
+    {
+      'name': 'in_transition_start',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_next',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_prev',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_jump',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_reset',
+      'events': {
+        'stop': 'in_pause'
+      }
+    }
+  ];
+
+  return { transition_states: transition_states};
+
+});
+
+
+// **frame.state_machine module**
+// 
+// From http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/
+
+define('frame/state_machine',['require'],function(require) {
+
+  function StateMachine (states) {
+    this.states = states;
+    this.indexes = {};
+    for( var i = 0; i < this.states.length; i++) {
+      this.indexes[this.states[i].name] = i;
+      if (this.states[i].initial){
+        this.currentState = this.states[i];
+      }
+    }
+  }
+
+  StateMachine.prototype.consumeEvent = function (e) {
+    if(this.currentState.events[e]){
+      this.currentState = this.states[this.indexes[this.currentState.events[e]]];
+    }
+  }
+
+  StateMachine.prototype.getStatus = function () {
+    return this.currentState.name;
+  }
+
+  // getLastEvent();
+
+  return StateMachine;
+
+});
+
+
+// **frame.frame module**
+
+define('frame/frame',[
+  'd3',
+  'utils/mixins',
+  'frame/config',
+  'frame/states',
+  'frame/state_machine'
+], function(d3, utils_mixins, default_config, states, StateMachine) {
+
+  return function (user_config) {
+
+    var config = user_config || {},
+      utils  = utils_mixins(),
+      extend = utils.extend,
+      getset = utils.getset,
+      __     = extend(default_config, config); 
+
+    function Frame () {
+  
+      var self = this instanceof Frame
+                 ? this
+                 : new Frame();
+      
+      this.frame = __.initial_frame;
+  
+      self.state_machine = new StateMachine(states.transition_states);
+      self.dispatch = d3.dispatch(
+        'start', 
+        'stop', 
+        'next', 
+        'prev', 
+        'reset', 
+        'end',
+        'jump',
+        'at_beginning_of_transition'
+      );
+      
+      // Fired when all the chart related transitions within a frame are 
+      // terminated.
+      // It is the only dispatch event that does not have a state_machine 
+      // equivalent event.
+      // `frame` is an arbitrary namespace, in order to register multiple 
+      // listeners for the same event type.
+      //
+      // https://github.com/mbostock/d3/wiki/Internals#events:
+      // If an event listener was already registered for the same type, the 
+      // existing listener is removed before the new listener is added. To 
+      // register multiple listeners for the same event type, the type may be 
+      // followed by an optional namespace, such as 'click.foo' and 'click.bar'.
+      self.dispatch.on('end.frame', self.handleFrameEnd);
+  
+      self.dispatch.on('stop', self.handleStop);
+  
+      self.dispatch.on('start', self.handleStart);
+  
+      self.dispatch.on('next', self.handleNext);
+  
+      self.dispatch.on('prev', self.handlePrev);
+  
+      self.dispatch.on('reset', self.handleReset);
+  
+      self.dispatch.on('jump', self.handleJump);
+  
+      return self;
+    }
+  
+    getset(Frame, __);
+  
+    Frame.prototype.startTransition = function () {
+      var self = this;
+      clearTimeout(__.current_timeout);
+      if (__.data[this.frame]) {
+        __.current_timeout = setTimeout( function () {
+          // Fire the draw event
+          __.draw_dispatch.draw.call(self, __.data[self.frame], __.old_frame);
+        }, __.step);
+      } else {
+        // When no data is left to consume, let us stop the running frames!
+        this.state_machine.consumeEvent('stop');
+        this.frame = __.old_frame;
+      }
+      self.dispatch.at_beginning_of_transition.call(self);
+    }
+  
+    Frame.prototype.handleFrameEnd = function () {
+      this.handleTransition();
+      return this;
+    }
+  
+    Frame.prototype.handleStop = function () {
+      this.state_machine.consumeEvent('stop');
+      return this;
+    }
+  
+    // TODO: there is a lot of repetition here!
+  
+    Frame.prototype.handleStart = function () {
+      if (this.state_machine.getStatus() === 'in_pause') {
+        this.state_machine.consumeEvent('start');
+        this.handleTransition();
+      } else {
+        console.log('State already in in_transition_start.');
+      }
+      return this;
+    }
+  
+    // TODO:
+    // for next and prev we are allowing multiple prev-next events to be 
+    // fired without waiting for the current frame to end. Change?
+  
+    Frame.prototype.handleNext = function () {
+      this.state_machine.consumeEvent('next');
+      if (this.state_machine.getStatus() === 'in_transition_next') {
+        this.handleTransition();
+      } else {
+        console.log('State not in pause when next event was fired.');
+      }
+      return this;
+    }
+  
+    Frame.prototype.handlePrev = function () {
+      this.state_machine.consumeEvent('prev');
+      if (this.state_machine.getStatus() === 'in_transition_prev') {
+        this.handleTransition();
+      } else {
+        console.log('State not in pause when prev event was fired.');
+      }
+      return this;
+    }
+  
+    Frame.prototype.handleReset = function () {
+      this.state_machine.consumeEvent('reset');
+      if (this.state_machine.getStatus() === 'in_transition_reset') {
+        this.handleTransition();
+      } else {
+        console.log('State not in pause when reset event was fired.');
+      }
+      return this;
+    }
+  
+    Frame.prototype.handleJump = function (value) {
+      this.state_machine.consumeEvent('jump');
+      if (this.state_machine.getStatus() === 'in_transition_jump') {
+        this.handleTransition(value);
+      } else {
+        console.log('State not in pause when jump event was fired.');
+      }
+      return this;
+    }
+  
+    
+    Frame.prototype.handleTransition = function (value) {
+      var self = this, status = this.state_machine.getStatus();
+      if (status === 'in_transition_start') {
+        __.old_frame = this.frame;
+        this.frame += __.delta;
+        this.startTransition();
+      } else if (status === 'in_transition_prev') {
+        __.old_frame = this.frame;
+        this.frame -= __.delta;
+        this.startTransition();
+        self.state_machine.consumeEvent('stop');
+      } else if (status === 'in_transition_next') {
+        __.old_frame = this.frame;
+        this.frame += __.delta;
+        this.startTransition();
+        self.state_machine.consumeEvent('stop');
+      } else if (status === 'in_transition_jump') {
+        if (!value) return new Error('need to pass a value to jump!');
+        __.old_frame = this.frame;
+        this.frame = value;
+        this.startTransition();
+        self.state_machine.consumeEvent('stop');
+      } else if (status === 'in_transition_reset') {
+        __.old_frame = this.frame;
+        this.frame = __.initial_frame;
+        this.startTransition();
+        self.state_machine.consumeEvent('stop');
+      } else if (status === 'in_pause') {
+        return;
+      } 
+    }
+  
+    return Frame;
+
+  };
+  
+});
+
+
 define('chart',[
   "d3", 
   "d3_tip",
@@ -1168,9 +1508,10 @@ define('chart',[
   "circle/config",
   "circle/mixins",
   "circle/circle",
-  //"frame/states",
-  //"frame/state_machine",
-  //"frame/frame"
+  "frame/config",
+  "frame/states",
+  "frame/state_machine",
+  "frame/frame"
 ], function(
   d3, 
   d3_tip,
@@ -1190,10 +1531,11 @@ define('chart',[
   Line,
   circle_config,
   circle_mixins,
-  Circle
-  //states, 
-  //StateMachine, 
-  //Frame
+  Circle,
+  frame_config,
+  states, 
+  StateMachine, 
+  Frame
 ) {
 
   d3.d3_tip = d3_tip;
@@ -1217,10 +1559,12 @@ define('chart',[
     circle_config: circle_config,
     circle_mixins: circle_mixins,
     Circle: Circle,
-    //Frame: Frame,
-    //states: states, 
-    //StateMachine: StateMachine,
+    frame_config: frame_config,
+    Frame: Frame,
+    states: states, 
+    StateMachine: StateMachine,
   };
 
 });
+
 

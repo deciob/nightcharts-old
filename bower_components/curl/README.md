@@ -66,6 +66,12 @@ curl.js with jQuery, dojo, or underscore.
 What's New?
 =======
 
+* 0.8.9
+	* Protect more API functions in plugins and loaders from closure compiler's
+	aggressive obfuscation.
+	* Switch to newer //# sourceURL syntax.
+	* Stop doubling the ".js" on the sourceURL.
+	* Ensure that `define` is undefined when wrapping cjs/node modules.
 * 0.8.8
 	* Stop double-appending .css extension in css! plugin.
 	(thanks @stanislawosinski!)
@@ -106,17 +112,6 @@ What's New?
 	* Updates READMEs in the plugin and loader folders.
 	* Drops dojo 1.6 compatibility in the "kitchen sink" distribution.
 	* Adds new dojo 1.8 distribution.
-* 0.7.6
-	* Adds compatibility with dojo 1.8 and 1.9, including the ability to provide
-	  `has` configuration via `curl.config()`. (Requires use of the
-	  curl/shim/dojo18 shim.)
-	* Fixes many bugs in the i18n and cjsm11 cram (build) plugins.
-	* Stops encoding the output of the cram plugins that emit javascript code.
-	* Adds code documentation improvements in the plugins.
-	* Applies Seriously overdue README updates.
-	* Restores text! plugin functionality to the "kitchen sink" build.
-* 0.7.5
-	* Can now resolve relative plugin ids in local require (bug fix).
 
 ----------------------------------------
 
@@ -534,12 +529,15 @@ curl.config({
 	paths: {
 		plainOldJsFile1: {
 			location: 'js/plainOldJsFile1.js',
-			exports: 'aGlobal'
+			config: { loader: 'curl/loader/legacy', exports: 'aGlobal' }
 		},
 		anotherPlainOldJsFile: {
 			location: 'js/anotherPlainOldJsFile.js',
-			exports: 'anotherGlobal',
-			requires: ['plainOldJsFile1']
+			config: { 
+				loader: 'curl/loader/legacy', 
+				exports: 'anotherGlobal',
+				requires: [ 'plainOldJsFile1' ]
+			}
 		}
 	}
 });
