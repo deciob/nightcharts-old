@@ -5,8 +5,9 @@ define([
   'utils/mixins',
   'frame/config',
   'frame/states',
+  'frame/mixins',
   'frame/state_machine'
-], function(d3, utils_mixins, default_config, states, StateMachine) {
+], function(d3, utils_mixins, default_config, states, frame_mixins, StateMachine) {
 
   return function (user_config) {
 
@@ -14,7 +15,7 @@ define([
       utils  = utils_mixins(),
       extend = utils.extend,
       getset = utils.getset,
-      __     = extend(default_config, config); 
+      __     = extend(default_config, config);
 
     function Frame () {
   
@@ -22,7 +23,9 @@ define([
                  ? this
                  : new Frame();
       
-      this.frame = __.initial_frame;
+      self.__ = __;
+      self.frame = __.initial_frame;
+      self.parsed_data = self.parseData.call(self);
   
       self.state_machine = new StateMachine(states.transition_states);
       self.dispatch = d3.dispatch(
@@ -65,15 +68,16 @@ define([
       return self;
     }
   
-    getset(Frame, __);
+    getset(Frame.prototype, __);
+    frame_mixins.call(Frame.prototype);
   
     Frame.prototype.startTransition = function () {
       var self = this;
       clearTimeout(__.current_timeout);
-      if (__.data[this.frame]) {
+      if (self.parsed_data[self.frame]) {
         __.current_timeout = setTimeout( function () {
           // Fire the draw event
-          __.draw_dispatch.draw.call(self, __.data[self.frame]);
+          __.draw_dispatch.draw.call(self, self.parsed_data[self.frame], __.old_frame);
         }, __.step);
       } else {
         // When no data is left to consume, let us stop the running frames!

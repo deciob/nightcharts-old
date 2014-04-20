@@ -21,6 +21,7 @@ define([
   "frame/config",
   "frame/states",
   "frame/state_machine",
+  "frame/mixins",
   "frame/frame"
 ], function(
   d3, 
@@ -43,8 +44,9 @@ define([
   circle_mixins,
   Circle,
   frame_config,
-  states, 
-  StateMachine, 
+  states,
+  StateMachine,
+  frame_mixins, 
   Frame
 ) {
 
@@ -71,8 +73,9 @@ define([
     Circle: Circle,
     frame_config: frame_config,
     Frame: Frame,
-    states: states, 
+    states: states,
     StateMachine: StateMachine,
+    frame_mixins: frame_mixins,
   };
 
 });

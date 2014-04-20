@@ -57,6 +57,7 @@ define('base_config', [
       // used for extending the timescale on the margins.
       date_offset: false,
       duration: 900,  // transition duration
+      delay: 100,  // transition delay
       invert_data: false,  // Data sorting
       categoricalValue: function (d) { return d[0]; },
       quantativeValue: function (d) { return d[1]; },

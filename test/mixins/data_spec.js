@@ -1,6 +1,6 @@
 define([
-  'chai', 'd3', 'utils/mixins', 'mixins/data'], 
-function(chai, d3, utils_mixins, data_mixins) {
+  'chai', 'd3', 'data', 'utils/mixins', 'mixins/data'], 
+function(chai, d3, data, utils_mixins, data_mixins) {
 
   var assert = chai.assert;
 

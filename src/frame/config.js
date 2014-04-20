@@ -9,6 +9,7 @@ define('frame/config', [], function() {
     delta: 1,
     step: 500,
     data: {},
+    frame_type: 'block', //or 'sequence'
 
   };
 

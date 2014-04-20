@@ -1,4 +1,4 @@
-define(['chai', 'data', 'd3', 'frame/frame'], function(chai, data, d3, Frame) {
+define(['chai', 'data_array', 'd3', 'frame/frame'], function(chai, data_array, d3, Frame) {
 
   // TODO: simplify the data and stick it here, so the meaning of the tests 
   // are more clear.
@@ -12,7 +12,9 @@ define(['chai', 'data', 'd3', 'frame/frame'], function(chai, data, d3, Frame) {
       draw_dispatch: d3.dispatch('draw'),
       delta: 5,
       step: 500,
-      data: data,
+      data: data_array,
+      frame_type: 'block',
+      frame_identifier: 'year',
     },
     FrameConstructor = Frame(__);
     frame = FrameConstructor();
@@ -21,7 +23,7 @@ define(['chai', 'data', 'd3', 'frame/frame'], function(chai, data, d3, Frame) {
 
     it('should not step backward', function() {
       frame.dispatch.prev.call(frame);
-      assert.isTrue(frame.frame === FrameConstructor.initial_frame());
+      assert.isTrue(frame.frame === frame.initial_frame());
     });
 
     it('should step forward, without waiting for each frame to finish', function () {
