@@ -1,12 +1,12 @@
 define('draw',['require'],function(require) {
   
 
-  return function (Chart, selection, data) {
+  return function (Chart, selection, data, old_frame_identifier) {
     if (data) {
-      return new Chart(selection.datum(data));
+      return new Chart(selection.datum(data), old_frame_identifier);
     }
-    return function (data) {
-      return new Chart(selection.datum(data));
+    return function (data, old_frame_identifier) {
+      return new Chart(selection.datum(data), old_frame_identifier);
     }
   }
 
@@ -72,6 +72,7 @@ define('base_config', [
       // used for extending the timescale on the margins.
       date_offset: false,
       duration: 900,  // transition duration
+      delay: 100,  // transition delay
       invert_data: false,  // Data sorting
       categoricalValue: function (d) { return d[0]; },
       quantativeValue: function (d) { return d[1]; },
@@ -851,47 +852,99 @@ define('line/config',[
 
 define('line/mixins', ["d3"], function (d3) {
 
+  function tweenDash() {
+    var l = this.getTotalLength(),
+        i = d3.interpolateString("0," + l, l + "," + l);
+    return function(t) { 
+      return i(t); };
+  }
+
+  function transitionLine (selection, data) {
+
+    var self = this,
+        __ = this.__,
+        back_line = d3.select(selection).select('.line.back'),
+        front_line = d3.select(selection).select('.line.front'),
+        back_line_path, 
+        front_line_path;
+
+    console.log('@@@@@', selection, data);
+
+    front_line_path = front_line.selectAll(".line.front.path")
+      .data([data], function(d) {
+        //console.log(d[0], '@@');
+        return d.length;});
+
+    front_line_path.exit().transition().remove();
+  
+    front_line_path.enter().append("path")
+      .attr("class", "line front path")
+      .attr("d", function (d) {
+        return self.line(__)(d);})    
+      .style("stroke", 'none')
+      .transition()
+      .delay(__.delay)
+      .style("stroke", '#05426C')
+      .duration(__.duration)
+      .attrTween("stroke-dasharray", tweenDash)
+      .call(self.endall, [data], __.handleTransitionEnd);
+      //.each("end", function() { 
+      //  self.endall.call(this, data, __.handleTransitionEnd); 
+      //});
+  
+  }
+
   function setLines () {
     var self = this,
           __ = this.__;
 
-    // Select the line elements, if they exists.
-    self.lines_g = self.g.select('g.lines').selectAll(".lines")
-      .data(__.data, self.dataIdentifier);
-
+    var lines = self.g.select('.lines').selectAll(".line")
+          // data is an array, each element one line.
+          .data(__.data, self.dataIdentifier),
+        line_g, line_g_back, line_g_front,
+        ov_options = __.overlapping_charts.options,
+        ov_line_options = ov_options ? ov_options.lines : void 0;
+  
     // Exit phase (let us push out old lines before the new ones come in).
-    self.lines_g.exit()
+    lines.exit()
       .transition().duration(__.duration).style('opacity', 0).remove();
 
-    // Otherwise, create them.
-    self.lines_g.enter().append("g").each( function (data, i) {
-      var lines = d3.select(this).selectAll(".line")
-            .data([data], self.dataIdentifier),
-          ov_options = __.overlapping_charts.options,
-          ov_line_options = ov_options ? ov_options.bars : void 0;
-
-      // Exit phase (let us push out old lines before the new ones come in).
-      lines.exit()
-        .transition().duration(__.duration).style('opacity', 0).remove();      
-
-      lines.enter().append("path")
-        .attr("class", "line")
-        .attr("d", self.line(__) )
-        .on('click', __.handleClick);
+    
+    // this should end my line or piece of line, all depends from the data,
+    // if the data only represents a fraction of the line then the charting
+    // function needs to be called again.
+    line_g = lines.enter().append("g")
+      .attr("class", "line");
+    line_g.append('g')
+      .attr("class", "line back");
+    line_g.append('g')
+      .attr("class", "line front")
+    line_g.each(function (d, i) { 
+        //console.log('lines.enter().append("g")', d);
+        return transitionLine.call(self, this, d) });
+  
+    //lines.enter().append("path")
+    //  .attr("class", "line")
+    //  //.attr("d", self.line(__) )
+    //  .on('click', __.handleClick)
+    //  .transition()
+    //  .duration(5000)
+    //  .ease("linear")
+    //  .attr("d", self.line(__) );
+    //
+    //if (__.tooltip) {
+    //  lines
+    //   .on('mouseover', self.tip.show)
+    //   .on('mouseout', self.tip.hide);
+    //}
       
-      if (__.tooltip) {
-        lines
-         .on('mouseover', self.tip.show)
-         .on('mouseout', self.tip.hide);
-      }
-        
-      //TODO
-      //And transition them.
-      //self.transitionLines
-      //  .call(transition.selectAll('.line'), 'vertical', params)
-      //  .call(utils.endall, data, __.handleTransitionEnd);
+    //TODO
+    //And transition them.
+    //self.transitionLines
+    //  .call(transition.selectAll('.line'), 'vertical', params)
+    //  .call(utils.endall, data, __.handleTransitionEnd);
 
-    });
+
 
     return this;
   }
@@ -1002,7 +1055,7 @@ define('line/line',[
         getset = utils.getset,
         __     = extend(default_config, config);
 
-    function Line (selection) {
+    function Line (selection, old_frame_identifier) {
 
       var self = this instanceof Line
                ? this
@@ -1011,6 +1064,7 @@ define('line/line',[
           lines;
 
       self.__ = __;
+      __.old_frame_identifier = old_frame_identifier || void 0;
       self.selection = selection;
 
       self.normalizeData();
@@ -1144,11 +1198,14 @@ define('frame/config', [], function() {
 
     initial_frame: void 0,
     old_frame: void 0,
+    frame_identifier: void 0,
     current_timeout: void 0,
     draw_dispatch: void 0,
     delta: 1,
     step: 500,
     data: {},
+    frame_type: 'block', //or 'sequence'
+    categoricalValue: function (d) { return d[0]; },
 
   };
 
@@ -1243,6 +1300,79 @@ define('frame/state_machine',['require'],function(require) {
 });
 
 
+define('frame/mixins', [
+  "d3"
+], function (d3) {
+
+  function generateDataBlocks () {
+    var __ = this.__;
+    var data_by_identifier = {};
+    __.data.forEach(function (d) {
+      var identifier = d[__.frame_identifier], 
+          g = data_by_identifier[identifier];
+      if (g) {
+        g.push(d);
+      } else {
+        data_by_identifier[identifier] = [d];
+      }
+    });
+
+    return data_by_identifier;
+  }
+
+  // TODO: not handling multiple data block groups!!!
+  // example: tokio and ny and cairo
+  function generateDataBlocksSeq () {
+    var self = this,
+        __ = this.__,
+        data_blocks = this.data_blocks || this.generateDataBlocks(),
+        data_blocks_seq = [];
+
+    for (var identifier in data_blocks) {
+      if( data_blocks.hasOwnProperty( identifier ) ) {
+        var block = data_blocks[identifier],
+            prev_block_arr;
+        if (data_blocks_seq.length > 0) {
+          prev_block_arr = data_blocks_seq.slice(-1)[0];
+          current_block_arr = block;
+          new_block_arr = prev_block_arr.concat(current_block_arr);
+          data_blocks_seq.push(new_block_arr);
+        } else {
+          data_blocks_seq.push(block);
+        };
+        // TODO: danger zone, it expects data_block objects to be sorted and
+        // it is doing sloppy coercions (ie: '1995' == 1995)
+        if (identifier == self.frame) {
+          data_blocks_seq.shift(); // first block can not create a line.
+          return data_blocks_seq;
+        }
+      } 
+    }
+    
+  }
+
+  function parseData () {
+    var frame_type = this.frame_type(),
+        frame = this.frame,
+        data_blocks_seq_obj = {};
+    if (frame_type == 'block') {
+      return this.generateDataBlocks();
+    } else if (frame_type == 'sequence') {
+      data_blocks_seq_obj[frame] = this.generateDataBlocksSeq();
+      return data_blocks_seq_obj;
+    } else {
+      throw new Error('Wrong frame type, must be one of: block, sequence');
+    }
+  }
+
+  return function () {
+    this.generateDataBlocks = generateDataBlocks;
+    this.generateDataBlocksSeq = generateDataBlocksSeq;
+    this.parseData = parseData;
+    return this;
+  };
+
+});
 // **frame.frame module**
 
 define('frame/frame',[
@@ -1250,8 +1380,9 @@ define('frame/frame',[
   'utils/mixins',
   'frame/config',
   'frame/states',
+  'frame/mixins',
   'frame/state_machine'
-], function(d3, utils_mixins, default_config, states, StateMachine) {
+], function(d3, utils_mixins, default_config, states, frame_mixins, StateMachine) {
 
   return function (user_config) {
 
@@ -1259,7 +1390,7 @@ define('frame/frame',[
       utils  = utils_mixins(),
       extend = utils.extend,
       getset = utils.getset,
-      __     = extend(default_config, config); 
+      __     = extend(default_config, config);
 
     function Frame () {
   
@@ -1267,7 +1398,10 @@ define('frame/frame',[
                  ? this
                  : new Frame();
       
-      this.frame = __.initial_frame;
+      self.__ = __;
+      getset(self, __);
+      self.frame = __.initial_frame;
+      self.parsed_data = self.parseData.call(self);
   
       self.state_machine = new StateMachine(states.transition_states);
       self.dispatch = d3.dispatch(
@@ -1310,15 +1444,17 @@ define('frame/frame',[
       return self;
     }
   
+    //getset(Frame.prototype, __);
     getset(Frame, __);
+    frame_mixins.call(Frame.prototype);
   
     Frame.prototype.startTransition = function () {
       var self = this;
       clearTimeout(__.current_timeout);
-      if (__.data[this.frame]) {
+      if (self.parsed_data[self.frame]) {
         __.current_timeout = setTimeout( function () {
           // Fire the draw event
-          __.draw_dispatch.draw.call(self, __.data[self.frame]);
+          __.draw_dispatch.draw.call(self, self.parsed_data[self.frame], __.old_frame);
         }, __.step);
       } else {
         // When no data is left to consume, let us stop the running frames!
@@ -1457,6 +1593,7 @@ define('chart',[
   "frame/config",
   "frame/states",
   "frame/state_machine",
+  "frame/mixins",
   "frame/frame"
 ], function(
   d3, 
@@ -1479,8 +1616,9 @@ define('chart',[
   circle_mixins,
   Circle,
   frame_config,
-  states, 
-  StateMachine, 
+  states,
+  StateMachine,
+  frame_mixins, 
   Frame
 ) {
 
@@ -1507,8 +1645,9 @@ define('chart',[
     Circle: Circle,
     frame_config: frame_config,
     Frame: Frame,
-    states: states, 
+    states: states,
     StateMachine: StateMachine,
+    frame_mixins: frame_mixins,
   };
 
 });

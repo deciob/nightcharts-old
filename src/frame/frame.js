@@ -24,6 +24,7 @@ define([
                  : new Frame();
       
       self.__ = __;
+      getset(self, __);
       self.frame = __.initial_frame;
       self.parsed_data = self.parseData.call(self);
   
@@ -68,7 +69,8 @@ define([
       return self;
     }
   
-    getset(Frame.prototype, __);
+    //getset(Frame.prototype, __);
+    getset(Frame, __);
     frame_mixins.call(Frame.prototype);
   
     Frame.prototype.startTransition = function () {

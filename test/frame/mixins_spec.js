@@ -43,11 +43,11 @@ function(chai, data, d3, utils_mixins, frame_mixins) {
         {__: __, frame: 1995, data_blocks: data_blocks});
 
       assert.isArray(data_blocks_seq);
-      assert.strictEqual(data_blocks_seq[0].length, 1);
-      assert.strictEqual(data_blocks_seq[1].length, 2);
-      assert.strictEqual(data_blocks_seq[1][0].length, 1);
-      assert.strictEqual(data_blocks_seq[1][0][0]['year'], 1950);
-      assert.strictEqual(data_blocks_seq[1][1][0]['year'], 1955);
+      assert.isArray(data_blocks_seq[0]);
+      assert.isObject(data_blocks_seq[0][0]);
+      assert.strictEqual(data_blocks_seq[1].length, 3);
+      assert.strictEqual(data_blocks_seq[1][0]['year'], 1950);
+      assert.strictEqual(data_blocks_seq[1][1]['year'], 1955);
       
     });
 

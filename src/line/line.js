@@ -32,7 +32,7 @@ define('line/line',[
         getset = utils.getset,
         __     = extend(default_config, config);
 
-    function Line (selection) {
+    function Line (selection, old_frame_identifier) {
 
       var self = this instanceof Line
                ? this
@@ -41,6 +41,7 @@ define('line/line',[
           lines;
 
       self.__ = __;
+      __.old_frame_identifier = old_frame_identifier || void 0;
       self.selection = selection;
 
       self.normalizeData();
