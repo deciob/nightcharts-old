@@ -1,16 +1,12 @@
-define('mixins/scale_helpers', [
-  "d3", 
-  "utils/utils"
-], function (d3, utils) {
+define('scale', [
+  "d3",
+], function (d3) {
 
   function _getRange (axis, __) {
-    var vertical = __.vertical;
     if ( axis == 'x') {
-      return [0, __.w()];
-    } else if ( axis == 'y' && vertical ) {
-      return [__.h(), 0];
-    } else if ( axis == 'y' && !vertical ) {
-      return [0, __.w()];
+      return [0, __.w];
+    } else if ( axis == 'y') {
+      return [__.h, 0];
     }
   }
 
@@ -31,7 +27,7 @@ define('mixins/scale_helpers', [
     return [d0, d1];
   }
 
-  function setScale (scale_type) {
+  function _setScale (scale_type) {
     switch (scale_type) {
       case undefined:
         return;
@@ -48,27 +44,35 @@ define('mixins/scale_helpers', [
     }
   }
 
-  // Sets the range and domain for the linear scale.
-  // TODO: unit test.
-  function _applyLinearScale (range, __) {
-    var force_scale_bounds = __.force_scale_bounds,
-        min_max,
-        min,
-        max;
-    if ( force_scale_bounds === false ) {
-      min_max = utils.getMinMaxValues(__.data);
-      return this.range(range).domain([0, min_max.max]);
-    } else if ( force_scale_bounds === true ) {
-      min_max = utils.getMinMaxValues(__.data);
-      return this.range(range).domain([min_max.min, min_max.max]);
-    } else if ( utils.isObject(force_scale_bounds) ) {
-      min_max = force_scale_bounds,
-      min = min_max.min || 0,
-      max = min_max.max || utils.getMinMaxValues(__.data).max;
-      return this.range(range).domain([min, max]);
+  function setScales () {
+    var __ = this.__;
+    __.xScale = this._setScale(__.x_scale)();
+    __.yScale = this._setScale(__.y_scale)();
+    return this;
+  }
+
+  //TODO: throw on wrong input
+  function _parseScaleBounds (bounds, __) {
+    var min_max = getMinMaxValues(__.data);
+    bounds = bounds.split(',');
+    if (bounds[0] == 'min') { 
+      bounds[0] = min_max.min; 
     } else {
-      throw new Error("force_scale_bounds wrong type");
+      bounds[0] = +bounds[0];
     }
+    if (bounds[1] == 'max') {
+      bounds[1] = min_max.max; 
+    } else {
+      bounds[1] = +bounds[1];
+    }
+    return bounds;
+  }
+
+  // Sets the range and domain for the linear scale.
+  function _applyLinearScale (range, __) {
+    var scale_bounds = __.scale_bounds,
+        min_max = _parseScaleBounds(scale_bounds, __);  
+    return this.range(range).domain(min_max);
   }
 
   function _applyTimeScale (range, __) {
@@ -87,7 +91,7 @@ define('mixins/scale_helpers', [
         .domain([t0, t3])
         .range([t0, t3].map(d3.time.scale()
           .domain([t1, t2])
-          .range([0, __.w()])));
+          .range([0, __.w])));
     } else {
       return this.range(range).domain(domain);
     }
@@ -101,7 +105,7 @@ define('mixins/scale_helpers', [
       .domain( __.data[0].map( function(d) { return d[0]; } ) );
   }
 
-  function applyScale (axis, scale_type, __) {
+  function _applyScale (axis, scale_type, __) {
     var range = _getRange(axis, __);
     switch (scale_type) {
       case 'ordinal':
@@ -119,15 +123,21 @@ define('mixins/scale_helpers', [
     }
   }
 
-  return function () {
-    this.setScale = setScale;
-    this.setScales = setScale;
-    this.applyScale = applyScale;
-    this.applyScales = applyScale;
-    // private methods, exposed for testing
-    this._applyLinearScale = _applyLinearScale;
-    this._getRange = _getRange;
+  function applyScales () {
+    var __ = this.__;
+    this.applyScale.call( __.xScale, 'x', __.x_scale, __ );
+    this.applyScale.call( __.yScale, 'y', __.y_scale, __ );
     return this;
+  }
+
+  return {
+    setScales: setScales,
+    applyScales: applyScales,
+    applyScale: _applyScale,
+    //private methods, exposed for testing
+    _setScale: _setScale,
+    _applyLinearScale: _applyLinearScale,
+    _getRange: _getRange,
   };
 
 });

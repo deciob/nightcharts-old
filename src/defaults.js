@@ -13,7 +13,7 @@
 // __.x_axis_data = data[0]  #FIXME
 
 
-define('base_config', [
+define('defaults', [
   "d3", 
 ], function(d3) {
     
@@ -27,7 +27,7 @@ define('base_config', [
       offset_x: 0,
       offset_y: 0,
       //vertical: true,
-      quantitative_scale: 'y',
+      //*quantitative_scale: 'y',
       // One of: ordinal, linear, time
       x_scale: 'ordinal',
       y_scale: 'linear',
@@ -36,19 +36,22 @@ define('base_config', [
       // true     ->  min: data_min, max: data_max
       // obj      ->  min: obj.min, max: obj.max
       scale_bounds: '0,max',
-      // axes, apart from `show`, properties match d3's api.
-      x_axis: {
-        show: true,
-        outerTickSize: 0,
-        orient: 'bottom',
-        tickValues: void 0,
-        tickFormat: null,
-      },
-      y_axis: {
-        show: true,
-        outerTickSize: 0,
-        orient: 'left',
-        tickValues: void 0,
+      components: {
+        // axes, properties match d3's api.
+        x_axis: {
+          outerTickSize: 0,
+          orient: 'bottom',
+          tickValues: void 0,
+          tickFormat: null,
+        },
+        y_axis: {
+          outerTickSize: 0,
+          orient: 'left',
+          tickValues: void 0,
+        },
+        lines: void 0,
+        bars: void 0,
+        frames: void 0,
       },
       // if x_scale: 'time'
       date_type: 'string', // or 'epoc'
@@ -59,8 +62,8 @@ define('base_config', [
       duration: 900,  // transition duration
       delay: 100,  // transition delay
       invert_data: false,  // Data sorting
-      categoricalValue: function (d) { return d[0]; },
-      quantativeValue: function (d) { return d[1]; },
+      xValue: function (d) { return d[0]; },
+      yValue: function (d) { return d[1]; },
       // events
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },

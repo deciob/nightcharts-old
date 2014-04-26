@@ -1,16 +1,12 @@
 // **The default configuration module for the point.point module**
 
 define('circle/config', [
-  "d3", 
   "base_config",
-  "utils/utils",
-], function(d3, base_config, utils) {
+  "utils/mixins",
+], function(base_config, utils_mixins) {
     
-  var config = {
-    //x_scale: 'time',
-    // TODO this is an yAxis offset....
-    //date_adjust: 5
-  };
+  var config = {},
+      utils = utils_mixins();
 
   return utils.extend(base_config, config);
   

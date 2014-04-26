@@ -2,64 +2,73 @@
 
 define('line/line',[
   "d3", 
-  "utils/utils",
+  "utils/mixins",
   "line/config", 
-  "mixins/data_helpers",
-  "mixins/layout_helpers",
-  "mixins/scale_helpers",
-  "mixins/axis_helpers",
-  "mixins/scaffolding",
-  "line/scaffolding",
-  "circle/scaffolding",
+  "mixins/data",
+  "mixins/layout",
+  "mixins/scale",
+  "mixins/axis",
+  "mixins/chart",
+  "line/mixins",
+  "circle/mixins",
 ], function(
   d3, 
-  utils, 
+  utils_mixins, 
   default_config, 
-  data_helpers, 
-  layout_helpers, 
-  scale_helpers, 
-  axis_helpers, 
-  scaffolding,
-  line_scaffolding,
-  circle_scaffolding
+  data_mixins,
+  layout_mixins,
+  scale_mixins,
+  axis_mixins,
+  chart_mixins,
+  line_mixins,
+  circle_mixins
 ) {
   
   return function (user_config) {
 
     var config = user_config || {},
-        __ = utils.extend(default_config, config);
+        utils  = utils_mixins(),
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config);
 
-    function Line (selection) {
+    function Line (selection, old_frame_identifier) {
 
       var self = this instanceof Line
                ? this
                : new Line(selection),
-          data = self.normalizeData(selection.datum(), __),
+          has_timescale = __.x_scale == 'time',
           lines;
 
       self.__ = __;
+      __.old_frame_identifier = old_frame_identifier || void 0;
+      self.selection = selection;
 
-      self.__.selection = selection;
+      self.normalizeData();
       self.setDimensions();
-      self.axisScaffolding.call(self, data, __);
-      self.chartScaffolding.call(self, selection, __, 'lines');
-      self.lineScaffolding.call(self, __);
+      self.setScales();
+      self.setAxes();
+      self.setDelay();
+      self.applyScales();
+      self.setChart('lines');
+      self.setLines();
 
       __.overlapping_charts.names.forEach( function (chart_name) {
-        utils.getScaffoldingMethod.call(self, chart_name).call(self, __);
+        utils.getGraphHelperMethod.call(self, chart_name).call(self, __);
       });
 
       return selection;
     }
 
-    utils.getset(Line, __);
-    data_helpers.call(Line.prototype);
-    layout_helpers.call(Line.prototype);
-    scale_helpers.call(Line.prototype);
-    axis_helpers.call(Line.prototype);
-    scaffolding.call(Line.prototype);
-    line_scaffolding.call(Line.prototype);
-    circle_scaffolding.call(Line.prototype);
+    getset(Line, __);
+    utils_mixins.call(Line.prototype);
+    data_mixins.call(Line.prototype);
+    layout_mixins.call(Line.prototype);
+    scale_mixins.call(Line.prototype);
+    axis_mixins.call(Line.prototype);
+    chart_mixins.call(Line.prototype);
+    line_mixins.call(Line.prototype);
+    circle_mixins.call(Line.prototype);
 
     Line.prototype.line = function (__) {
       return d3.svg.line().x(function(d, i) {

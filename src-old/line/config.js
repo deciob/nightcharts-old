@@ -3,12 +3,13 @@
 define('line/config',[
   "d3", 
   "base_config",
-  "utils/utils",
-], function(d3, base_config, utils) {
+  "utils/mixins",
+], function(d3, base_config, utils_mixins) {
     
   var config = {
-    x_scale: 'time',
-  };
+        x_scale: 'time',
+      },
+      utils = utils_mixins();
 
   return utils.extend(base_config, config);
   

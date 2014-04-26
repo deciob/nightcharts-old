@@ -1,4 +1,4 @@
-define(['chai', 'data', 'frame/frame'], function(chai, data, Frame) {
+define(['chai', 'data_array', 'd3', 'frame/frame'], function(chai, data_array, d3, Frame) {
 
   // TODO: simplify the data and stick it here, so the meaning of the tests 
   // are more clear.
@@ -7,43 +7,45 @@ define(['chai', 'data', 'frame/frame'], function(chai, data, Frame) {
     drawChart = function (data) {
       return data;
     },
-    config = {
-      frame: 1950,  // Start date in data.
-      chart: { handleTransitionEnd: function(f) { return f; } },
+    __ = {
+      initial_frame: 1950,  // Start date in data.
+      draw_dispatch: d3.dispatch('draw'),
       delta: 5,
-      step: 1000,
-      data: data,
-      drawChart: drawChart
+      step: 500,
+      data: data_array,
+      frame_type: 'block',
+      frame_identifier: 'year',
     },
-    transition = new Frame(config);
+    FrameConstructor = Frame(__);
+    frame = FrameConstructor();
 
   describe('frame/frame', function () {
 
-    it('should should not step backward', function() {
-      transition.dispatch.prev.call(transition);
-      assert.isTrue(transition.frame === transition.initial_frame);
+    it('should not step backward', function() {
+      frame.dispatch.prev.call(frame);
+      assert.isTrue(frame.frame === frame.initial_frame());
     });
 
-    it('should step forward, without waiting for each transition to finish', function () {
-      transition.dispatch.next.call(transition);
-      transition.dispatch.next.call(transition);
-      transition.dispatch.next.call(transition);
-      assert.isTrue(transition.frame === 1965);
+    it('should step forward, without waiting for each frame to finish', function () {
+      frame.dispatch.next.call(frame);
+      frame.dispatch.next.call(frame);
+      frame.dispatch.next.call(frame);
+      assert.isTrue(frame.frame === 1965);
     });
 
     it('should step backward', function () {
-      transition.dispatch.prev.call(transition);
-      assert.isTrue(transition.frame === 1960);
+      frame.dispatch.prev.call(frame);
+      assert.isTrue(frame.frame === 1960);
     });
 
     it('should reset', function () {
-      transition.dispatch.reset.call(transition);
-      assert.isTrue(transition.frame === 1950);
+      frame.dispatch.reset.call(frame);
+      assert.isTrue(frame.frame === 1950);
     });
 
     it('should jump to 1990', function () {
-      transition.dispatch.jump.call(transition, 1990);
-      assert.isTrue(transition.frame === 1990);
+      frame.dispatch.jump.call(frame, 1990);
+      assert.isTrue(frame.frame === 1990);
     });
 
     // This one is more complicated... because it is tightly coupled with
@@ -51,10 +53,10 @@ define(['chai', 'data', 'frame/frame'], function(chai, data, Frame) {
     //
     //it('should stop at 1995', function (done) {
     //  this.timeout(3000);
-    //  transition.dispatch.start.call(transition);
-    //  transition.dispatch.on('stop', function () {
-    //    console.log('transition.frame')
-    //    assert.isTrue(transition.frame === 1955);
+    //  frame.dispatch.start.call(frame);
+    //  frame.dispatch.on('stop', function () {
+    //    console.log('frame.frame')
+    //    assert.isTrue(frame.frame === 1955);
     //    done();
     //  });
     //});

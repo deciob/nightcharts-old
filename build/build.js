@@ -1,9 +1,8 @@
 {
   baseUrl: "../src/",
   paths: {
-    d3: '../lib/d3/d3',
-    d3_tip: '../lib/d3-tip/index', 
+    d3: '../lib/d3/d3'
   },
-  exclude: ['d3', 'd3_tip'],
+  exclude: ['d3'],
   name: 'chart'
 }

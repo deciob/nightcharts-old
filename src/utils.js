@@ -1,7 +1,16 @@
 // **Useful functions that can be shared across modules**
 
-define(["d3", "d3_tip"], function(d3, d3_tip) {
-  
+define([
+  'd3'
+], function(
+  d3
+) {
+
+  function toCamelCase (str) {
+    // http://stackoverflow.com/a/6661012/1932827
+    return str.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); });
+  }
+
   function clone (obj) {
     if (null == obj || "object" != typeof obj) return obj;
     var copy = obj.constructor();
@@ -11,8 +20,11 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return copy;
   }
 
-  function extend (target, source, use_clone, not_override) {
-    var use_clone = (typeof use_clone === "undefined") ? true : use_clone,
+  function extend (target, source, options) {
+    var use_clone = (!options || options.use_clone === "undefined") ?
+          true : options.use_clone,
+        not_override = (!options || options.not_override === "undefined") ? 
+          true : options.not_override,
         target_clone = use_clone ? clone(target): target;
     for(prop in source) {
       if (not_override) {
@@ -28,17 +40,6 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return Object.prototype.toString.call(o) === "[object Object]";
   }
 
-  /* Adapted from Stoyan Stafanov */
-  function schonfinkelize(fn) {
-      var slice = Array.prototype.slice,
-          stored_args = slice.call(arguments, 1);
-      return function () {
-          var new_args = slice.call(arguments),
-              args = stored_args.concat(new_args);
-          return fn.apply(null, args);
-      };
-  }
-
   // For each attribute in `state` it sets a getter-setter function 
   // on `obj`.
   // Accepts one level nested `state` objects.
@@ -46,20 +47,25 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
   //
   // obj - object or function
   // state - object
-  function getset (obj, state) {
+  function getset (obj, state, options) {
+    var exclude = (!options || options.exclude === "undefined") ?
+      [] : options.exclude;
     d3.entries(state).forEach(function(o) {
-      obj[o.key] = function (x) {
-        if (!arguments.length) return state[o.key];
-        var old = state[o.key];
-        state[o.key] = x;
-        if ( isObject(o.value) ) {
-          d3.keys(o.value).forEach(function(key) {
-            state[o.key][key] = typeof x[key] !== 'undefined' ? x[key] : o.value[key];
-          });
+      if (exclude.indexOf(o.key) === -1) {
+        obj[o.key] = function (x) {
+          if (!arguments.length) return state[o.key];
+          var old = state[o.key];
+          state[o.key] = x;
+          if ( isObject(o.value) ) {
+            d3.keys(o.value).forEach(function(key) {
+              state[o.key][key] = typeof x[key] !== 'undefined' ? x[key] : o.value[key];
+            });
+          }
+          return obj;
         }
-        return obj;
       }
     });
+    return obj;
   }
 
   // Fires a callback when all transitions of a chart have ended.
@@ -95,9 +101,10 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return tip;
   }
 
-  function getScaffoldingMethod (chart_name) {
-    var name = chart_name.substring(0, chart_name.length - 1);
-    return this[name+'Scaffolding'];
+  function getGraphHelperMethod (chart_name) {
+    var name = chart_name.replace(/(?:^|\s)\S/g, 
+      function(a) { return a.toUpperCase(); });
+    return this['set' + name];
   }
 
   function getMinMaxValues (data) {
@@ -112,16 +119,27 @@ define(["d3", "d3_tip"], function(d3, d3_tip) {
     return {min: min, max: max};
   }
 
+  function setAxisProps (axis_conf, scale) { 
+    if ( !axis_conf.show ) { return; }
+    var axis = d3.svg.axis().scale(scale);
+    d3.entries(axis_conf).forEach(function(o) {
+      if ( o.value !== undefined && o.key !== 'show' ) {
+        axis[o.key](o.value);
+      }
+    });
+    return axis;
+  }
+
   return {
+    clone: clone,
     extend: extend,
-    getset: getset,
     isObject: isObject,
-    schonfinkelize: schonfinkelize,
+    getset: getset,
     endall: endall,
     tip: tip,
-    getScaffoldingMethod: getScaffoldingMethod,
+    getGraphHelperMethod: getGraphHelperMethod,
     getMinMaxValues: getMinMaxValues,
+    setAxisProps: setAxisProps,
   };
 
 });
-

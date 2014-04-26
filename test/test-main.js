@@ -14,9 +14,9 @@ requirejs.config({
     paths: {
         'chai': '../lib/chai/chai',
         'd3': '../lib/d3/d3',
-        'd3_tip': '../lib/d3-tip/index',
-        'data': '../test/data',
-        'data_array': '../test/data_array',
+        'utils': 'utils',
+        'defaults': 'defaults',
+        'sample_data': '../test/sample_data'
     },
 
     // ask Require.js to load these files (all our tests)
