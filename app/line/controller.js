@@ -41,14 +41,15 @@ define([
         offset: [-12, 0]  // [top, left]
       }
 
-      linechart = chart.Line()
+      linechart = chart.composer()
         //.offset_x(200)
         .duration(0)
         .date_format('%b, %Y')
-        .overlapping_charts({ 
-          names: ['circles'],
-          options: { circles: { tooltip: tooltip_conf } }
-        })
+        .x_scale('time')
+        //.overlapping_charts({ 
+        //  names: ['circles'],
+        //  options: { circles: { tooltip: tooltip_conf } }
+        //})
         .x_axis({tickFormat: d3.time.format("%b")});
 
 
