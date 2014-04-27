@@ -2,30 +2,26 @@ define('layout', [
   "d3"
 ], function (d3) {
 
-  // TODO: unit test.
-  function setDimensions () {
-    var __ = this.__;
+  function setDimensions (selection, __) {
     if ( __.width === undefined ) {
-      __.width  = +this.selection.style('width').replace('px', '');
+      __.width  = +selection.style('width').replace('px', '');
       __.height = __.height || __.width * __.ratio;
     } else if ( __.width && __.height === undefined) {
       __.height = __.width * __.ratio;
     }
-    this.setW();
-    this.setH();
-    return this;
+    setW.call(this, __);
+    setH.call(this, __);
+    return __;
   }
 
-  function setW () {
-    var __ = this.__;
+  function setW (__) {
     __.w   = __.width - __.margin.right - __.margin.left;
-    return this;
+    return __;
   };
       
-  function setH () {
-    var __ = this.__;
+  function setH (__) {
     __.h   = __.height - __.margin.top - __.margin.bottom;
-    return this; 
+    return __;
   };
 
   return {

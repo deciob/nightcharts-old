@@ -44,11 +44,10 @@ define('scale', [
     }
   }
 
-  function setScales () {
-    var __ = this.__;
-    __.xScale = this._setScale(__.x_scale)();
-    __.yScale = this._setScale(__.y_scale)();
-    return this;
+  function setScales (__) {
+    __.xScale = _setScale(__.x_scale)();
+    __.yScale = _setScale(__.y_scale)();
+    return __;
   }
 
   //TODO: throw on wrong input
@@ -135,7 +134,6 @@ define('scale', [
     applyScales: applyScales,
     applyScale: _applyScale,
     //private methods, exposed for testing
-    _setScale: _setScale,
     _applyLinearScale: _applyLinearScale,
     _getRange: _getRange,
   };

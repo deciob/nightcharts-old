@@ -33,8 +33,8 @@ define([
           data = selection.datum();
 
       data = data_module.normalizeData.call(composer, __, data);
-      //layout.setDimensions.call(composer, __);
-      //scale.setScales.call(composer, __);
+      __ = layout.setDimensions.call(composer, selection, __);
+      __ = scale.setScales.call(composer, __, data);
 
       //components.forEach( function (key, values) {
       //  var method_name;

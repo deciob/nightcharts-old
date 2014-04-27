@@ -32,7 +32,6 @@ function(chai, d3, data, utils, data_module) {
       __.invert_data = true;
 
       normalized_data = data_module.normalizeData.call(context, __, data);
-      console.log(normalized_data);
       assert.equal(normalized_data[0][0][0], 'd', 
         'Expected input data, exit data to have same structure but reversed order');
       assert.equal(normalized_data[0][0][1], 322, 
