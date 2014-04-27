@@ -13,6 +13,7 @@
 			{name: 'chart', location: 'app/chart', main: 'chart_constructor',},
 			{name: 'welcome', location: 'app/welcome',},
 			{name: 'inline', location: 'app/inline',},
+			{name: 'line_frame', location: 'app/line_frame',},
 			{name: 'frame', location: 'app/frame',},
 			{name: 'tooltip', location: 'app/tooltip',},
 			{name: 'timeseries', location: 'app/timeseries',},
