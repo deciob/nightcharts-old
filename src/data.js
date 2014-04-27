@@ -8,17 +8,15 @@ define('data', [
     return d[0];
   }
 
-  function setDelay () {
-    var __ = this.__,
-        duration = __.duration,
-        data = __.data;
+  function setDelay (__, data) {
+    var duration = __.duration;
     if (duration == undefined) { throw new Error('__.duration unset')}
     __.delay = function (d, i) {
       // FIXME: only referring to the first dataset, 
       // while setting the delay on all!
       return i / data[0].length * duration;
     }
-    return this;
+    return __;
   };
 
   function normalizeData (__, data) {

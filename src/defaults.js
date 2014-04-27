@@ -28,6 +28,7 @@ define('defaults', [
       offset_y: 0,
       //vertical: true,
       //*quantitative_scale: 'y',
+      orientation: 'horizontal', // needs validation or error: only bars can have vertical option
       // One of: ordinal, linear, time
       x_scale: 'ordinal',
       y_scale: 'linear',
@@ -36,23 +37,22 @@ define('defaults', [
       // true     ->  min: data_min, max: data_max
       // obj      ->  min: obj.min, max: obj.max
       scale_bounds: '0,max',
-      components: {
+      components: ['x_axis', 'y_axis'],
         // axes, properties match d3's api.
-        x_axis: {
-          outerTickSize: 0,
-          orient: 'bottom',
-          tickValues: void 0,
-          tickFormat: null,
-        },
-        y_axis: {
-          outerTickSize: 0,
-          orient: 'left',
-          tickValues: void 0,
-        },
-        lines: void 0,
-        bars: void 0,
-        frames: void 0,
+      x_axis: {
+        outerTickSize: 0,
+        orient: 'bottom',
+        tickValues: void 0,
+        tickFormat: null,
       },
+      y_axis: {
+        outerTickSize: 0,
+        orient: 'left',
+        tickValues: void 0,
+      },
+      lines: void 0,
+      bars: void 0,
+      frames: {},
       // if x_scale: 'time'
       date_type: 'string', // or 'epoc'
       date_format: '%Y',

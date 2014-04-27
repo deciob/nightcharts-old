@@ -1,12 +1,12 @@
 define(function(require) {
   'use strict';
 
-  return function (Chart, selection, data, old_frame_identifier) {
+  return function (chart, selection, data, options) {
     if (data) {
-      return new Chart(selection.datum(data), old_frame_identifier);
+      return chart(selection.datum(data), options);
     }
-    return function (data, old_frame_identifier) {
-      return new Chart(selection.datum(data), old_frame_identifier);
+    return function (data, options) {
+      return chart(selection.datum(data), options);
     }
   }
 

@@ -1,37 +1,45 @@
-define('x_axis', [
+define('components/x_axis', [
   "d3"
 ], function (d3) {
 
-  function _transitionXAxisV (__) {
+  function _transitionAxisV (__) {
     return this
       .attr("transform", "translate(" + __.offset_x + "," + __.yScale.range()[0] + ")")
       .call(__.xAxis);
   }
 
-  function _transitionXAxisH (__) {
+  function _transitionAxisH (__) {
     return this
       .attr("transform", "translate(" + __.offset_x + "," + __.h + ")")
       .call(__.xAxis);
   }
 
   function transitionAxis (__) {
-    if ( !__.x_axis.show ) { return; }
-    if (__.quantitative_scale == 'y') {
-      return _transitionXAxisV.call(this, __);
-    } else if (__.quantitative_scale == 'x') {
-      return _transitionXAxisH.call(this, __);
+    if (__.orientation == 'vertical') {
+      return _transitionAxisV.call(this, __);
+    } else if (__.orientation == 'horizontal') {
+      return _transitionAxisH.call(this, __);
     } else {
-      throw new Error('quantitative_scale must be one of: x, y');
+      throw new Error('orientation must be one of: vertical, horizontal');
     } 
   }
 
-  function setAxis () {
-    var __ = this.__;
-    __.xAxis = this._setProps(__.x_axis, __.xScale);
-    return this;
+  function setAxis (__) {
+    __.xAxis = this.setAxisProps(__.x_axis, __.xScale);
+    return __;
   }
 
+  function drawXAxis (selection, transition, __) {
+    var g;
+    __ = setAxis.call(this, __);
+    g = selection.append("g").attr("class", "x axis");
+    // Update the axis.
+    transitionAxis.call(transition.selectAll('.x.axis'), __);
+    return g;
+  } 
+
   return {
+    drawXAxis: drawXAxis,
     setAxis: setAxis,
     transitionAxis: transitionAxis,
   };

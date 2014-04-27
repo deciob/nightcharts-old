@@ -16,6 +16,8 @@ define([
   components_module
 ) {
 
+  'use strict';
+
   var defaults = defaults,
       utils  = utils,
       extend = utils.extend,
@@ -29,20 +31,39 @@ define([
     function chart (selection, options) {
       var is_frame = (!options || options.is_frame === "undefined") ? false : options.is_frame,
           old_frame_identifier = (!options || options.old_frame_identifier === "undefined") ? void 0 : options.old_frame_identifier,
-          components = d3.map(__.components),
-          data = selection.datum();
+          data = selection.datum(),
+          svg,
+          g,
+          transition;
+
+      // TODO: run a validation function on __, if debug mode.
 
       data = data_module.normalizeData.call(composer, __, data);
+      __ = data_module.setDelay.call(composer, __, data); //FIXME and TESTME
       __ = layout.setDimensions.call(composer, selection, __);
       __ = scale.setScales.call(composer, __, data);
 
-      //components.forEach( function (key, values) {
-      //  var method_name;
-      //  if (components_module[key]) {
-      //    method_name = composer.toCamelCase('set_' + [key]);
-      //    components_module[key][method_name].call(composer, values);
-      //  }
-      //});
+      scale.applyScales.call(composer, __, data); //TESTME
+
+      // Select the svg element, if it exists.
+      svg = selection.selectAll("svg").data([data]);
+      // Otherwise, create the skeletal chart.
+      g = svg.enter().append("svg").append("g");
+      // Update the outer dimensions.
+      svg.attr("width", __.width).attr("height", __.height);
+      // Update the inner dimensions.
+      g.attr("transform", "translate(" + 
+        __.margin.left + "," + __.margin.top + ")");
+      // Transitions root.
+      transition = g.transition().duration(__.duration);
+
+      __.components.forEach( function (component) {
+        var method_name;
+        if (components_module[component]) {
+          method_name = composer.toCamelCase('draw_' + component);
+          components_module[component][method_name].call(composer, g, transition, __);
+        }
+      });
 
     }
 

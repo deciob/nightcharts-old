@@ -51,8 +51,8 @@ define('scale', [
   }
 
   //TODO: throw on wrong input
-  function _parseScaleBounds (bounds, __) {
-    var min_max = getMinMaxValues(__.data);
+  function _parseScaleBounds (bounds, __, data, options) {
+    var min_max = options.getMinMaxValues(data);
     bounds = bounds.split(',');
     if (bounds[0] == 'min') { 
       bounds[0] = min_max.min; 
@@ -68,16 +68,15 @@ define('scale', [
   }
 
   // Sets the range and domain for the linear scale.
-  function _applyLinearScale (range, __) {
+  function _applyLinearScale (range, __, data, options) {
     var scale_bounds = __.scale_bounds,
-        min_max = _parseScaleBounds(scale_bounds, __);  
+        min_max = _parseScaleBounds(scale_bounds, __, data, options);  
     return this.range(range).domain(min_max);
   }
 
-  function _applyTimeScale (range, __) {
+  function _applyTimeScale (range, __, data, options) {
     // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
-    var data = __.data,
-        domain = _getDomain(data, 'x'),
+    var domain = _getDomain(data, 'x'),
         t1 = domain[0],
         t2 = domain[1],
         offset = __.date_offset,
@@ -97,22 +96,22 @@ define('scale', [
   }
 
   // Sets the range and domain for the ordinal scale.
-  function _applyOrdinalScale (range, __) {
-    var data = __.x_axis_data || __.data;  // FIXME this hack!
+  function _applyOrdinalScale (range, __, data, options) {
+    var data = __.x_axis_data || data;  // FIXME this hack!
     return this
       .rangeRoundBands(range, __.padding)
-      .domain( __.data[0].map( function(d) { return d[0]; } ) );
+      .domain(data[0].map( function(d) { return d[0]; } ) );
   }
 
-  function _applyScale (axis, scale_type, __) {
-    var range = _getRange(axis, __);
-    switch (scale_type) {
+  function _applyScale (__, data, options) {
+    var range = _getRange(options.axis, __);
+    switch (options.scale_type) {
       case 'ordinal':
-        return _applyOrdinalScale.call(this, range, __);
+        return _applyOrdinalScale.call(this, range, __, data, options);
       case 'linear':
-        return _applyLinearScale.call(this, range, __);
+        return _applyLinearScale.call(this, range, __, data, options);
       case 'time':
-        return _applyTimeScale.call(this, range, __);
+        return _applyTimeScale.call(this, range, __, data, options);
       case undefined:
         return new Error('scale cannot be undefined');
       default:
@@ -122,11 +121,15 @@ define('scale', [
     }
   }
 
-  function applyScales () {
-    var __ = this.__;
-    this.applyScale.call( __.xScale, 'x', __.x_scale, __ );
-    this.applyScale.call( __.yScale, 'y', __.y_scale, __ );
-    return this;
+  function applyScales (__, data) {
+    var options = {};
+    options.getMinMaxValues = this.getMinMaxValues;
+    options.axis = 'x';
+    options.scale_type = __.x_scale;
+    _applyScale.call( __.xScale, __, data, options);
+    options.axis = 'y';
+    options.scale_type = __.y_scale;
+    _applyScale.call( __.yScale, __, data, options);
   }
 
   return {

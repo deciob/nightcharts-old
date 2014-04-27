@@ -120,7 +120,6 @@ define([
   }
 
   function setAxisProps (axis_conf, scale) { 
-    if ( !axis_conf.show ) { return; }
     var axis = d3.svg.axis().scale(scale);
     d3.entries(axis_conf).forEach(function(o) {
       if ( o.value !== undefined && o.key !== 'show' ) {
@@ -131,6 +130,7 @@ define([
   }
 
   return {
+    toCamelCase: toCamelCase,
     clone: clone,
     extend: extend,
     isObject: isObject,

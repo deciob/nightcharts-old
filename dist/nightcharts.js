@@ -6,6 +6,11 @@ define('utils',[
   d3
 ) {
 
+  function toCamelCase (str) {
+    // http://stackoverflow.com/a/6661012/1932827
+    return str.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); });
+  }
+
   function clone (obj) {
     if (null == obj || "object" != typeof obj) return obj;
     var copy = obj.constructor();
@@ -15,8 +20,11 @@ define('utils',[
     return copy;
   }
 
-  function extend (target, source, use_clone, not_override) {
-    var use_clone = (typeof use_clone === "undefined") ? true : use_clone,
+  function extend (target, source, options) {
+    var use_clone = (!options || options.use_clone === "undefined") ?
+          true : options.use_clone,
+        not_override = (!options || options.not_override === "undefined") ? 
+          true : options.not_override,
         target_clone = use_clone ? clone(target): target;
     for(prop in source) {
       if (not_override) {
@@ -39,20 +47,25 @@ define('utils',[
   //
   // obj - object or function
   // state - object
-  function getset (obj, state) {
+  function getset (obj, state, options) {
+    var exclude = (!options || options.exclude === "undefined") ?
+      [] : options.exclude;
     d3.entries(state).forEach(function(o) {
-      obj[o.key] = function (x) {
-        if (!arguments.length) return state[o.key];
-        var old = state[o.key];
-        state[o.key] = x;
-        if ( isObject(o.value) ) {
-          d3.keys(o.value).forEach(function(key) {
-            state[o.key][key] = typeof x[key] !== 'undefined' ? x[key] : o.value[key];
-          });
+      if (exclude.indexOf(o.key) === -1) {
+        obj[o.key] = function (x) {
+          if (!arguments.length) return state[o.key];
+          var old = state[o.key];
+          state[o.key] = x;
+          if ( isObject(o.value) ) {
+            d3.keys(o.value).forEach(function(key) {
+              state[o.key][key] = typeof x[key] !== 'undefined' ? x[key] : o.value[key];
+            });
+          }
+          return obj;
         }
-        return obj;
       }
     });
+    return obj;
   }
 
   // Fires a callback when all transitions of a chart have ended.
@@ -106,7 +119,18 @@ define('utils',[
     return {min: min, max: max};
   }
 
+  function setAxisProps (axis_conf, scale) { 
+    var axis = d3.svg.axis().scale(scale);
+    d3.entries(axis_conf).forEach(function(o) {
+      if ( o.value !== undefined && o.key !== 'show' ) {
+        axis[o.key](o.value);
+      }
+    });
+    return axis;
+  }
+
   return {
+    toCamelCase: toCamelCase,
     clone: clone,
     extend: extend,
     isObject: isObject,
@@ -115,6 +139,7 @@ define('utils',[
     tip: tip,
     getGraphHelperMethod: getGraphHelperMethod,
     getMinMaxValues: getMinMaxValues,
+    setAxisProps: setAxisProps,
   };
 
 });
@@ -133,7 +158,7 @@ define('utils',[
 // __.x_axis_data = data[0]  #FIXME
 
 
-define('base_config', [
+define('defaults', [
   "d3", 
 ], function(d3) {
     
@@ -147,7 +172,8 @@ define('base_config', [
       offset_x: 0,
       offset_y: 0,
       //vertical: true,
-      quantitative_scale: 'y',
+      //*quantitative_scale: 'y',
+      orientation: 'horizontal', // needs validation or error: only bars can have vertical option
       // One of: ordinal, linear, time
       x_scale: 'ordinal',
       y_scale: 'linear',
@@ -156,20 +182,22 @@ define('base_config', [
       // true     ->  min: data_min, max: data_max
       // obj      ->  min: obj.min, max: obj.max
       scale_bounds: '0,max',
-      // axes, apart from `show`, properties match d3's api.
+      components: ['x_axis', 'y_axis'],
+        // axes, properties match d3's api.
       x_axis: {
-        show: true,
         outerTickSize: 0,
         orient: 'bottom',
         tickValues: void 0,
         tickFormat: null,
       },
       y_axis: {
-        show: true,
         outerTickSize: 0,
         orient: 'left',
         tickValues: void 0,
       },
+      lines: void 0,
+      bars: void 0,
+      frames: {},
       // if x_scale: 'time'
       date_type: 'string', // or 'epoc'
       date_format: '%Y',
@@ -179,8 +207,8 @@ define('base_config', [
       duration: 900,  // transition duration
       delay: 100,  // transition delay
       invert_data: false,  // Data sorting
-      categoricalValue: function (d) { return d[0]; },
-      quantativeValue: function (d) { return d[1]; },
+      xValue: function (d) { return d[0]; },
+      yValue: function (d) { return d[1]; },
       // events
       handleClick: function (d, i) { return void 0; },
       handleTransitionEnd: function(d) { return void 0; },
@@ -194,69 +222,34 @@ define('base_config', [
 });
 
 
-define("defaults", function(){});
-
-define('composer',[
-  'd3',
-  'utils',
-  'defaults',
-], function(
-  d3,
-  utils,
-  defaults
-) {
-
-  return function (user_config) {
-
-    var config = user_config || {},
-        utils  = utils,
-        extend = utils.extend,
-        getset = utils.getset,
-        __     = extend(defaults, config);
-
-    function composer (selection) {
-
-      debugger;
-
-    }
-
-    getset(composer, __);
-    d3.keys(utils).each( function (k) { d3.rebind(composer, utils, utils[k]); });
-
-    return composer;
-
-  }
-
-});
-define('mixins/data', [
+define('data', [
   "d3"
-], function (d3) {
+], function(
+  d3
+) {
 
   function dataIdentifier (d) {
     return d[0];
   }
 
-  function setDelay () {
-    var __ = this.__,
-        duration = __.duration,
-        data = __.data;
+  function setDelay (__, data) {
+    var duration = __.duration;
     if (duration == undefined) { throw new Error('__.duration unset')}
     __.delay = function (d, i) {
       // FIXME: only referring to the first dataset, 
       // while setting the delay on all!
       return i / data[0].length * duration;
     }
-    return this;
+    return __;
   };
 
-  function normalizeData () {
-    var data = this.selection.datum(),
-        __ = this.__,
+  function normalizeData (__, data) {
+    var self = this,
         parsed_data = [],
         date_chart = __.x_scale == 'time' ? true : false,
         date_format = __.date_format,
         date_type = __.date_type,
-        categoricalValue = __.categoricalValue;
+        xValue = __.xValue;
     data.forEach( function (dataset, index) {
       if (date_chart) {
         parsed_data.push(dataset.map(function(d, i) {
@@ -264,49 +257,482 @@ define('mixins/data', [
           // The time data is encoded in a string:
           if (date_chart && date_type == 'string') {
             x = d3.time.format(date_format)
-              .parse(categoricalValue.call(dataset, d));
+              .parse(xValue.call(dataset, d));
           // The time data is encoded in an epoch number:
           } else if (date_chart && __.date_type == 'epoch') {
-            x = new Date(categoricalValue.call(dataset, d) * 1000);
+            x = new Date(xValue.call(dataset, d) * 1000);
           } 
-          return [x, __.quantativeValue.call(dataset, d)];
+          return [x, __.yValue.call(dataset, d)];
         }));
       } else {
-        dataset = __.invert_data ? this.clone(dataset).reverse() : dataset;
+        dataset = __.invert_data ? self.clone(dataset).reverse() : dataset;
         parsed_data.push(dataset.map(function(d, i) {
-          var x = __.categoricalValue.call(dataset, d);
-          return [x, __.quantativeValue.call(dataset, d)];
+          var x = __.xValue.call(dataset, d);
+          return [x, __.yValue.call(dataset, d)];
         }));
       }
     });
-    __.data = parsed_data;
-    return this;
+    return parsed_data;
   }
 
-  return function () {
-    this.dataIdentifier = dataIdentifier;
-    this.setDelay = setDelay;
-    this.normalizeData = normalizeData;
-    return this;
+  function parseDataForBlockFrame () {
+    var __ = this.__;
+    var data_by_identifier = {};
+    __.data.forEach(function (d) {
+      var identifier = d[__.frame_identifier], 
+          g = data_by_identifier[identifier];
+      if (g) {
+        g.push(d);
+      } else {
+        data_by_identifier[identifier] = [d];
+      }
+    });
+
+    return data_by_identifier;
+  }
+
+  // TODO: not handling multiple data block groups!!!
+  // example: tokio and ny and cairo
+  function parseDataForSequentialFrame () {
+    var self = this,
+        __ = this.__,
+        data_blocks = this.data_blocks || this.parseDataForBlockFrame(),
+        data_blocks_seq = [];
+
+    for (var identifier in data_blocks) {
+      if( data_blocks.hasOwnProperty( identifier ) ) {
+        var block = data_blocks[identifier],
+            prev_block_arr;
+        if (data_blocks_seq.length > 0) {
+          prev_block_arr = data_blocks_seq.slice(-1)[0];
+          current_block_arr = block;
+          new_block_arr = prev_block_arr.concat(current_block_arr);
+          data_blocks_seq.push(new_block_arr);
+        } else {
+          data_blocks_seq.push(block);
+        };
+        // TODO: danger zone, it expects data_block objects to be sorted and
+        // it is doing sloppy coercions (ie: '1995' == 1995)
+        if (identifier == self.frame) {
+          data_blocks_seq.shift(); // first block can not create a line.
+          return data_blocks_seq;
+        }
+      } 
+    }
+
+  }
+
+  function parseDataForFrame () {
+    var frame_type = this.frame_type(),
+        frame = this.frame,
+        data_blocks_seq_obj = {};
+    if (frame_type == 'block') { // barchart frames
+      return this.parseDataForBlockFrame();
+    } else if (frame_type == 'sequential') { // line frames
+      data_blocks_seq_obj[frame] = this.parseDataForSequentialFrame();
+      return data_blocks_seq_obj;
+    } else {
+      throw new Error('Wrong frame type, must be one of: block, sequence');
+    }
+  }
+
+  return {
+    dataIdentifier: dataIdentifier, // TODO: ????????
+    setDelay: setDelay,
+    normalizeData: normalizeData,
+    parseDataForBlockFrame: parseDataForBlockFrame,
+    parseDataForSequentialFrame: parseDataForSequentialFrame,
+    parseDataForFrame: parseDataForFrame,
   };
 
 });
 
 
-define("data", function(){});
+define('scale', [
+  "d3",
+], function (d3) {
+
+  function _getRange (axis, __) {
+    if ( axis == 'x') {
+      return [0, __.w];
+    } else if ( axis == 'y') {
+      return [__.h, 0];
+    }
+  }
+
+  // It assumes the data is correctly sorted.
+  // TODO: Guard against axis argument == null or undefined
+  function _getDomain (data, axis) {
+    var d0 = Infinity, 
+        d1 = 0, 
+        index = axis == 'x' ? 0 : 1;
+    data.forEach( function (dataset, i) {
+      if (dataset[0][index] < d0) {
+        d0 = dataset[0][index];
+      }
+      if (dataset[dataset.length - 1][index] > d1) {
+        d1 = dataset[dataset.length - 1][index];
+      }
+    });
+    return [d0, d1];
+  }
+
+  function _setScale (scale_type) {
+    switch (scale_type) {
+      case undefined:
+        return;
+      case 'ordinal':
+        return d3.scale.ordinal;
+      case 'linear':
+        return d3.scale.linear;
+      case 'time':
+        return d3.time.scale;
+      default:
+        throw new Error('scale_type `'
+          + scale_type
+          + '` is not supported. Supported types are: ordinal, linear, time' );
+    }
+  }
+
+  function setScales (__) {
+    __.xScale = _setScale(__.x_scale)();
+    __.yScale = _setScale(__.y_scale)();
+    return __;
+  }
+
+  //TODO: throw on wrong input
+  function _parseScaleBounds (bounds, __, data, options) {
+    var min_max = options.getMinMaxValues(data);
+    bounds = bounds.split(',');
+    if (bounds[0] == 'min') { 
+      bounds[0] = min_max.min; 
+    } else {
+      bounds[0] = +bounds[0];
+    }
+    if (bounds[1] == 'max') {
+      bounds[1] = min_max.max; 
+    } else {
+      bounds[1] = +bounds[1];
+    }
+    return bounds;
+  }
+
+  // Sets the range and domain for the linear scale.
+  function _applyLinearScale (range, __, data, options) {
+    var scale_bounds = __.scale_bounds,
+        min_max = _parseScaleBounds(scale_bounds, __, data, options);  
+    return this.range(range).domain(min_max);
+  }
+
+  function _applyTimeScale (range, __, data, options) {
+    // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
+    var domain = _getDomain(data, 'x'),
+        t1 = domain[0],
+        t2 = domain[1],
+        offset = __.date_offset,
+        t0,
+        t3;
+    if (__.date_offset) {
+      t0 = d3.time[offset].offset(t1, -1);
+      t3 = d3.time[offset].offset(t2, +1);
+      return this
+        .domain([t0, t3])
+        .range([t0, t3].map(d3.time.scale()
+          .domain([t1, t2])
+          .range([0, __.w])));
+    } else {
+      return this.range(range).domain(domain);
+    }
+  }
+
+  // Sets the range and domain for the ordinal scale.
+  function _applyOrdinalScale (range, __, data, options) {
+    var data = __.x_axis_data || data;  // FIXME this hack!
+    return this
+      .rangeRoundBands(range, __.padding)
+      .domain(data[0].map( function(d) { return d[0]; } ) );
+  }
+
+  function _applyScale (__, data, options) {
+    var range = _getRange(options.axis, __);
+    switch (options.scale_type) {
+      case 'ordinal':
+        return _applyOrdinalScale.call(this, range, __, data, options);
+      case 'linear':
+        return _applyLinearScale.call(this, range, __, data, options);
+      case 'time':
+        return _applyTimeScale.call(this, range, __, data, options);
+      case undefined:
+        return new Error('scale cannot be undefined');
+      default:
+        throw new Error('scale_type ' 
+                         + scale_type 
+                         + ' not supported. Is it misspelled?' );
+    }
+  }
+
+  function applyScales (__, data) {
+    var options = {};
+    options.getMinMaxValues = this.getMinMaxValues;
+    options.axis = 'x';
+    options.scale_type = __.x_scale;
+    _applyScale.call( __.xScale, __, data, options);
+    options.axis = 'y';
+    options.scale_type = __.y_scale;
+    _applyScale.call( __.yScale, __, data, options);
+  }
+
+  return {
+    setScales: setScales,
+    applyScales: applyScales,
+    applyScale: _applyScale,
+    //private methods, exposed for testing
+    _applyLinearScale: _applyLinearScale,
+    _getRange: _getRange,
+  };
+
+});
+
+
+define('layout', [
+  "d3"
+], function (d3) {
+
+  function setDimensions (selection, __) {
+    if ( __.width === undefined ) {
+      __.width  = +selection.style('width').replace('px', '');
+      __.height = __.height || __.width * __.ratio;
+    } else if ( __.width && __.height === undefined) {
+      __.height = __.width * __.ratio;
+    }
+    setW.call(this, __);
+    setH.call(this, __);
+    return __;
+  }
+
+  function setW (__) {
+    __.w   = __.width - __.margin.right - __.margin.left;
+    return __;
+  };
+      
+  function setH (__) {
+    __.h   = __.height - __.margin.top - __.margin.bottom;
+    return __;
+  };
+
+  return {
+    setDimensions: setDimensions,
+    setW: setW,
+    setH: setH,
+  };
+
+});
+
+define('components/x_axis', [
+  "d3"
+], function (d3) {
+
+  function _transitionAxisV (__) {
+    return this
+      .attr("transform", "translate(" + __.offset_x + "," + __.yScale.range()[0] + ")")
+      .call(__.xAxis);
+  }
+
+  function _transitionAxisH (__) {
+    return this
+      .attr("transform", "translate(" + __.offset_x + "," + __.h + ")")
+      .call(__.xAxis);
+  }
+
+  function transitionAxis (__) {
+    if (__.orientation == 'vertical') {
+      return _transitionAxisV.call(this, __);
+    } else if (__.orientation == 'horizontal') {
+      return _transitionAxisH.call(this, __);
+    } else {
+      throw new Error('orientation must be one of: vertical, horizontal');
+    } 
+  }
+
+  function setAxis (__) {
+    __.xAxis = this.setAxisProps(__.x_axis, __.xScale);
+    return __;
+  }
+
+  function drawXAxis (selection, transition, __) {
+    var g;
+    __ = setAxis.call(this, __);
+    g = selection.append("g").attr("class", "x axis");
+    // Update the axis.
+    transitionAxis.call(transition.selectAll('.x.axis'), __);
+    return g;
+  } 
+
+  return {
+    drawXAxis: drawXAxis,
+    setAxis: setAxis,
+    transitionAxis: transitionAxis,
+  };
+
+});
+define('components/y_axis', [
+  "d3"
+], function (d3) {
+
+  function setAxis (__) {
+    __.yAxis = this.setAxisProps(__.y_axis, __.yScale);
+    return __;
+  }
+
+  function transitionAxis (__) {
+    return this
+      .attr("transform", "translate(0,-" + __.offset_y + ")")
+      .call(__.yAxis)
+      .selectAll("g")
+      .delay( __.delay );
+  }
+
+  function drawYAxis (selection, transition, __) {
+    var g;
+    __ = setAxis.call(this, __);
+    g = selection.append("g").attr("class", "y axis");
+    // Update the axis.
+    transitionAxis.call(transition.selectAll('.y.axis'), __);
+    return g; 
+  }
+
+  return {
+    drawYAxis: drawYAxis,
+    setAxis: setAxis,
+    transitionAxis: transitionAxis,
+  };
+
+});
+define('components/components', [
+  'components/x_axis',
+  'components/y_axis'
+], function (x_axis, y_axis) {
+
+  return {
+    x_axis: x_axis,
+    y_axis: y_axis
+  };
+
+});
+define('composer',[
+  'd3',
+  'utils',
+  'defaults',
+  'data',
+  'scale',
+  'layout',
+  'components/components',
+], function(
+  d3,
+  utils,
+  defaults,
+  data_module,
+  scale,
+  layout,
+  components_module
+) {
+
+  
+
+  var defaults = defaults,
+      utils  = utils,
+      extend = utils.extend,
+      getset = utils.getset;
+
+  function composer (user_config) {
+
+    var config = user_config || {},
+        __     = extend(defaults, config);
+
+    function chart (selection, options) {
+      var is_frame = (!options || options.is_frame === "undefined") ? false : options.is_frame,
+          old_frame_identifier = (!options || options.old_frame_identifier === "undefined") ? void 0 : options.old_frame_identifier,
+          data = selection.datum(),
+          svg,
+          g,
+          transition;
+
+      // TODO: run a validation function on __.
+
+      data = data_module.normalizeData.call(composer, __, data);
+      __ = data_module.setDelay.call(composer, __, data); //FIXME and TESTME
+      __ = layout.setDimensions.call(composer, selection, __);
+      __ = scale.setScales.call(composer, __, data);
+
+      scale.applyScales.call(composer, __, data);
+
+      // Select the svg element, if it exists.
+      svg = selection.selectAll("svg").data([data]);
+      // Otherwise, create the skeletal chart.
+      g = svg.enter().append("svg").append("g");
+      // Update the outer dimensions.
+      svg.attr("width", __.width).attr("height", __.height);
+      // Update the inner dimensions.
+      g.attr("transform", "translate(" + 
+        __.margin.left + "," + __.margin.top + ")");
+      // Transitions root.
+      transition = g.transition().duration(__.duration);
+
+      __.components.forEach( function (component) {
+        var method_name;
+        if (components_module[component]) {
+          method_name = composer.toCamelCase('draw_' + component);
+          components_module[component][method_name].call(composer, g, transition, __);
+        }
+      });
+
+    }
+
+    getset(chart, __, {exclude: ['components']});
+
+    return chart;
+
+  }
+
+  d3.keys(utils).forEach( function (k) { d3.rebind(composer, utils, k); });
+  return composer;
+
+});
+define('draw',['require'],function(require) {
+  
+
+  return function (chart, selection, data, options) {
+    if (data) {
+      return chart(selection.datum(data), options);
+    }
+    return function (data, options) {
+      return chart(selection.datum(data), options);
+    }
+  }
+
+});
+
 
 define('chart',[
   'd3',
   'utils',
   'defaults',
   'composer',
+  'draw',
   'data',
+  'scale',
+  'layout',
+  'components/components',
 ], function (
   d3,
   utils,
   defaults, 
   composer,
-  data 
+  draw,
+  data,
+  scale,
+  layout,
+  components
 ) {
 
   return {
@@ -314,7 +740,11 @@ define('chart',[
     utils: utils,
     defaults: defaults,
     composer: composer,
+    draw: draw,
     data: data,
+    scale: scale,
+    layout: layout,
+    components: components,
   };
 
 });
