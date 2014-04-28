@@ -18,6 +18,8 @@ define('defaults', [
 ], function(d3) {
     
     return {
+      // used with the range methods. TODO: better name, pass function?
+      padding: .1,
       // layout.
       margin: {top: 20, right: 20, bottom: 40, left: 40},
       width: void 0,
