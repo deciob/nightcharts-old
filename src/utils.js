@@ -2,9 +2,8 @@
 
 define([
   'd3'
-], function(
-  d3
-) {
+], function (d3) {
+  'use strict';
 
   function toCamelCase (str) {
     // http://stackoverflow.com/a/6661012/1932827

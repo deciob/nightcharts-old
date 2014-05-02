@@ -1,6 +1,8 @@
 define('components/line', [
-  "d3"
-], function (d3) {
+  "d3",
+  'utils'
+], function (d3, utils) {
+  'use strict';
 
   function line (__) {
     return d3.svg.line().x(function(d, i) {
@@ -51,6 +53,7 @@ define('components/line', [
   }
 
   function setLines (selection, transition, __, old_frame_identifier) {
+    //TODO: this is utils!!!
     var lines = selection.selectAll(".line")
           // data is an array, each element one line.
           .data(__.data, self.dataIdentifier),
@@ -82,7 +85,7 @@ define('components/line', [
   function drawLines (selection, transition, __, old_frame_identifier) {
     var has_timescale = __.x_scale == 'time',
         g = selection.append("g").attr("class", ".lines");
-        setLines.call(this, g, transition, __, old_frame_identifier);
+        setLines(g, transition, __, old_frame_identifier);
   }
 
   return {

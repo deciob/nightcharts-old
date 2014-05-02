@@ -1,6 +1,8 @@
 define('scale', [
   "d3",
-], function (d3) {
+  'utils'
+], function (d3, utils) {
+  'use strict';
 
   function _getRange (axis, __) {
     if ( axis == 'x') {
@@ -51,9 +53,10 @@ define('scale', [
   }
 
   //TODO: throw on wrong input
-  function _parseScaleBounds (__, data, options) {
-    var min_max = options.getMinMaxValues(data);
-    bounds = __.scale_bounds.split(',');
+  function _parseScaleBounds (__, options) {
+    var data = __.data,
+        min_max = utils.getMinMaxValues(data),
+        bounds = __.scale_bounds.split(',');
     if (bounds[0] == 'min') { 
       bounds[0] = min_max.min; 
     } else {
@@ -68,14 +71,16 @@ define('scale', [
   }
 
   // Sets the range and domain for the linear scale.
-  function _applyLinearScale (__, data, options) {
-    var min_max = _parseScaleBounds(__, data, options);  
+  function _applyLinearScale (__, options) {
+    var data = __.data,
+        min_max = _parseScaleBounds(__, data, options);  
     return this.range(options.range).domain(min_max);
   }
 
-  function _applyTimeScale (__, data, options) {
+  function _applyTimeScale (__, options) {
     // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
-    var domain = _getDomain(data, 'x'),
+    var data = __.data,
+        domain = _getDomain(data, 'x'),
         t1 = domain[0],
         t2 = domain[1],
         offset = __.date_offset,
@@ -95,8 +100,8 @@ define('scale', [
   }
 
   // Sets the range and domain for the ordinal scale.
-  function _applyOrdinalScale (__, data, options) {
-    var data = __.x_axis_data || data,  // FIXME this hack!
+  function _applyOrdinalScale (__, options) {
+    var data = __.x_axis_data || __.data,  // FIXME this hack!
         range_method;
     if (options.scale_type == 'time') {
       range_method = 'rangePoints';
@@ -108,15 +113,15 @@ define('scale', [
       .domain(data[0].map( function(d) { return d[0]; } ) );
   }
 
-  function _applyScale (__, data, options) {
+  function _applyScale (__, options) {
     options.range = _getRange(options.axis, __);
     switch (options.scale_type) {
       case 'ordinal':
-        return _applyOrdinalScale.call(this, __, data, options);
+        return _applyOrdinalScale.call(this, __, options);
       case 'linear':
-        return _applyLinearScale.call(this, __, data, options);
+        return _applyLinearScale.call(this, __, options);
       case 'time':
-        return _applyTimeScale.call(this, __, data, options);
+        return _applyTimeScale.call(this, __, options);
       case undefined:
         return new Error('scale cannot be undefined');
       default:
@@ -126,15 +131,15 @@ define('scale', [
     }
   }
 
-  function applyScales (__, data) {
+  function applyScales (__) {
     var options = {};
-    options.getMinMaxValues = this.getMinMaxValues;
+    options.getMinMaxValues = utils.getMinMaxValues;
     options.axis = 'x';
     options.scale_type = __.x_scale;
-    _applyScale.call( __.xScale, __, data, options);
+    _applyScale.call( __.xScale, __, options);
     options.axis = 'y';
     options.scale_type = __.y_scale;
-    _applyScale.call( __.yScale, __, data, options);
+    _applyScale.call( __.yScale, __, options);
   }
 
   return {

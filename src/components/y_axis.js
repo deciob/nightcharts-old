@@ -1,6 +1,8 @@
 define('components/y_axis', [
-  "d3"
-], function (d3) {
+  "d3",
+  'utils'
+], function (d3, utils) {
+  'use strict';
 
   function setAxis (__) {
     __.yAxis = this.setAxisProps(__.y_axis, __.yScale);
@@ -17,7 +19,7 @@ define('components/y_axis', [
 
   function drawYAxis (selection, transition, __) {
     var g;
-    __ = setAxis.call(this, __);
+    __ = setAxis(__);
     g = selection.append("g").attr("class", "y axis");
     // Update the axis.
     transitionAxis.call(transition.selectAll('.y.axis'), __);

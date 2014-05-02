@@ -1,6 +1,8 @@
 define('components/x_axis', [
-  "d3"
-], function (d3) {
+  "d3",
+  'utils'
+], function (d3, utils) {
+  'use strict';
 
   function _transitionAxisV (__) {
     return this
@@ -25,13 +27,13 @@ define('components/x_axis', [
   }
 
   function setAxis (__) {
-    __.xAxis = this.setAxisProps(__.x_axis, __.xScale);
+    __.xAxis = utils.setAxisProps(__.x_axis, __.xScale);
     return __;
   }
 
   function drawXAxis (selection, transition, __) {
     var g;
-    __ = setAxis.call(this, __);
+    __ = setAxis(utils, __);
     g = selection.append("g").attr("class", "x axis");
     // Update the axis.
     transitionAxis.call(transition.selectAll('.x.axis'), __);

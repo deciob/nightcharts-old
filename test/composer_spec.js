@@ -19,12 +19,5 @@ define([
 
   });
 
-  describe('clone', function() {
-    it('should be a property of composer', function() {
-      assert.isFunction(composer.clone, 
-        'Expected composer.clone to be a function');
-    });
-
-  });
 
 });

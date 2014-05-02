@@ -15,7 +15,7 @@ function(chai, d3, utils, scale) {
               y_scale: 'linear',
             };
 
-        __ = scale.setScales.call(utils, __);
+        __ = scale.setScales(__);
 
         assert.isFunction(__.xScale, 'Expected __.xScale to be a function');
 
@@ -35,8 +35,7 @@ function(chai, d3, utils, scale) {
     describe('applyScales', function() {
   
       it('should set full ordinal and a linear scales', function() {
-        var context = utils,
-            data  = [ [['a', 21], ['b', 71], ['d', 322]], ],
+        var data  = [ [['a', 21], ['b', 71], ['d', 322]], ],
             __    = {
               x_scale: 'ordinal',
               y_scale: 'linear',
@@ -44,10 +43,11 @@ function(chai, d3, utils, scale) {
               h: 322,
               w: 100,
               padding: .1,
+              data: data,
             };
 
-        __ = scale.setScales.call(utils, __);
-        scale.applyScales.call(context, __, data);
+        __ = scale.setScales(__);
+        scale.applyScales(__);
 
         assert.isFunction(__.xScale, 'Expected __.xScale to be a function');
         assert.isFunction(__.yScale, 'Expected __.yScale to be a function');
@@ -69,10 +69,11 @@ function(chai, d3, utils, scale) {
               padding: .1,
               date_type: 'string',
               date_format: '%Y',
+              data: data,
             };
 
-        __ = scale.setScales.call(utils, __);
-        scale.applyScales.call(context, __, data);
+        __ = scale.setScales(__);
+        scale.applyScales(__);
 
         assert.isFunction(__.xScale, 'Expected __.xScale to be a function');
         assert.isFunction(__.yScale, 'Expected __.yScale to be a function');

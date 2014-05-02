@@ -1,6 +1,8 @@
 define('layout', [
-  "d3"
-], function (d3) {
+  "d3",
+  'utils'
+], function (d3, utils) {
+  'use strict';
 
   function setDimensions (selection, __) {
     if ( __.width === undefined ) {
@@ -9,8 +11,8 @@ define('layout', [
     } else if ( __.width && __.height === undefined) {
       __.height = __.width * __.ratio;
     }
-    setW.call(this, __);
-    setH.call(this, __);
+    setW(__);
+    setH(__);
     return __;
   }
 

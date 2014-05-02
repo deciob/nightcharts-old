@@ -15,7 +15,6 @@ define([
   layout,
   components_module
 ) {
-
   'use strict';
 
   var defaults = defaults,
@@ -34,17 +33,17 @@ define([
           data = selection.datum(),
           svg,
           g,
-          transition,
-          component_options = {};
+          transition;
 
       // TODO: run a validation function on __, if debug mode.
 
-      data = data_module.normalizeData.call(composer, __, data);
-      __ = data_module.setDelay.call(composer, __, data); //FIXME and TESTME
-      __ = layout.setDimensions.call(composer, selection, __);
-      __ = scale.setScales.call(composer, __, data);
+      data = data_module.normalizeData(__);
+      __.data = data;
+      __ = data_module.setDelay(__); //FIXME and TESTME
+      __ = layout.setDimensions(selection, __);
+      __ = scale.setScales(__);
 
-      scale.applyScales.call(composer, __, data); //TESTME
+      scale.applyScales(__); //TESTME
 
       // Select the svg element, if it exists.
       svg = selection.selectAll("svg").data([data]);
@@ -62,10 +61,7 @@ define([
         var method_name;
         if (components_module[component]) {
           method_name = composer.toCamelCase('draw_' + component);
-          //component_options.selection = g;
-          //component_options.transition = component_options;
-          //component_options.config = __;
-          components_module[component][method_name].call(composer, g, transition, __);
+          components_module[component][method_name](g, transition, __);
         }
       });
 
@@ -77,7 +73,6 @@ define([
 
   }
 
-  d3.keys(utils).forEach( function (k) { d3.rebind(composer, utils, k); });
   return composer;
 
 });

@@ -1,8 +1,8 @@
 define('data', [
-  "d3"
-], function(
-  d3
-) {
+  "d3",
+  'utils'
+], function (d3, utils) {
+  'use strict';
 
   function dataIdentifier (d) {
     return d[0];
@@ -19,8 +19,8 @@ define('data', [
     return __;
   };
 
-  function normalizeData (__, data) {
-    var self = this,
+  function normalizeData (__) {
+    var data = __.data,
         parsed_data = [],
         date_chart = __.x_scale == 'time' ? true : false,
         date_format = __.date_format,
@@ -41,7 +41,7 @@ define('data', [
           return [x, __.yValue.call(dataset, d)];
         }));
       } else {
-        dataset = __.invert_data ? self.clone(dataset).reverse() : dataset;
+        dataset = __.invert_data ? utils.clone(dataset).reverse() : dataset;
         parsed_data.push(dataset.map(function(d, i) {
           var x = __.xValue.call(dataset, d);
           return [x, __.yValue.call(dataset, d)];
