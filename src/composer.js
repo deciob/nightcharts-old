@@ -34,7 +34,8 @@ define([
           data = selection.datum(),
           svg,
           g,
-          transition;
+          transition,
+          component_options = {};
 
       // TODO: run a validation function on __, if debug mode.
 
@@ -61,13 +62,16 @@ define([
         var method_name;
         if (components_module[component]) {
           method_name = composer.toCamelCase('draw_' + component);
+          //component_options.selection = g;
+          //component_options.transition = component_options;
+          //component_options.config = __;
           components_module[component][method_name].call(composer, g, transition, __);
         }
       });
 
     }
 
-    getset(chart, __, {exclude: ['components']});
+    getset(chart, __);
 
     return chart;
 
