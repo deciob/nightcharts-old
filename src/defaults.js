@@ -67,6 +67,7 @@ define('defaults', [
     invert_data: false,  // Data sorting
     xValue: function (d) { return d[0]; },
     yValue: function (d) { return d[1]; },
+    zValue: function (d) { return d[2]; },
     // events
     handleClick: function (d, i) { return void 0; },
     handleTransitionEnd: function(d) { return void 0; },

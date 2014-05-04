@@ -19,45 +19,46 @@ define('components/line', [
       return i(t); };
   }
 
-  function transitionLine (selection, data) {
+  function transitionLine (d, __) {
 
     var self = this,
-        __ = this.__,
-        back_line = d3.select(selection).select('.line.back'),
-        front_line = d3.select(selection).select('.line.front'),
-        back_line_path, 
-        front_line_path;
+        start_line = this.select('.line.start'),
+        end_line = this.select('.line.end'),
+        start_line_path, 
+        end_line_path;
 
-    front_line_path = front_line.selectAll(".line.front.path")
-      .data([data], function(d) {
-        //console.log(d[0], '@@');
+    end_line_path = end_line.selectAll(".line.end.path")
+      .data([d], function(d) {
+        console.log(d[0], '@@');
         return d.length;});
 
-    front_line_path.exit().transition().remove();
+    end_line_path.exit().transition().remove();
   
-    front_line_path.enter().append("path")
-      .attr("class", "line front path")
+    end_line_path.enter().append("path")
+      .attr("class", "line end path")
       .attr("d", function (d) {
-        return self.line(__)(d);})    
+        return line(__)(d);})    
       .style("stroke", 'none')
       .transition()
       .delay(__.delay)
       .style("stroke", '#05426C')
       .duration(__.duration)
       .attrTween("stroke-dasharray", tweenDash)
-      .call(self.endall, [data], __.handleTransitionEnd);
+      .call(utils.endall, [d], __.handleTransitionEnd);
       //.each("end", function() { 
       //  self.endall.call(this, data, __.handleTransitionEnd); 
       //});
   
   }
 
-  function setLines (selection, transition, __, old_frame_identifier) {
+  function setLines (selection, __, data, old_frame_identifier) {
     //TODO: this is utils!!!
     var lines = selection.selectAll(".line")
           // data is an array, each element one line.
-          .data(__.data, self.dataIdentifier),
-        line_g, line_g_back, line_g_front,
+          .data(data, self.dataIdentifier),
+        line_g, 
+        line_g_start, 
+        line_g_end,
         ov_options = __.overlapping_charts.options,
         ov_line_options = ov_options ? ov_options.lines : void 0;
   
@@ -65,27 +66,39 @@ define('components/line', [
     lines.exit()
       .transition().duration(__.duration).style('opacity', 0).remove();
 
-    
-    // this should end my line or piece of line, all depends from the data,
+    // this should end the line or line segment (depends from the data),
     // if the data only represents a fraction of the line then the charting
     // function needs to be called again.
     line_g = lines.enter().append("g")
       .attr("class", "line");
     line_g.append('g')
-      .attr("class", "line back");
+      .attr("class", "line start");
     line_g.append('g')
-      .attr("class", "line front")
+      .attr("class", "line end");
     line_g.each(function (d, i) { 
         //console.log('lines.enter().append("g")', d);
-        return transitionLine.call(self, this, d) });
+        return transitionLine.call(selection, d, __) });
 
     return this;
   }
 
   function drawLines (selection, transition, __, old_frame_identifier) {
     var has_timescale = __.x_scale == 'time',
-        g = selection.append("g").attr("class", ".lines");
-        setLines(g, transition, __, old_frame_identifier);
+        g = selection.selectAll('g.lines').data(__.data);
+
+    g.exit().remove();
+    g.enter().append('g').attr('class', 'lines');
+
+    g.each(function(data, i) {
+      setLines(d3.select(this), __, data, old_frame_identifier);
+      //var lines = this.selectAll(".line").data(data, __.dataIdentifier);
+    });
+
+
+    //__.data.forEach( function (data, i) {
+    //  var g = selection.append("g").attr("class", ".lines");
+    //  setLines(g, transition, __, old_frame_identifier);
+    //});
   }
 
   return {

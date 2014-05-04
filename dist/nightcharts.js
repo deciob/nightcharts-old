@@ -2,9 +2,8 @@
 
 define('utils',[
   'd3'
-], function(
-  d3
-) {
+], function (d3) {
+  
 
   function toCamelCase (str) {
     // http://stackoverflow.com/a/6661012/1932827
@@ -107,14 +106,16 @@ define('utils',[
     return this['set' + name];
   }
 
-  function getMinMaxValues (data) {
+  function getMinMaxValues (dataset) {
     var min = Infinity,
         max = 0;
-    data.forEach( function (data, i) {
-      var min_p = d3.min( data, function(d) { return parseFloat(d[1]); } ),
-          max_p = d3.max( data, function(d) { return parseFloat(d[1]); } );
-      min = min_p < min ? min_p : min;
-      max = max_p > max ? max_p : max;
+    dataset.forEach( function (data, index) {
+      data.forEach( function (data, i) {
+        var min_p = d3.min( data, function(d) { return parseFloat(d[1]); } ),
+            max_p = d3.max( data, function(d) { return parseFloat(d[1]); } );
+        min = min_p < min ? min_p : min;
+        max = max_p > max ? max_p : max;
+      });
     });
     return {min: min, max: max};
   }
@@ -160,81 +161,83 @@ define('utils',[
 
 define('defaults', [
   "d3", 
-], function(d3) {
+], function (d3) {
+  
     
-    return {
-      // used with the range methods. TODO: better name, pass function?
-      padding: .1,
-      // layout.
-      margin: {top: 20, right: 20, bottom: 40, left: 40},
-      width: void 0,
-      height: void 0, // if set, height has precedence on ratio
-      ratio: .4,
-      //
-      offset_x: 0,
-      offset_y: 0,
-      //vertical: true,
-      //*quantitative_scale: 'y',
-      orientation: 'horizontal', // needs validation or error: only bars can have vertical option
-      // One of: ordinal, linear, time
-      x_scale: 'ordinal',
-      y_scale: 'linear',
-      // Forces the quantitative scale bounds:
-      // false    ->  min: 0, max: data_max
-      // true     ->  min: data_min, max: data_max
-      // obj      ->  min: obj.min, max: obj.max
-      scale_bounds: '0,max',
-      components: ['x_axis', 'y_axis'],
-        // axes, properties match d3's api.
-      x_axis: {
-        outerTickSize: 0,
-        orient: 'bottom',
-        tickValues: void 0,
-        tickFormat: null,
-      },
-      y_axis: {
-        outerTickSize: 0,
-        orient: 'left',
-        tickValues: void 0,
-      },
-      lines: void 0,
-      bars: void 0,
-      frames: {},
-      // if x_scale: 'time'
-      date_type: 'string', // or 'epoc'
-      date_format: '%Y',
-      // false or string: 'month', 'year', etc.
-      // used for extending the timescale on the margins.
-      date_offset: false,
-      duration: 900,  // transition duration
-      delay: 100,  // transition delay
-      invert_data: false,  // Data sorting
-      xValue: function (d) { return d[0]; },
-      yValue: function (d) { return d[1]; },
-      // events
-      handleClick: function (d, i) { return void 0; },
-      handleTransitionEnd: function(d) { return void 0; },
-      // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
-      // can pass boolean or object with d3-tip configuration.
-      tooltip: false,
-      overlapping_charts: { names: [] },
-      drawDispatch: d3.dispatch('draw')
-    };
+  return {
+    // used with the range methods. TODO: better name, pass function?
+    padding: .1,
+    // layout.
+    margin: {top: 20, right: 20, bottom: 40, left: 40},
+    width: void 0,
+    height: void 0, // if set, height has precedence on ratio
+    ratio: .4,
+    //
+    offset_x: 0,
+    offset_y: 0,
+    //vertical: true,
+    //*quantitative_scale: 'y',
+    orientation: 'horizontal', // needs validation or error: only bars can have vertical option
+    // One of: ordinal, linear, time
+    x_scale: 'ordinal',
+    y_scale: 'linear',
+    // Forces the quantitative scale bounds:
+    // false    ->  min: 0, max: data_max
+    // true     ->  min: data_min, max: data_max
+    // obj      ->  min: obj.min, max: obj.max
+    scale_bounds: '0,max',
+    components: ['x_axis', 'y_axis'],
+      // axes, properties match d3's api.
+    x_axis: {
+      outerTickSize: 0,
+      orient: 'bottom',
+      tickValues: void 0,
+      tickFormat: null,
+    },
+    y_axis: {
+      outerTickSize: 0,
+      orient: 'left',
+      tickValues: void 0,
+    },
+    lines: void 0,
+    bars: void 0,
+    frames: {},
+    // if x_scale: 'time'
+    date_type: 'string', // or 'epoc'
+    date_format: '%Y',
+    // false or string: 'month', 'year', etc.
+    // used for extending the timescale on the margins.
+    date_offset: false,
+    duration: 900,  // transition duration
+    delay: 100,  // transition delay
+    invert_data: false,  // Data sorting
+    xValue: function (d) { return d[0]; },
+    yValue: function (d) { return d[1]; },
+    zValue: function (d) { return d[2]; },
+    // events
+    handleClick: function (d, i) { return void 0; },
+    handleTransitionEnd: function(d) { return void 0; },
+    // [d3-tip](https://github.com/Caged/d3-tip) tooltips,
+    // can pass boolean or object with d3-tip configuration.
+    tooltip: false,
+    overlapping_charts: { names: [] },
+    drawDispatch: d3.dispatch('draw')
+  };
   
 });
 
 
 define('data', [
-  "d3"
-], function(
-  d3
-) {
+  "d3",
+  'utils'
+], function (d3, utils) {
+  
 
   function dataIdentifier (d) {
     return d[0];
   }
 
-  function setDelay (__, data) {
+  function setDelay (data, __) {
     var duration = __.duration;
     if (duration == undefined) { throw new Error('__.duration unset')}
     __.delay = function (d, i) {
@@ -245,52 +248,87 @@ define('data', [
     return __;
   };
 
-  function normalizeData (__, data) {
-    var self = this,
-        parsed_data = [],
+  function normalizeData (dataset, __) {
+    var parsed_data = [],
         date_chart = __.x_scale == 'time' ? true : false,
         date_format = __.date_format,
         date_type = __.date_type,
-        xValue = __.xValue;
-    data.forEach( function (dataset, index) {
+        xValue = __.xValue,
+        yValue = __.yValue,
+        zValue = __.zValue;
+    dataset.forEach( function (data, index) {
       if (date_chart) {
-        parsed_data.push(dataset.map(function(d, i) {
-          var x;
+        parsed_data.push(data.map(function(d, i) {
+          var x,
+              z = zValue.call(data, d);
           // The time data is encoded in a string:
           if (date_chart && date_type == 'string') {
             x = d3.time.format(date_format)
-              .parse(xValue.call(dataset, d));
+              .parse( xValue.call(data, d).toString() );
           // The time data is encoded in an epoch number:
-          } else if (date_chart && __.date_type == 'epoch') {
-            x = new Date(xValue.call(dataset, d) * 1000);
-          } 
-          return [x, __.yValue.call(dataset, d)];
+          } else if (date_chart && date_type == 'epoch') {
+            x = new Date(xValue.call(data, d) * 1000);
+          }
+          if (z) {
+            return [x, yValue.call(data, d), z];
+          } else {
+            return [x, yValue.call(data, d)];
+          }
         }));
       } else {
-        dataset = __.invert_data ? self.clone(dataset).reverse() : dataset;
-        parsed_data.push(dataset.map(function(d, i) {
-          var x = __.xValue.call(dataset, d);
-          return [x, __.yValue.call(dataset, d)];
+        data = __.invert_data ? utils.clone(data).reverse() : data;
+        parsed_data.push(data.map(function(d, i) {
+          var x = xValue.call(data, d),
+              z = zValue.call(data, d);
+          if (z) {
+            return [x, yValue.call(data, d), z];
+          } else {
+            return [x, yValue.call(data, d)];
+          }
         }));
       }
     });
     return parsed_data;
   }
 
-  function parseDataForBlockFrame () {
-    var __ = this.__;
-    var data_by_identifier = {};
-    __.data.forEach(function (d) {
-      var identifier = d[__.frame_identifier], 
-          g = data_by_identifier[identifier];
-      if (g) {
-        g.push(d);
-      } else {
-        data_by_identifier[identifier] = [d];
+  function _groupInObj (dataset, __, identifier_index) {
+    var parsed_data = [];
+    dataset.forEach(function (data, index) {
+      parsed_data.push({});
+      data.forEach(function (d, i) {
+        var group = parsed_data[index][d[identifier_index]];
+        if (group) {
+          group.push(d)
+        } else {
+          parsed_data[index][d[identifier_index]] = [d];
+        }
+      });
+    });
+    return parsed_data;    
+  }
+
+  function _groupInArr (dataset, __, identifier_index) {
+    var parsed_data = [];
+    _groupInObj(dataset, __, identifier_index).forEach(function (data, index) {
+      parsed_data.push([]);
+      for (var identifier in data) {
+        if( data.hasOwnProperty( identifier ) ) {
+          parsed_data[index].push(data[identifier]);
+        }
       }
     });
+    return parsed_data;  
+  }
 
-    return data_by_identifier;
+  // Expects dataset argument to be the return value of normalizeData
+  function groupNormalizedDataBy (dataset, __, identifier_index, grouper) {
+    if (grouper === 'object') {
+      return _groupInObj(dataset, __, identifier_index);
+    } else if (grouper === 'array') {
+      return _groupInArr(dataset, __, identifier_index);
+    } else {
+      throw new Error('grouper must be either `object` or `array`');
+    }
   }
 
   // TODO: not handling multiple data block groups!!!
@@ -342,7 +380,7 @@ define('data', [
     dataIdentifier: dataIdentifier, // TODO: ????????
     setDelay: setDelay,
     normalizeData: normalizeData,
-    parseDataForBlockFrame: parseDataForBlockFrame,
+    groupNormalizedDataBy: groupNormalizedDataBy,
     parseDataForSequentialFrame: parseDataForSequentialFrame,
     parseDataForFrame: parseDataForFrame,
   };
@@ -352,7 +390,9 @@ define('data', [
 
 define('scale', [
   "d3",
-], function (d3) {
+  'utils'
+], function (d3, utils) {
+  
 
   function _getRange (axis, __) {
     if ( axis == 'x') {
@@ -363,18 +403,20 @@ define('scale', [
   }
 
   // It assumes the data is correctly sorted.
-  // TODO: Guard against axis argument == null or undefined
-  function _getDomain (data, axis) {
+  // TODO: Guard against axis argument == null or undefined --- TEST TEST TEST
+  function _getDomain (dataset, axis) {
     var d0 = Infinity, 
         d1 = 0, 
         index = axis == 'x' ? 0 : 1;
-    data.forEach( function (dataset, i) {
-      if (dataset[0][index] < d0) {
-        d0 = dataset[0][index];
-      }
-      if (dataset[dataset.length - 1][index] > d1) {
-        d1 = dataset[dataset.length - 1][index];
-      }
+    dataset.forEach( function (data, i) {
+      data.forEach( function (d, i) {
+        if (d[0][index] < d0) {
+          d0 = d[0][index];
+        }
+        if (d[d.length - 1][index] > d1) {
+          d1 = d[d.length - 1][index];
+        }
+      });
     });
     return [d0, d1];
   }
@@ -403,9 +445,10 @@ define('scale', [
   }
 
   //TODO: throw on wrong input
-  function _parseScaleBounds (__, data, options) {
-    var min_max = options.getMinMaxValues(data);
-    bounds = __.scale_bounds.split(',');
+  function _parseScaleBounds (__, options) {
+    var data = __.data,
+        min_max = utils.getMinMaxValues(data),
+        bounds = __.scale_bounds.split(',');
     if (bounds[0] == 'min') { 
       bounds[0] = min_max.min; 
     } else {
@@ -420,14 +463,16 @@ define('scale', [
   }
 
   // Sets the range and domain for the linear scale.
-  function _applyLinearScale (__, data, options) {
-    var min_max = _parseScaleBounds(__, data, options);  
+  function _applyLinearScale (__, options) {
+    var data = __.data,
+        min_max = _parseScaleBounds(__, data, options);  
     return this.range(options.range).domain(min_max);
   }
 
-  function _applyTimeScale (__, data, options) {
+  function _applyTimeScale (__, options) {
     // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
-    var domain = _getDomain(data, 'x'),
+    var data = __.data,
+        domain = _getDomain(data, 'x'),
         t1 = domain[0],
         t2 = domain[1],
         offset = __.date_offset,
@@ -447,8 +492,8 @@ define('scale', [
   }
 
   // Sets the range and domain for the ordinal scale.
-  function _applyOrdinalScale (__, data, options) {
-    var data = __.x_axis_data || data,  // FIXME this hack!
+  function _applyOrdinalScale (__, options) {
+    var data = __.x_axis_data || __.data,  // FIXME this hack!
         range_method;
     if (options.scale_type == 'time') {
       range_method = 'rangePoints';
@@ -460,15 +505,15 @@ define('scale', [
       .domain(data[0].map( function(d) { return d[0]; } ) );
   }
 
-  function _applyScale (__, data, options) {
+  function _applyScale (__, options) {
     options.range = _getRange(options.axis, __);
     switch (options.scale_type) {
       case 'ordinal':
-        return _applyOrdinalScale.call(this, __, data, options);
+        return _applyOrdinalScale.call(this, __, options);
       case 'linear':
-        return _applyLinearScale.call(this, __, data, options);
+        return _applyLinearScale.call(this, __, options);
       case 'time':
-        return _applyTimeScale.call(this, __, data, options);
+        return _applyTimeScale.call(this, __, options);
       case undefined:
         return new Error('scale cannot be undefined');
       default:
@@ -478,15 +523,15 @@ define('scale', [
     }
   }
 
-  function applyScales (__, data) {
+  function applyScales (__) {
     var options = {};
-    options.getMinMaxValues = this.getMinMaxValues;
+    options.getMinMaxValues = utils.getMinMaxValues;
     options.axis = 'x';
     options.scale_type = __.x_scale;
-    _applyScale.call( __.xScale, __, data, options);
+    _applyScale.call( __.xScale, __, options);
     options.axis = 'y';
     options.scale_type = __.y_scale;
-    _applyScale.call( __.yScale, __, data, options);
+    _applyScale.call( __.yScale, __, options);
   }
 
   return {
@@ -502,8 +547,10 @@ define('scale', [
 
 
 define('layout', [
-  "d3"
-], function (d3) {
+  "d3",
+  'utils'
+], function (d3, utils) {
+  
 
   function setDimensions (selection, __) {
     if ( __.width === undefined ) {
@@ -512,8 +559,8 @@ define('layout', [
     } else if ( __.width && __.height === undefined) {
       __.height = __.width * __.ratio;
     }
-    setW.call(this, __);
-    setH.call(this, __);
+    setW(__);
+    setH(__);
     return __;
   }
 
@@ -536,8 +583,10 @@ define('layout', [
 });
 
 define('components/x_axis', [
-  "d3"
-], function (d3) {
+  "d3",
+  'utils'
+], function (d3, utils) {
+  
 
   function _transitionAxisV (__) {
     return this
@@ -562,13 +611,13 @@ define('components/x_axis', [
   }
 
   function setAxis (__) {
-    __.xAxis = this.setAxisProps(__.x_axis, __.xScale);
+    __.xAxis = utils.setAxisProps(__.x_axis, __.xScale);
     return __;
   }
 
   function drawXAxis (selection, transition, __) {
     var g;
-    __ = setAxis.call(this, __);
+    __ = setAxis(__);
     g = selection.append("g").attr("class", "x axis");
     // Update the axis.
     transitionAxis.call(transition.selectAll('.x.axis'), __);
@@ -583,11 +632,13 @@ define('components/x_axis', [
 
 });
 define('components/y_axis', [
-  "d3"
-], function (d3) {
+  "d3",
+  'utils'
+], function (d3, utils) {
+  
 
   function setAxis (__) {
-    __.yAxis = this.setAxisProps(__.y_axis, __.yScale);
+    __.yAxis = utils.setAxisProps(__.y_axis, __.yScale);
     return __;
   }
 
@@ -601,7 +652,7 @@ define('components/y_axis', [
 
   function drawYAxis (selection, transition, __) {
     var g;
-    __ = setAxis.call(this, __);
+    __ = setAxis(__);
     g = selection.append("g").attr("class", "y axis");
     // Update the axis.
     transitionAxis.call(transition.selectAll('.y.axis'), __);
@@ -616,8 +667,10 @@ define('components/y_axis', [
 
 });
 define('components/line', [
-  "d3"
-], function (d3) {
+  "d3",
+  'utils'
+], function (d3, utils) {
+  
 
   function line (__) {
     return d3.svg.line().x(function(d, i) {
@@ -634,44 +687,46 @@ define('components/line', [
       return i(t); };
   }
 
-  function transitionLine (selection, data) {
+  function transitionLine (d, __) {
 
     var self = this,
-        __ = this.__,
-        back_line = d3.select(selection).select('.line.back'),
-        front_line = d3.select(selection).select('.line.front'),
-        back_line_path, 
-        front_line_path;
+        start_line = this.select('.line.start'),
+        end_line = this.select('.line.end'),
+        start_line_path, 
+        end_line_path;
 
-    front_line_path = front_line.selectAll(".line.front.path")
-      .data([data], function(d) {
-        //console.log(d[0], '@@');
+    end_line_path = end_line.selectAll(".line.end.path")
+      .data([d], function(d) {
+        console.log(d[0], '@@');
         return d.length;});
 
-    front_line_path.exit().transition().remove();
+    end_line_path.exit().transition().remove();
   
-    front_line_path.enter().append("path")
-      .attr("class", "line front path")
+    end_line_path.enter().append("path")
+      .attr("class", "line end path")
       .attr("d", function (d) {
-        return self.line(__)(d);})    
+        return line(__)(d);})    
       .style("stroke", 'none')
       .transition()
       .delay(__.delay)
       .style("stroke", '#05426C')
       .duration(__.duration)
       .attrTween("stroke-dasharray", tweenDash)
-      .call(self.endall, [data], __.handleTransitionEnd);
+      .call(utils.endall, [d], __.handleTransitionEnd);
       //.each("end", function() { 
       //  self.endall.call(this, data, __.handleTransitionEnd); 
       //});
   
   }
 
-  function setLines (selection, transition, __, old_frame_identifier) {
+  function setLines (selection, __, data, old_frame_identifier) {
+    //TODO: this is utils!!!
     var lines = selection.selectAll(".line")
           // data is an array, each element one line.
-          .data(__.data, self.dataIdentifier),
-        line_g, line_g_back, line_g_front,
+          .data(data, self.dataIdentifier),
+        line_g, 
+        line_g_start, 
+        line_g_end,
         ov_options = __.overlapping_charts.options,
         ov_line_options = ov_options ? ov_options.lines : void 0;
   
@@ -679,27 +734,39 @@ define('components/line', [
     lines.exit()
       .transition().duration(__.duration).style('opacity', 0).remove();
 
-    
-    // this should end my line or piece of line, all depends from the data,
+    // this should end the line or line segment (depends from the data),
     // if the data only represents a fraction of the line then the charting
     // function needs to be called again.
     line_g = lines.enter().append("g")
       .attr("class", "line");
     line_g.append('g')
-      .attr("class", "line back");
+      .attr("class", "line start");
     line_g.append('g')
-      .attr("class", "line front")
+      .attr("class", "line end");
     line_g.each(function (d, i) { 
         //console.log('lines.enter().append("g")', d);
-        return transitionLine.call(self, this, d) });
+        return transitionLine.call(selection, d, __) });
 
     return this;
   }
 
   function drawLines (selection, transition, __, old_frame_identifier) {
     var has_timescale = __.x_scale == 'time',
-        g = selection.append("g").attr("class", ".lines");
-        setLines.call(this, g, transition, __, old_frame_identifier);
+        g = selection.selectAll('g.lines').data(__.data);
+
+    g.exit().remove();
+    g.enter().append('g').attr('class', 'lines');
+
+    g.each(function(data, i) {
+      setLines(d3.select(this), __, data, old_frame_identifier);
+      //var lines = this.selectAll(".line").data(data, __.dataIdentifier);
+    });
+
+
+    //__.data.forEach( function (data, i) {
+    //  var g = selection.append("g").attr("class", ".lines");
+    //  setLines(g, transition, __, old_frame_identifier);
+    //});
   }
 
   return {
@@ -739,7 +806,6 @@ define('composer',[
   layout,
   components_module
 ) {
-
   
 
   var defaults = defaults,
@@ -752,26 +818,26 @@ define('composer',[
     var config = user_config || {},
         __     = extend(defaults, config);
 
-    function chart (selection, options) {
+    function compose (selection, options) {
       var is_frame = (!options || options.is_frame === "undefined") ? false : options.is_frame,
           old_frame_identifier = (!options || options.old_frame_identifier === "undefined") ? void 0 : options.old_frame_identifier,
           data = selection.datum(),
           svg,
           g,
-          transition,
-          component_options = {};
+          transition;
 
       // TODO: run a validation function on __, if debug mode.
 
-      data = data_module.normalizeData.call(composer, __, data);
-      __ = data_module.setDelay.call(composer, __, data); //FIXME and TESTME
-      __ = layout.setDimensions.call(composer, selection, __);
-      __ = scale.setScales.call(composer, __, data);
+      //data = data_module.normalizeData(data, __);
+      __.data = data;
+      __ = data_module.setDelay(data, __); //FIXME and TESTME
+      __ = layout.setDimensions(selection, __);
+      __ = scale.setScales(__);
 
-      scale.applyScales.call(composer, __, data); //TESTME
+      scale.applyScales(__); //TESTME
 
       // Select the svg element, if it exists.
-      svg = selection.selectAll("svg").data([data]);
+      svg = selection.selectAll("svg").data(data);
       // Otherwise, create the skeletal chart.
       g = svg.enter().append("svg").append("g");
       // Update the outer dimensions.
@@ -785,23 +851,20 @@ define('composer',[
       __.components.forEach( function (component) {
         var method_name;
         if (components_module[component]) {
-          method_name = composer.toCamelCase('draw_' + component);
-          //component_options.selection = g;
-          //component_options.transition = component_options;
-          //component_options.config = __;
-          components_module[component][method_name].call(composer, g, transition, __);
+          method_name = utils.toCamelCase('draw_' + component);
+          components_module[component][method_name](g, transition, __);
         }
       });
 
     }
 
-    getset(chart, __);
+    getset(compose, __);
+    compose.__ = __;
 
-    return chart;
+    return compose;
 
   }
 
-  d3.keys(utils).forEach( function (k) { d3.rebind(composer, utils, k); });
   return composer;
 
 });

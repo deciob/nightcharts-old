@@ -27,7 +27,7 @@ define([
     var config = user_config || {},
         __     = extend(defaults, config);
 
-    function chart (selection, options) {
+    function compose (selection, options) {
       var is_frame = (!options || options.is_frame === "undefined") ? false : options.is_frame,
           old_frame_identifier = (!options || options.old_frame_identifier === "undefined") ? void 0 : options.old_frame_identifier,
           data = selection.datum(),
@@ -37,16 +37,16 @@ define([
 
       // TODO: run a validation function on __, if debug mode.
 
-      data = data_module.normalizeData(__);
+      //data = data_module.normalizeData(data, __);
       __.data = data;
-      __ = data_module.setDelay(__); //FIXME and TESTME
+      __ = data_module.setDelay(data, __); //FIXME and TESTME
       __ = layout.setDimensions(selection, __);
       __ = scale.setScales(__);
 
       scale.applyScales(__); //TESTME
 
       // Select the svg element, if it exists.
-      svg = selection.selectAll("svg").data([data]);
+      svg = selection.selectAll("svg").data(data);
       // Otherwise, create the skeletal chart.
       g = svg.enter().append("svg").append("g");
       // Update the outer dimensions.
@@ -60,16 +60,17 @@ define([
       __.components.forEach( function (component) {
         var method_name;
         if (components_module[component]) {
-          method_name = composer.toCamelCase('draw_' + component);
+          method_name = utils.toCamelCase('draw_' + component);
           components_module[component][method_name](g, transition, __);
         }
       });
 
     }
 
-    getset(chart, __);
+    getset(compose, __);
+    compose.__ = __;
 
-    return chart;
+    return compose;
 
   }
 

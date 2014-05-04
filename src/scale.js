@@ -13,18 +13,20 @@ define('scale', [
   }
 
   // It assumes the data is correctly sorted.
-  // TODO: Guard against axis argument == null or undefined
-  function _getDomain (data, axis) {
+  // TODO: Guard against axis argument == null or undefined --- TEST TEST TEST
+  function _getDomain (dataset, axis) {
     var d0 = Infinity, 
         d1 = 0, 
         index = axis == 'x' ? 0 : 1;
-    data.forEach( function (dataset, i) {
-      if (dataset[0][index] < d0) {
-        d0 = dataset[0][index];
-      }
-      if (dataset[dataset.length - 1][index] > d1) {
-        d1 = dataset[dataset.length - 1][index];
-      }
+    dataset.forEach( function (data, i) {
+      data.forEach( function (d, i) {
+        if (d[0][index] < d0) {
+          d0 = d[0][index];
+        }
+        if (d[d.length - 1][index] > d1) {
+          d1 = d[d.length - 1][index];
+        }
+      });
     });
     return [d0, d1];
   }

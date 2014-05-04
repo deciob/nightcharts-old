@@ -33,7 +33,7 @@ define('components/x_axis', [
 
   function drawXAxis (selection, transition, __) {
     var g;
-    __ = setAxis(utils, __);
+    __ = setAxis(__);
     g = selection.append("g").attr("class", "x axis");
     // Update the axis.
     transitionAxis.call(transition.selectAll('.x.axis'), __);

@@ -5,7 +5,7 @@ define('components/y_axis', [
   'use strict';
 
   function setAxis (__) {
-    __.yAxis = this.setAxisProps(__.y_axis, __.yScale);
+    __.yAxis = utils.setAxisProps(__.y_axis, __.yScale);
     return __;
   }
 
