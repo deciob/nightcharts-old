@@ -65,7 +65,7 @@ define('defaults', [
     duration: 900,  // transition duration
     delay: 100,  // transition delay
     invert_data: false,  // Data sorting
-    data_parser: 'simpleDataParser', // or groupedDataParser
+    data_parser: 'groupedDataParser', // or simpleDataParser
     xValue: function (d) { return d[0]; },
     yValue: function (d) { return d[1]; },
     zValue: function (d) { return d[2]; },

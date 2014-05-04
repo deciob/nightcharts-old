@@ -26,19 +26,19 @@ define('components/line', [
   function transitionLine (d, __) {
 
     var self = this,
-        start_line = this.select('.line.start'),
-        end_line = this.select('.line.end'),
-        start_line_path, 
-        end_line_path;
+        line_body = this.select('.line.body'),
+        line_head = this.select('.line.head'),
+        line_body_path, 
+        line_head_path;
 
-    end_line_path = end_line.selectAll(".line.end.path")
+    line_head_path = line_head.selectAll(".line.head.path")
       .data([d], function(d) {
         //console.log(d[0], '@@');
         return d.length;});
 
-    end_line_path.exit().transition().remove();
+    line_head_path.exit().transition().remove();
   
-    end_line_path.enter().append("path")
+    line_head_path.enter().append("path")
       .attr("class", "line end path")
       .attr("d", function (d) {
         return line(__)(d);})    
@@ -55,28 +55,28 @@ define('components/line', [
 
   function setLines (selection, __, data, old_frame_identifier) {
     //TODO: this is utils!!!
-    var lines = selection.selectAll(".line")
+    var line = selection.selectAll(".line")
           // data is an array, each element one line.
-          .data([data], dataIdentifier),
+          .data(data, dataIdentifier),
         line_g, 
         line_g_start, 
         line_g_end,
         ov_options = __.overlapping_charts.options,
         ov_line_options = ov_options ? ov_options.lines : void 0;
   
-    // Exit phase (let us push out old lines before the new ones come in).
-    lines.exit()
+    // Exit phase (let us push out old line before the new ones come in).
+    line.exit()
       .transition().duration(__.duration).style('opacity', 0).remove();
 
     // this should end the line or line segment (depends from the data),
     // if the data only represents a fraction of the line then the charting
     // function needs to be called again.
-    line_g = lines.enter().append("g")
+    line_g = line.enter().append("g")
       .attr("class", "line");
     line_g.append('g')
-      .attr("class", "line start");
+      .attr("class", "line body");
     line_g.append('g')
-      .attr("class", "line end");
+      .attr("class", "line head");
     line_g.each(function (d, i) { 
         //console.log('lines.enter().append("g")', d);
         return transitionLine.call(selection, d, __) });
@@ -86,7 +86,7 @@ define('components/line', [
 
   function drawLines (selection, transition, __, old_frame_identifier) {
     var has_timescale = __.x_scale == 'time',
-        g = selection.selectAll('g.lines').data(__.data);
+        g = selection.selectAll('g.lines').data([__.data]);
 
     g.exit().remove();
     g.enter().append('g').attr('class', 'lines');
