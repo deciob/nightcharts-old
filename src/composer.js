@@ -46,7 +46,7 @@ define([
       scale.applyScales(__); //TESTME
 
       // Select the svg element, if it exists.
-      svg = selection.selectAll("svg").data(data);
+      svg = selection.selectAll("svg").data([data]);
       // Otherwise, create the skeletal chart.
       g = svg.enter().append("svg").append("g");
       // Update the outer dimensions.

@@ -1,7 +1,8 @@
 define('scale', [
-  "d3",
-  'utils'
-], function (d3, utils) {
+  'd3',
+  'utils',
+  'data'
+], function (d3, utils, data_module) {
   'use strict';
 
   function _getRange (axis, __) {
@@ -14,22 +15,14 @@ define('scale', [
 
   // It assumes the data is correctly sorted.
   // TODO: Guard against axis argument == null or undefined --- TEST TEST TEST
-  function _getDomain (dataset, axis) {
-    var d0 = Infinity, 
-        d1 = 0, 
-        index = axis == 'x' ? 0 : 1;
-    dataset.forEach( function (data, i) {
-      data.forEach( function (d, i) {
-        if (d[0][index] < d0) {
-          d0 = d[0][index];
-        }
-        if (d[d.length - 1][index] > d1) {
-          d1 = d[d.length - 1][index];
-        }
-      });
-    });
-    return [d0, d1];
+  // TODO: data accessor?
+  function _getDomain (data, axis, __) {
+    var dataParser = data_module[__.data_parser],
+        min_max = utils.getMinMaxValues(data, dataParser, axis);
+    return [min_max.min, min_max.max];
   }
+
+
 
   function _setScale (scale_type) {
     switch (scale_type) {
@@ -57,7 +50,8 @@ define('scale', [
   //TODO: throw on wrong input
   function _parseScaleBounds (__, options) {
     var data = __.data,
-        min_max = utils.getMinMaxValues(data),
+        data_parser = data_module[__.data_parser],
+        min_max = utils.getMinMaxValues(data, data_parser),
         bounds = __.scale_bounds.split(',');
     if (bounds[0] == 'min') { 
       bounds[0] = min_max.min; 
@@ -82,7 +76,7 @@ define('scale', [
   function _applyTimeScale (__, options) {
     // see [bl.ocks.org/mbostock/6186172](http://bl.ocks.org/mbostock/6186172)
     var data = __.data,
-        domain = _getDomain(data, 'x'),
+        domain = _getDomain(data, 'x', __),
         t1 = domain[0],
         t2 = domain[1],
         offset = __.date_offset,
@@ -151,6 +145,7 @@ define('scale', [
     //private methods, exposed for testing
     _applyLinearScale: _applyLinearScale,
     _getRange: _getRange,
+    _getDomain: _getDomain,
   };
 
 });

@@ -5,6 +5,17 @@ function(chai, d3, utils, scale) {
   describe('scale', function() {
 
     var assert = chai.assert;
+
+    describe('_getDomain', function() {
+      it('should return the input domain for the data (min, max)', function() {
+        var data  = [ [['a', 21], ['b', 71], ['d', 322]], ],
+            domain,
+            __ = { data_parser: 'groupedDataParser'};
+        domain = scale._getDomain(data, 'y', __);
+        assert.equal(domain[0], 21);
+    
+      });
+    });
   
     describe('setScales', function() {
   
@@ -34,7 +45,7 @@ function(chai, d3, utils, scale) {
 
     describe('applyScales', function() {
   
-      it('should set full ordinal and a linear scales', function() {
+      it('should set full ordinal and linear scales', function() {
         var data  = [ [['a', 21], ['b', 71], ['d', 322]], ],
             __    = {
               x_scale: 'ordinal',
@@ -44,6 +55,7 @@ function(chai, d3, utils, scale) {
               w: 100,
               padding: .1,
               data: data,
+              data_parser: 'groupedDataParser',
             };
 
         __ = scale.setScales(__);
@@ -70,6 +82,7 @@ function(chai, d3, utils, scale) {
               date_type: 'string',
               date_format: '%Y',
               data: data,
+              data_parser: 'groupedDataParser'
             };
 
         __ = scale.setScales(__);

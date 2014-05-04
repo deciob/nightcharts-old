@@ -5,6 +5,7 @@ define([
 ], function (d3) {
   'use strict';
 
+
   function toCamelCase (str) {
     // http://stackoverflow.com/a/6661012/1932827
     return str.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); });
@@ -106,17 +107,23 @@ define([
     return this['set' + name];
   }
 
-  function getMinMaxValues (dataset) {
+  function getMinMaxValues (data, dataParser, axis) {
     var min = Infinity,
-        max = 0;
-    dataset.forEach( function (data, index) {
-      data.forEach( function (data, i) {
-        var min_p = d3.min( data, function(d) { return parseFloat(d[1]); } ),
-            max_p = d3.max( data, function(d) { return parseFloat(d[1]); } );
-        min = min_p < min ? min_p : min;
-        max = max_p > max ? max_p : max;
-      });
-    });
+        max = 0,
+        index;
+    if (axis === undefined) {axis = 'y'};
+    if (axis === 'x') {index = 0} else if (axis === 'y') {index = 1};
+
+    function callback (d, i, data) {
+      //TODO: handle parseFloat
+      var min_p = d3.min( data, function(d) { return d[index]; } ),
+          max_p = d3.max( data, function(d) { return d[index]; } );
+      min = min_p < min ? min_p : min;
+      max = max_p > max ? max_p : max;
+    }
+
+    dataParser(data, callback);
+
     return {min: min, max: max};
   }
 

@@ -19,6 +19,10 @@ define('components/line', [
       return i(t); };
   }
 
+  function dataIdentifier (d) {
+    return d[0];
+  }
+
   function transitionLine (d, __) {
 
     var self = this,
@@ -29,7 +33,7 @@ define('components/line', [
 
     end_line_path = end_line.selectAll(".line.end.path")
       .data([d], function(d) {
-        console.log(d[0], '@@');
+        //console.log(d[0], '@@');
         return d.length;});
 
     end_line_path.exit().transition().remove();
@@ -38,10 +42,8 @@ define('components/line', [
       .attr("class", "line end path")
       .attr("d", function (d) {
         return line(__)(d);})    
-      .style("stroke", 'none')
       .transition()
       .delay(__.delay)
-      .style("stroke", '#05426C')
       .duration(__.duration)
       .attrTween("stroke-dasharray", tweenDash)
       .call(utils.endall, [d], __.handleTransitionEnd);
@@ -55,7 +57,7 @@ define('components/line', [
     //TODO: this is utils!!!
     var lines = selection.selectAll(".line")
           // data is an array, each element one line.
-          .data(data, self.dataIdentifier),
+          .data([data], dataIdentifier),
         line_g, 
         line_g_start, 
         line_g_end,
