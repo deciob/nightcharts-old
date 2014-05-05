@@ -1,6 +1,6 @@
 define([
-  'chai', 'd3', 'sample_data', 'utils', 'data'], 
-function(chai, d3, data, utils, data_module) {
+  'chai', 'd3', 'sample_data', 'utils', 'data', 'sample_data'], 
+function(chai, d3, data, utils, data_module, sample_data) {
 
   var assert = chai.assert;
 
@@ -64,7 +64,7 @@ function(chai, d3, data, utils, data_module) {
 
   });
 
-  describe('groupNormalizedDataBy object', function() {
+  describe('groupNormalizedDataByIndex (option object)', function() {
 
     var data  = [ ['a', 21], ['a', 71], ['d', 322] ],
         __    = {
@@ -78,7 +78,8 @@ function(chai, d3, data, utils, data_module) {
       __.x_scale = 'ordinal';
 
       normalized_data = data_module.normalizeData(data, __);
-      groupedData = data_module.groupNormalizedDataBy(normalized_data, __, 0, 'object');
+      groupedData = data_module.groupNormalizedDataByIndex(
+        0, normalized_data, __, {grouper: 'object'});
       assert.equal(groupedData.a[0][0], 'a', 
         'Expected...');
       assert.equal(groupedData.d[0][0], 'd', 
@@ -87,7 +88,7 @@ function(chai, d3, data, utils, data_module) {
 
   });
 
-  describe('groupNormalizedDataBy array', function() {
+  describe('groupNormalizedDataByIndex (option array)', function() {
 
     var data  = [ ['a', 21], ['a', 71], ['d', 322] ],
         __    = {
@@ -101,11 +102,49 @@ function(chai, d3, data, utils, data_module) {
       __.x_scale = 'ordinal';
 
       normalized_data = data_module.normalizeData(data, __);
-      groupedData = data_module.groupNormalizedDataBy(normalized_data, __, 0, 'array');
+      groupedData = data_module.groupNormalizedDataByIndex(
+        0, normalized_data, __, {grouper: 'array'});
       assert.equal(groupedData[0][0][0], 'a', 
         'Expected...');
       assert.equal(groupedData[1][0][0], 'd', 
         'Expected...');
+    });
+
+  });
+
+  describe('sliceGroupedNormalizedDataAtIdentifier array', function() {
+
+    var data  = sample_data,
+        __    = {
+          xValue: function (d) { return d.year; },
+          yValue: function (d) { return d.population; },
+          zValue: function (d) { return d.agglomeration; },
+          date_type: 'string',
+          date_format: '%Y',
+          x_scale: 'time',
+        };
+
+    it('should return a complex array...', function() {
+      var normalized_data,
+          options = {
+            grouper: 'object',
+            keyFunction: function(k){return k.getFullYear();},
+          };
+
+      normalized_data = data_module.normalizeData(data, __);
+      groupedData = data_module.groupNormalizedDataByIndex(
+        0, normalized_data, __, options);
+      assert.equal(groupedData[1950][0][2], 'New York', 
+        'Expected...');
+      assert.equal(groupedData[1955][0][1], 13.71, 
+        'Expected...');
+      slicedData = data_module.sliceGroupedNormalizedDataAtIdentifier(
+        '1965', groupedData, __);
+      assert.isUndefined(slicedData[1970], 
+        'Expected 1970 not to be in the data');
+      assert.equal(groupedData[1965][0][2], 'Tokyo', 
+        'Expected...');
+
     });
 
   });

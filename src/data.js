@@ -58,39 +58,58 @@ define('data', [
     return parsed_data;
   }
 
-  function _groupInObj (data, __, identifier_index) {
-    var parsed_data = {};
+  function _groupInObj (identifier_index, data, __, options) {
+    var parsed_data = {},
+        keyFunction = options && options.keyFunction || function(k){return k;};
     data.forEach(function (d, i) {
-      var group = parsed_data[d[identifier_index]];
+      var group = parsed_data[keyFunction(d[identifier_index])];
       if (group) {
-        group.push(d)
+        group.push(d);
       } else {
-        parsed_data[d[identifier_index]] = [d];
+        parsed_data[keyFunction(d[identifier_index])] = [d];
       }
     });
     return parsed_data;    
   }
 
-  function _groupInArr (data, __, identifier_index) {
+  function _groupInArr (identifier_index, data, __, options) {
     var parsed_data = [],
-        objGroupedData = _groupInObj(data, __, identifier_index);
-    for ( var identifier in objGroupedData ) {
-      if( objGroupedData.hasOwnProperty( identifier ) ) {
-        parsed_data.push(objGroupedData[identifier]);
+        obj_grouped_data = options && options.obj_grouped_data || 
+          _groupInObj(identifier_index, data, __, options);
+    for ( var identifier in obj_grouped_data ) {
+      if( obj_grouped_data.hasOwnProperty( identifier ) ) {
+        parsed_data.push(obj_grouped_data[identifier]);
       }
     }
     return parsed_data;
   }
 
   // Expects dataset argument to be the return value of normalizeData
-  function groupNormalizedDataBy (data, __, identifier_index, grouper) {
+  // groupNormalizedDataByIndex(index, options) data, __, identifier_index, grouper
+  function groupNormalizedDataByIndex (identifier_index, data, __, options) {
+    var grouper = options.grouper;
+    //console.log('m', grouper);
     if (grouper === 'object') {
-      return _groupInObj(data, __, identifier_index);
+      return _groupInObj(identifier_index, data, __, options);
     } else if (grouper === 'array') {
-      return _groupInArr(data, __, identifier_index);
+      return _groupInArr(identifier_index, data, __, options);
     } else {
       throw new Error('grouper must be either `object` or `array`');
     }
+  }
+
+  function sliceGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+    var sliced_data = {};
+    for (var id in data) {
+      if( data.hasOwnProperty( id ) ) {
+        // it assumes the data object is correctly sorted.
+        sliced_data[id] = data[id];
+        if (identifier === id) {
+          break;
+        }
+      }
+    }
+    return sliced_data;
   }
 
   function simpleDataParser (data, callback) {
@@ -105,59 +124,13 @@ define('data', [
     });
   }
 
-  // TODO: not handling multiple data block groups!!!
-  // example: tokio and ny and cairo
-  function parseDataForSequentialFrame () {
-    var self = this,
-        __ = this.__,
-        data_blocks = this.data_blocks || this.parseDataForBlockFrame(),
-        data_blocks_seq = [];
-
-    for (var identifier in data_blocks) {
-      if( data_blocks.hasOwnProperty( identifier ) ) {
-        var block = data_blocks[identifier],
-            prev_block_arr;
-        if (data_blocks_seq.length > 0) {
-          prev_block_arr = data_blocks_seq.slice(-1)[0];
-          current_block_arr = block;
-          new_block_arr = prev_block_arr.concat(current_block_arr);
-          data_blocks_seq.push(new_block_arr);
-        } else {
-          data_blocks_seq.push(block);
-        };
-        // TODO: danger zone, it expects data_block objects to be sorted and
-        // it is doing sloppy coercions (ie: '1995' == 1995)
-        if (identifier == self.frame) {
-          data_blocks_seq.shift(); // first block can not create a line.
-          return data_blocks_seq;
-        }
-      } 
-    }
-
-  }
-
-  function parseDataForFrame () {
-    var frame_type = this.frame_type(),
-        frame = this.frame,
-        data_blocks_seq_obj = {};
-    if (frame_type == 'block') { // barchart frames
-      return this.parseDataForBlockFrame();
-    } else if (frame_type == 'sequential') { // line frames
-      data_blocks_seq_obj[frame] = this.parseDataForSequentialFrame();
-      return data_blocks_seq_obj;
-    } else {
-      throw new Error('Wrong frame type, must be one of: block, sequence');
-    }
-  }
-
   return {
     setDelay: setDelay,
     normalizeData: normalizeData,
-    groupNormalizedDataBy: groupNormalizedDataBy,
+    groupNormalizedDataByIndex: groupNormalizedDataByIndex,
+    sliceGroupedNormalizedDataAtIdentifier: sliceGroupedNormalizedDataAtIdentifier,
     simpleDataParser: simpleDataParser,
     groupedDataParser: groupedDataParser,
-    parseDataForSequentialFrame: parseDataForSequentialFrame,
-    parseDataForFrame: parseDataForFrame,
   };
 
 });
