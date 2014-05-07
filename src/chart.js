@@ -8,6 +8,7 @@ define([
   'scale',
   'layout',
   'components/components',
+  'frame/frame'
 ], function (
   d3,
   utils,
@@ -17,7 +18,8 @@ define([
   data,
   scale,
   layout,
-  components
+  components,
+  frame
 ) {
 
   return {
@@ -30,6 +32,7 @@ define([
     scale: scale,
     layout: layout,
     components: components,
+    frame: frame
   };
 
 });
