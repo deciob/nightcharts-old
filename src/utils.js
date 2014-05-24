@@ -26,7 +26,7 @@ define([
         not_override = (!options || options.not_override === "undefined") ? 
           true : options.not_override,
         target_clone = use_clone ? clone(target): target;
-    for(prop in source) {
+    for(var prop in source) {
       if (not_override) {
         target_clone[prop] = target_clone[prop] ? target_clone[prop] : source[prop];
       } else {
