@@ -12,9 +12,9 @@ define([
   return function (user_config) {
 
     var config = user_config || {},
-      extend = utils.extend,
-      getset = utils.getset,
-      __     = extend(default_config, config);
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config, {not_override: false});
 
     function Frame () {
   

@@ -68,6 +68,7 @@ define([
     }
 
     getset(compose, __);
+    //compose.getCurrentConfiguration = __;
     compose.__ = __;
 
     return compose;

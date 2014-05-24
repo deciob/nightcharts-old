@@ -15,6 +15,13 @@ define(['chai', 'sample_data', 'd3', 'frame/frame'], function(chai, sample_data,
       data: sample_data,
       frame_type: 'block',
       frame_identifier: 'year',
+      // From the chart configuration:
+      x_scale: 'linear',
+      invert_data: false,
+      frame_identifier_index: 0,
+      xValue: function (d) { return d['year']; },
+      yValue: function (d) { return d['population']; },
+      zValue: function (d) { return d['agglomeration']; },
     },
     FrameConstructor = Frame(__);
     frame = FrameConstructor();
