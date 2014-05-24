@@ -46,15 +46,19 @@ define([
 
       scale.applyScales(__); //TESTME
 
-      // Select the svg element, if it exists.
-      svg = selection.selectAll("svg").data([data]);
-      // Otherwise, create the skeletal chart.
-      g = svg.enter().append("svg").append("g");
-      // Update the outer dimensions.
-      svg.attr("width", __.width).attr("height", __.height);
-      // Update the inner dimensions.
-      g.attr("transform", "translate(" + 
-        __.margin.left + "," + __.margin.top + ")");
+      if (__.use_existing_chart) {
+        g = selection.select('g');
+      } else {
+        // Select the svg element, if it exists.
+        svg = selection.selectAll("svg").data([data]);
+        // Otherwise, create the skeletal chart.
+        g = svg.enter().append("svg").append("g");
+        // Update the outer dimensions.
+        svg.attr("width", __.width).attr("height", __.height);
+        // Update the inner dimensions.
+        g.attr("transform", "translate(" + 
+          __.margin.left + "," + __.margin.top + ")");
+      }
       // Transitions root.
       transition = g.transition().duration(__.duration);
 

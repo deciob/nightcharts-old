@@ -206,7 +206,7 @@ define('defaults', [
       orient: 'left',
       tickValues: void 0,
     },
-    lines: void 0,
+    lines: {class_name: ''},
     bars: void 0,
     frames: {},
     // if x_scale: 'time'
@@ -229,7 +229,9 @@ define('defaults', [
     // can pass boolean or object with d3-tip configuration.
     tooltip: false,
     overlapping_charts: { names: [] },
-    drawDispatch: d3.dispatch('draw')
+    drawDispatch: d3.dispatch('draw'),
+    // .....
+    use_existing_chart: false
   };
   
 });
@@ -733,11 +735,18 @@ define('components/line', [
   }
 
   function drawLines (selection, transition, __, old_frame_identifier) {
+    console.log(selection[0]);
     var has_timescale = __.x_scale == 'time',
-        g = selection.selectAll('g.lines').data([__.data]);
+        g; 
+
+    if (__.lines.class_name != '') {
+      g = selection.selectAll('g.lines.' + __.lines.class_name).data([__.data]);
+    } else {
+      g = selection.selectAll('g.lines').data([__.data]);
+    }
 
     g.exit().remove();
-    g.enter().append('g').attr('class', 'lines');
+    g.enter().append('g').attr('class', 'lines ' + __.lines.class_name);
 
     g.each(function(data, i) {
       setLines(d3.select(this), __, data, old_frame_identifier);
@@ -801,6 +810,7 @@ define('composer',[
         __     = extend(defaults, config);
 
     function compose (selection, options) {
+      console.log(selection[0]);
       var is_frame = (!options || options.is_frame === "undefined") ? false : options.is_frame,
           old_frame_identifier = (!options || options.old_frame_identifier === "undefined") ? void 0 : options.old_frame_identifier,
           data = selection.datum(),
@@ -819,15 +829,19 @@ define('composer',[
 
       scale.applyScales(__); //TESTME
 
-      // Select the svg element, if it exists.
-      svg = selection.selectAll("svg").data([data]);
-      // Otherwise, create the skeletal chart.
-      g = svg.enter().append("svg").append("g");
-      // Update the outer dimensions.
-      svg.attr("width", __.width).attr("height", __.height);
-      // Update the inner dimensions.
-      g.attr("transform", "translate(" + 
-        __.margin.left + "," + __.margin.top + ")");
+      if (__.use_existing_chart) {
+        g = selection.select('g');
+      } else {
+        // Select the svg element, if it exists.
+        svg = selection.selectAll("svg").data([data]);
+        // Otherwise, create the skeletal chart.
+        g = svg.enter().append("svg").append("g");
+        // Update the outer dimensions.
+        svg.attr("width", __.width).attr("height", __.height);
+        // Update the inner dimensions.
+        g.attr("transform", "translate(" + 
+          __.margin.left + "," + __.margin.top + ")");
+      }
       // Transitions root.
       transition = g.transition().duration(__.duration);
 

@@ -53,7 +53,7 @@ define('defaults', [
       orient: 'left',
       tickValues: void 0,
     },
-    lines: void 0,
+    lines: {class_name: ''},
     bars: void 0,
     frames: {},
     // if x_scale: 'time'
@@ -76,7 +76,9 @@ define('defaults', [
     // can pass boolean or object with d3-tip configuration.
     tooltip: false,
     overlapping_charts: { names: [] },
-    drawDispatch: d3.dispatch('draw')
+    drawDispatch: d3.dispatch('draw'),
+    // .....
+    use_existing_chart: false
   };
   
 });

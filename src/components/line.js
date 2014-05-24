@@ -86,10 +86,16 @@ define('components/line', [
 
   function drawLines (selection, transition, __, old_frame_identifier) {
     var has_timescale = __.x_scale == 'time',
-        g = selection.selectAll('g.lines').data([__.data]);
+        g; 
+
+    if (__.lines.class_name != '') {
+      g = selection.selectAll('g.lines.' + __.lines.class_name).data([__.data]);
+    } else {
+      g = selection.selectAll('g.lines').data([__.data]);
+    }
 
     g.exit().remove();
-    g.enter().append('g').attr('class', 'lines');
+    g.enter().append('g').attr('class', 'lines ' + __.lines.class_name);
 
     g.each(function(data, i) {
       setLines(d3.select(this), __, data, old_frame_identifier);
