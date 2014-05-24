@@ -79,7 +79,7 @@ define('components/line', [
       .attr("class", "line head");
     line_g.each(function (d, i) { 
         //console.log('lines.enter().append("g")', d);
-        return transitionLine.call(selection, d, __) });
+        return transitionLine.call(d3.select(this), d, __) });
 
     return this;
   }

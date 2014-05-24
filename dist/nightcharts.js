@@ -26,7 +26,7 @@ define('utils',[
         not_override = (!options || options.not_override === "undefined") ? 
           true : options.not_override,
         target_clone = use_clone ? clone(target): target;
-    for(prop in source) {
+    for(var prop in source) {
       if (not_override) {
         target_clone[prop] = target_clone[prop] ? target_clone[prop] : source[prop];
       } else {
@@ -727,7 +727,7 @@ define('components/line', [
       .attr("class", "line head");
     line_g.each(function (d, i) { 
         //console.log('lines.enter().append("g")', d);
-        return transitionLine.call(selection, d, __) });
+        return transitionLine.call(d3.select(this), d, __) });
 
     return this;
   }
@@ -810,7 +810,8 @@ define('composer',[
 
       // TODO: run a validation function on __, if debug mode.
 
-      //data = data_module.normalizeData(data, __);
+      compose.current_configuration = extend ({}, __, {use_clone: true});
+
       __.data = data;
       __ = data_module.setDelay(data, __); //FIXME and TESTME
       __ = layout.setDimensions(selection, __);
@@ -841,6 +842,7 @@ define('composer',[
     }
 
     getset(compose, __);
+    //compose.getCurrentConfiguration = __;
     compose.__ = __;
 
     return compose;
@@ -865,6 +867,315 @@ define('draw',['require'],function(require) {
 });
 
 
+define('frame/defaults', [], function() {
+    
+  return {
+
+    initial_frame: void 0,
+    old_frame: void 0,
+    frame_identifier_index: void 0,
+    frameIdentifierKeyFunction: void 0,
+    frame_identifier: void 0, // deprecated, obsolete, no longer used?
+    current_timeout: void 0,
+    draw_dispatch: void 0,
+    delta: 1,
+    step: 500,
+    data: {},
+    frame_type: 'block', //or 'sequence'
+    categoricalValue: function (d) { return d[0]; },
+
+  };
+
+});
+// **frame.states module**
+
+// Used by the *frame.state_machine* module.
+// Name-spaced, might add other states if needed.
+
+define('frame/states',['require'],function(require) {
+
+  var transition_states = [
+    {
+      'name': 'in_pause',
+      'initial': true,
+      'events': {
+        'start': 'in_transition_start',
+        'next': 'in_transition_next',
+        'prev': 'in_transition_prev',
+        'jump': 'in_transition_jump',
+        'reset': 'in_transition_reset'
+      }
+    },
+    {
+      'name': 'in_transition_start',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_next',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_prev',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_jump',
+      'events': {
+        'stop': 'in_pause'
+      }
+    },
+    {
+      'name': 'in_transition_reset',
+      'events': {
+        'stop': 'in_pause'
+      }
+    }
+  ];
+
+  return { transition_states: transition_states};
+
+});
+
+
+// **frame.state_machine module**
+// 
+// From http://lamehacks.net/blog/implementing-a-state-machine-in-javascript/
+
+define('frame/state_machine',['require'],function(require) {
+
+  function StateMachine (states) {
+    this.states = states;
+    this.indexes = {};
+    for( var i = 0; i < this.states.length; i++) {
+      this.indexes[this.states[i].name] = i;
+      if (this.states[i].initial){
+        this.currentState = this.states[i];
+      }
+    }
+  }
+
+  StateMachine.prototype.consumeEvent = function (e) {
+    if(this.currentState.events[e]){
+      this.currentState = this.states[this.indexes[this.currentState.events[e]]];
+    }
+  }
+
+  StateMachine.prototype.getStatus = function () {
+    return this.currentState.name;
+  }
+
+  // getLastEvent();
+
+  return StateMachine;
+
+});
+
+
+// **frame.frame module**
+
+define('frame/frame',[
+  'd3',
+  'utils',
+  'data',
+  'frame/defaults',
+  'frame/states',
+  'frame/state_machine'
+], function(d3, utils, data_module, default_config, states, StateMachine) {
+
+  return function (user_config) {
+
+    var config = user_config || {},
+        extend = utils.extend,
+        getset = utils.getset,
+        __     = extend(default_config, config, {not_override: false});
+
+    function Frame () {
+  
+      var self = this instanceof Frame
+                 ? this
+                 : new Frame();
+      
+      self.__ = __;
+      getset(self, __);
+      self.frame = __.initial_frame;
+
+      self.normalized_data = data_module.normalizeData(__.data, __);
+      self.parsed_data = data_module.groupNormalizedDataByIndex(
+        __.frame_identifier_index, self.normalized_data, __, 
+        {grouper: 'object', keyFunction: __.frameIdentifierKeyFunction});
+  
+      self.state_machine = new StateMachine(states.transition_states);
+      self.dispatch = d3.dispatch(
+        'start', 
+        'stop', 
+        'next', 
+        'prev', 
+        'reset', 
+        'end',
+        'jump',
+        'at_beginning_of_transition'
+      );
+      
+      // Fired when all the chart related transitions within a frame are 
+      // terminated.
+      // It is the only dispatch event that does not have a state_machine 
+      // equivalent event.
+      // `frame` is an arbitrary namespace, in order to register multiple 
+      // listeners for the same event type.
+      //
+      // https://github.com/mbostock/d3/wiki/Internals#events:
+      // If an event listener was already registered for the same type, the 
+      // existing listener is removed before the new listener is added. To 
+      // register multiple listeners for the same event type, the type may be 
+      // followed by an optional namespace, such as 'click.foo' and 'click.bar'.
+      self.dispatch.on('end.frame', self.handleFrameEnd);
+  
+      self.dispatch.on('stop', self.handleStop);
+  
+      self.dispatch.on('start', self.handleStart);
+  
+      self.dispatch.on('next', self.handleNext);
+  
+      self.dispatch.on('prev', self.handlePrev);
+  
+      self.dispatch.on('reset', self.handleReset);
+  
+      self.dispatch.on('jump', self.handleJump);
+  
+      return self;
+    }
+  
+    //getset(Frame.prototype, __);
+    getset(Frame, __);
+  
+    Frame.prototype.startTransition = function () {
+      var self = this;
+      clearTimeout(__.current_timeout);
+      if (self.parsed_data[self.frame]) {
+        __.current_timeout = setTimeout( function () {
+          // Fire the draw event
+          __.draw_dispatch.draw.call(self, self.parsed_data[self.frame], __.old_frame);
+        }, __.step);
+      } else {
+        // When no data is left to consume, let us stop the running frames!
+        this.state_machine.consumeEvent('stop');
+        this.frame = __.old_frame;
+      }
+      self.dispatch.at_beginning_of_transition.call(self);
+    }
+  
+    Frame.prototype.handleFrameEnd = function () {
+      this.handleTransition();
+      return this;
+    }
+  
+    Frame.prototype.handleStop = function () {
+      this.state_machine.consumeEvent('stop');
+      return this;
+    }
+  
+    // TODO: there is a lot of repetition here!
+  
+    Frame.prototype.handleStart = function () {
+      if (this.state_machine.getStatus() === 'in_pause') {
+        this.state_machine.consumeEvent('start');
+        this.handleTransition();
+      } else {
+        console.log('State already in in_transition_start.');
+      }
+      return this;
+    }
+  
+    // TODO:
+    // for next and prev we are allowing multiple prev-next events to be 
+    // fired without waiting for the current frame to end. Change?
+  
+    Frame.prototype.handleNext = function () {
+      this.state_machine.consumeEvent('next');
+      if (this.state_machine.getStatus() === 'in_transition_next') {
+        this.handleTransition();
+      } else {
+        console.log('State not in pause when next event was fired.');
+      }
+      return this;
+    }
+  
+    Frame.prototype.handlePrev = function () {
+      this.state_machine.consumeEvent('prev');
+      if (this.state_machine.getStatus() === 'in_transition_prev') {
+        this.handleTransition();
+      } else {
+        console.log('State not in pause when prev event was fired.');
+      }
+      return this;
+    }
+  
+    Frame.prototype.handleReset = function () {
+      this.state_machine.consumeEvent('reset');
+      if (this.state_machine.getStatus() === 'in_transition_reset') {
+        this.handleTransition();
+      } else {
+        console.log('State not in pause when reset event was fired.');
+      }
+      return this;
+    }
+  
+    Frame.prototype.handleJump = function (value) {
+      this.state_machine.consumeEvent('jump');
+      if (this.state_machine.getStatus() === 'in_transition_jump') {
+        this.handleTransition(value);
+      } else {
+        console.log('State not in pause when jump event was fired.');
+      }
+      return this;
+    }
+  
+    
+    Frame.prototype.handleTransition = function (value) {
+      var self = this, status = this.state_machine.getStatus();
+      if (status === 'in_transition_start') {
+        __.old_frame = this.frame;
+        this.frame += __.delta;
+        this.startTransition();
+      } else if (status === 'in_transition_prev') {
+        __.old_frame = this.frame;
+        this.frame -= __.delta;
+        this.startTransition();
+        self.state_machine.consumeEvent('stop');
+      } else if (status === 'in_transition_next') {
+        __.old_frame = this.frame;
+        this.frame += __.delta;
+        this.startTransition();
+        self.state_machine.consumeEvent('stop');
+      } else if (status === 'in_transition_jump') {
+        if (!value) return new Error('need to pass a value to jump!');
+        __.old_frame = this.frame;
+        this.frame = value;
+        this.startTransition();
+        self.state_machine.consumeEvent('stop');
+      } else if (status === 'in_transition_reset') {
+        __.old_frame = this.frame;
+        this.frame = __.initial_frame;
+        this.startTransition();
+        self.state_machine.consumeEvent('stop');
+      } else if (status === 'in_pause') {
+        return;
+      } 
+    }
+  
+    return Frame;
+
+  };
+  
+});
+
+
 define('chart',[
   'd3',
   'utils',
@@ -875,6 +1186,7 @@ define('chart',[
   'scale',
   'layout',
   'components/components',
+  'frame/frame'
 ], function (
   d3,
   utils,
@@ -884,7 +1196,8 @@ define('chart',[
   data,
   scale,
   layout,
-  components
+  components,
+  Frame
 ) {
 
   return {
@@ -897,6 +1210,7 @@ define('chart',[
     scale: scale,
     layout: layout,
     components: components,
+    Frame: Frame
   };
 
 });

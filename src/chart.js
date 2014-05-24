@@ -19,7 +19,7 @@ define([
   scale,
   layout,
   components,
-  frame
+  Frame
 ) {
 
   return {
@@ -32,7 +32,7 @@ define([
     scale: scale,
     layout: layout,
     components: components,
-    frame: frame
+    Frame: Frame
   };
 
 });

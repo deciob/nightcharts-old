@@ -28,7 +28,8 @@ define([
 
       self.normalized_data = data_module.normalizeData(__.data, __);
       self.parsed_data = data_module.groupNormalizedDataByIndex(
-        __.frame_identifier_index, self.normalized_data, __, {grouper: 'object'});
+        __.frame_identifier_index, self.normalized_data, __, 
+        {grouper: 'object', keyFunction: __.frameIdentifierKeyFunction});
   
       self.state_machine = new StateMachine(states.transition_states);
       self.dispatch = d3.dispatch(

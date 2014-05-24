@@ -5,6 +5,7 @@ define('frame/defaults', [], function() {
     initial_frame: void 0,
     old_frame: void 0,
     frame_identifier_index: void 0,
+    frameIdentifierKeyFunction: void 0,
     frame_identifier: void 0, // deprecated, obsolete, no longer used?
     current_timeout: void 0,
     draw_dispatch: void 0,

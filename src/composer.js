@@ -37,7 +37,8 @@ define([
 
       // TODO: run a validation function on __, if debug mode.
 
-      //data = data_module.normalizeData(data, __);
+      compose.current_configuration = extend ({}, __, {use_clone: true});
+
       __.data = data;
       __ = data_module.setDelay(data, __); //FIXME and TESTME
       __ = layout.setDimensions(selection, __);
