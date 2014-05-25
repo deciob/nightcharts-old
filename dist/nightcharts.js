@@ -735,7 +735,6 @@ define('components/line', [
   }
 
   function drawLines (selection, transition, __, old_frame_identifier) {
-    console.log(selection[0]);
     var has_timescale = __.x_scale == 'time',
         g; 
 
@@ -810,7 +809,6 @@ define('composer',[
         __     = extend(defaults, config);
 
     function compose (selection, options) {
-      console.log(selection[0]);
       var is_frame = (!options || options.is_frame === "undefined") ? false : options.is_frame,
           old_frame_identifier = (!options || options.old_frame_identifier === "undefined") ? void 0 : options.old_frame_identifier,
           data = selection.datum(),
@@ -1074,7 +1072,7 @@ define('frame/frame',[
       if (self.parsed_data[self.frame]) {
         __.current_timeout = setTimeout( function () {
           // Fire the draw event
-          __.draw_dispatch.draw.call(self, self.parsed_data[self.frame], __.old_frame);
+          __.draw_dispatch.draw.call(self, [self.parsed_data[self.frame]], __.old_frame);
         }, __.step);
       } else {
         // When no data is left to consume, let us stop the running frames!

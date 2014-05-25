@@ -81,7 +81,7 @@ define([
       if (self.parsed_data[self.frame]) {
         __.current_timeout = setTimeout( function () {
           // Fire the draw event
-          __.draw_dispatch.draw.call(self, self.parsed_data[self.frame], __.old_frame);
+          __.draw_dispatch.draw.call(self, [self.parsed_data[self.frame]], __.old_frame);
         }, __.step);
       } else {
         // When no data is left to consume, let us stop the running frames!
