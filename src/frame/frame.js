@@ -79,17 +79,18 @@ define([
       console.log('startTransition');
       var self = this;
       clearTimeout(__.current_timeout);
-      if (self.parsed_data[self.frame]) {
-        __.current_timeout = setTimeout( function () {
-          // Fire the draw event
-          var data = self.getDataForFrame(self.parsed_data, __);
-          __.draw_dispatch.draw.call(self, data, __.old_frame);
-        }, __.step);
+      var data = self.getDataForFrame(self.parsed_data, __);
+      if (data) {
+      __.current_timeout = setTimeout( function () {
+        // Fire the draw event
+        
+        __.draw_dispatch.draw.call(self, data, __.old_frame);
+      }, __.step);
       } else {
         // When no data is left to consume, let us stop the running frames!
         this.state_machine.consumeEvent('stop');
         this.frame = __.old_frame;
-      }
+      //}
       self.dispatch.at_beginning_of_transition.call(self);
     }
 
