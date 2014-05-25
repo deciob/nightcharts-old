@@ -39,7 +39,7 @@ define('components/line', [
     line_head_path.exit().transition().remove();
   
     line_head_path.enter().append("path")
-      .attr("class", "line end path")
+      .attr("class", "line head path")
       .attr("d", function (d) {
         return line(__)(d);})    
       .transition()
