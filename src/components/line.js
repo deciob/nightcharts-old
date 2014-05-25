@@ -6,6 +6,10 @@ define('components/line', [
 
   function line (__) {
     return d3.svg.line().x(function(d, i) {
+      //if(1950 === d[0].getFullYear() && d[2]==='São Paulo') {
+      //  debugger;
+      //}
+      //console.log(d[0], __.xScale(d[0]));
       return __.xScale(d[0]);
     }).y(function(d, i) {
       return __.yScale(d[1]);
@@ -20,6 +24,7 @@ define('components/line', [
   }
 
   function dataIdentifier (d) {
+    //console.log('dataIdentifier', d[0][0]);
     return d[0];
   }
 
@@ -41,6 +46,7 @@ define('components/line', [
     line_head_path.enter().append("path")
       .attr("class", "line head path")
       .attr("d", function (d) {
+        //console.log(JSON.stringify(d));
         return line(__)(d);})    
       .transition()
       .delay(__.delay)
@@ -54,6 +60,8 @@ define('components/line', [
   }
 
   function setLines (selection, __, data, old_frame_identifier) {
+    //console.log('-----------------------------------');
+    //console.log(data);
     //TODO: this is utils!!!
     var line = selection.selectAll(".line")
           // data is an array, each element one line.
@@ -85,6 +93,7 @@ define('components/line', [
   }
 
   function drawLines (selection, transition, __, old_frame_identifier) {
+    console.log(__.data, 'xxx');
     var has_timescale = __.x_scale == 'time',
         g; 
 

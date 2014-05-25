@@ -327,7 +327,6 @@ define('data', [
   // groupNormalizedDataByIndex(index, options) data, __, identifier_index, grouper
   function groupNormalizedDataByIndex (identifier_index, data, __, options) {
     var grouper = options.grouper;
-    //console.log('m', grouper);
     if (grouper === 'object') {
       return _groupInObj(identifier_index, data, __, options);
     } else if (grouper === 'array') {
@@ -351,6 +350,54 @@ define('data', [
     return sliced_data;
   }
 
+  function getIndexFromIdentifier (identifier, data, __) {
+    var index;
+    data.forEach(function(d, i) {
+      if (__.frameIdentifierKeyFunction(d) === identifier) {
+        index = i;
+      }
+    });
+    return index;
+  }
+
+  function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+    var index = getIndexFromIdentifier(identifier, data, __);
+    return data.slice(index, index+2);
+  }
+
+  //function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+  //  var identified = false;
+  //  return data.map(function(data) {
+  //    return data.filter(function(d) {
+  //      var include = identified ? false : true;
+  //      console.log(d, identifier);
+  //      indentified = d[__.frame_identifier_index] === identifier;
+  //      return include;
+  //    });
+  //  });
+  //}
+
+//  // TODO: rock test this shit!!!!
+//  function sliceNormalizedDataAtIdentifier (identifier, data, __) {
+//    var sliced_data = [];
+//    for (var id in data) {
+//      if( data.hasOwnProperty( id ) ) {
+//        var g = [];
+//        data[id].forEach(function (d, i) {
+//          g.push(d);
+//        })
+//        // it assumes the data object is correctly sorted.
+//        sliced_data.push(data[id][0]);
+//        if (identifier === id) {
+//          break;
+//        }
+//      }
+//    }
+//    return sliced_data;
+//  }
+
+
+
   function simpleDataParser (data, callback) {
     data.forEach( function (d, i, data) {
       callback(d, i, data);
@@ -368,6 +415,8 @@ define('data', [
     normalizeData: normalizeData,
     groupNormalizedDataByIndex: groupNormalizedDataByIndex,
     sliceGroupedNormalizedDataAtIdentifier: sliceGroupedNormalizedDataAtIdentifier,
+    filterGroupedNormalizedDataAtIdentifier: filterGroupedNormalizedDataAtIdentifier,
+    //sliceNormalizedDataAtIdentifier: sliceNormalizedDataAtIdentifier,
     simpleDataParser: simpleDataParser,
     groupedDataParser: groupedDataParser,
   };
@@ -656,6 +705,10 @@ define('components/line', [
 
   function line (__) {
     return d3.svg.line().x(function(d, i) {
+      //if(1950 === d[0].getFullYear() && d[2]==='São Paulo') {
+      //  debugger;
+      //}
+      //console.log(d[0], __.xScale(d[0]));
       return __.xScale(d[0]);
     }).y(function(d, i) {
       return __.yScale(d[1]);
@@ -670,6 +723,7 @@ define('components/line', [
   }
 
   function dataIdentifier (d) {
+    //console.log('dataIdentifier', d[0][0]);
     return d[0];
   }
 
@@ -691,6 +745,7 @@ define('components/line', [
     line_head_path.enter().append("path")
       .attr("class", "line head path")
       .attr("d", function (d) {
+        //console.log(JSON.stringify(d));
         return line(__)(d);})    
       .transition()
       .delay(__.delay)
@@ -704,6 +759,8 @@ define('components/line', [
   }
 
   function setLines (selection, __, data, old_frame_identifier) {
+    console.log('-----------------------------------');
+    console.log(data);
     //TODO: this is utils!!!
     var line = selection.selectAll(".line")
           // data is an array, each element one line.
@@ -735,6 +792,7 @@ define('components/line', [
   }
 
   function drawLines (selection, transition, __, old_frame_identifier) {
+    //console.log(__.data, 'xxx');
     var has_timescale = __.x_scale == 'time',
         g; 
 
@@ -820,12 +878,19 @@ define('composer',[
 
       compose.current_configuration = extend ({}, __, {use_clone: true});
 
-      __.data = data;
-      __ = data_module.setDelay(data, __); //FIXME and TESTME
-      __ = layout.setDimensions(selection, __);
-      __ = scale.setScales(__);
+      
 
-      scale.applyScales(__); //TESTME
+        __.data = data;
+        __ = data_module.setDelay(data, __); //FIXME and TESTME
+      if (!__.use_existing_chart) {
+        __ = layout.setDimensions(selection, __);
+        __ = scale.setScales(__);
+  
+        scale.applyScales(__); //TESTME
+  
+        compose.current_applied_configuration = extend ({}, __, {use_clone: true});
+
+      }
 
       if (__.use_existing_chart) {
         g = selection.select('g');
@@ -895,6 +960,7 @@ define('frame/defaults', [], function() {
     data: {},
     frame_type: 'block', //or 'sequence'
     categoricalValue: function (d) { return d[0]; },
+    normalize_data: false
 
   };
 
@@ -1017,7 +1083,7 @@ define('frame/frame',[
       getset(self, __);
       self.frame = __.initial_frame;
 
-      self.normalized_data = data_module.normalizeData(__.data, __);
+      self.normalized_data = __.normalize_data ? data_module.normalizeData(__.data, __) : __.data;
       self.parsed_data = data_module.groupNormalizedDataByIndex(
         __.frame_identifier_index, self.normalized_data, __, 
         {grouper: 'object', keyFunction: __.frameIdentifierKeyFunction});
@@ -1067,12 +1133,14 @@ define('frame/frame',[
     getset(Frame, __);
   
     Frame.prototype.startTransition = function () {
+      console.log('startTransition');
       var self = this;
       clearTimeout(__.current_timeout);
       if (self.parsed_data[self.frame]) {
         __.current_timeout = setTimeout( function () {
           // Fire the draw event
-          __.draw_dispatch.draw.call(self, [self.parsed_data[self.frame]], __.old_frame);
+          var data = self.getDataForFrame(self.parsed_data, __);
+          __.draw_dispatch.draw.call(self, data, __.old_frame);
         }, __.step);
       } else {
         // When no data is left to consume, let us stop the running frames!
@@ -1080,6 +1148,18 @@ define('frame/frame',[
         this.frame = __.old_frame;
       }
       self.dispatch.at_beginning_of_transition.call(self);
+    }
+
+    Frame.prototype.getDataForFrame = function (data, __) {
+      var self = this;
+      if (__.frame_type == 'block') {
+        return [this.parsed_data[this.frame]];
+      } else {
+        return this.parsed_data[this.frame].map(function(d) {
+          return data_module.filterGroupedNormalizedDataAtIdentifier(
+            self.frame, d, __);
+        });
+      }
     }
   
     Frame.prototype.handleFrameEnd = function () {

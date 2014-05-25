@@ -26,7 +26,7 @@ define([
       getset(self, __);
       self.frame = __.initial_frame;
 
-      self.normalized_data = data_module.normalizeData(__.data, __);
+      self.normalized_data = __.normalize_data ? data_module.normalizeData(__.data, __) : __.data;
       self.parsed_data = data_module.groupNormalizedDataByIndex(
         __.frame_identifier_index, self.normalized_data, __, 
         {grouper: 'object', keyFunction: __.frameIdentifierKeyFunction});
@@ -76,12 +76,14 @@ define([
     getset(Frame, __);
   
     Frame.prototype.startTransition = function () {
+      console.log('startTransition');
       var self = this;
       clearTimeout(__.current_timeout);
       if (self.parsed_data[self.frame]) {
         __.current_timeout = setTimeout( function () {
           // Fire the draw event
-          __.draw_dispatch.draw.call(self, [self.parsed_data[self.frame]], __.old_frame);
+          var data = self.getDataForFrame(self.parsed_data, __);
+          __.draw_dispatch.draw.call(self, data, __.old_frame);
         }, __.step);
       } else {
         // When no data is left to consume, let us stop the running frames!
@@ -89,6 +91,18 @@ define([
         this.frame = __.old_frame;
       }
       self.dispatch.at_beginning_of_transition.call(self);
+    }
+
+    Frame.prototype.getDataForFrame = function (data, __) {
+      var self = this;
+      if (__.frame_type == 'block') {
+        return [this.parsed_data[this.frame]];
+      } else {
+        return this.parsed_data[this.frame].map(function(d) {
+          return data_module.filterGroupedNormalizedDataAtIdentifier(
+            self.frame, d, __);
+        });
+      }
     }
   
     Frame.prototype.handleFrameEnd = function () {

@@ -39,12 +39,19 @@ define([
 
       compose.current_configuration = extend ({}, __, {use_clone: true});
 
-      __.data = data;
-      __ = data_module.setDelay(data, __); //FIXME and TESTME
-      __ = layout.setDimensions(selection, __);
-      __ = scale.setScales(__);
+      
 
-      scale.applyScales(__); //TESTME
+        __.data = data;
+        __ = data_module.setDelay(data, __); //FIXME and TESTME
+      if (!__.use_existing_chart) {
+        __ = layout.setDimensions(selection, __);
+        __ = scale.setScales(__);
+  
+        scale.applyScales(__); //TESTME
+  
+        compose.current_applied_configuration = extend ({}, __, {use_clone: true});
+
+      }
 
       if (__.use_existing_chart) {
         g = selection.select('g');

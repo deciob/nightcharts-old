@@ -88,7 +88,6 @@ define('data', [
   // groupNormalizedDataByIndex(index, options) data, __, identifier_index, grouper
   function groupNormalizedDataByIndex (identifier_index, data, __, options) {
     var grouper = options.grouper;
-    //console.log('m', grouper);
     if (grouper === 'object') {
       return _groupInObj(identifier_index, data, __, options);
     } else if (grouper === 'array') {
@@ -112,6 +111,54 @@ define('data', [
     return sliced_data;
   }
 
+  function getIndexFromIdentifier (identifier, data, __) {
+    var index;
+    data.forEach(function(d, i) {
+      if (__.frameIdentifierKeyFunction(d) === identifier) {
+        index = i;
+      }
+    });
+    return index;
+  }
+
+  function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+    var index = getIndexFromIdentifier(identifier, data, __);
+    return data.slice(index, index+2);
+  }
+
+  //function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+  //  var identified = false;
+  //  return data.map(function(data) {
+  //    return data.filter(function(d) {
+  //      var include = identified ? false : true;
+  //      console.log(d, identifier);
+  //      indentified = d[__.frame_identifier_index] === identifier;
+  //      return include;
+  //    });
+  //  });
+  //}
+
+//  // TODO: rock test this shit!!!!
+//  function sliceNormalizedDataAtIdentifier (identifier, data, __) {
+//    var sliced_data = [];
+//    for (var id in data) {
+//      if( data.hasOwnProperty( id ) ) {
+//        var g = [];
+//        data[id].forEach(function (d, i) {
+//          g.push(d);
+//        })
+//        // it assumes the data object is correctly sorted.
+//        sliced_data.push(data[id][0]);
+//        if (identifier === id) {
+//          break;
+//        }
+//      }
+//    }
+//    return sliced_data;
+//  }
+
+
+
   function simpleDataParser (data, callback) {
     data.forEach( function (d, i, data) {
       callback(d, i, data);
@@ -129,6 +176,8 @@ define('data', [
     normalizeData: normalizeData,
     groupNormalizedDataByIndex: groupNormalizedDataByIndex,
     sliceGroupedNormalizedDataAtIdentifier: sliceGroupedNormalizedDataAtIdentifier,
+    filterGroupedNormalizedDataAtIdentifier: filterGroupedNormalizedDataAtIdentifier,
+    //sliceNormalizedDataAtIdentifier: sliceNormalizedDataAtIdentifier,
     simpleDataParser: simpleDataParser,
     groupedDataParser: groupedDataParser,
   };
