@@ -6,10 +6,6 @@ define('components/line', [
 
   function line (__) {
     return d3.svg.line().x(function(d, i) {
-      //if(1950 === d[0].getFullYear() && d[2]==='São Paulo') {
-      //  debugger;
-      //}
-      //console.log(d[0], __.xScale(d[0]));
       return __.xScale(d[0]);
     }).y(function(d, i) {
       return __.yScale(d[1]);
@@ -93,7 +89,6 @@ define('components/line', [
   }
 
   function drawLines (selection, transition, __, old_frame_identifier) {
-    console.log(__.data, 'xxx');
     var has_timescale = __.x_scale == 'time',
         g; 
 

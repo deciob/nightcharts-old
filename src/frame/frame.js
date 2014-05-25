@@ -27,9 +27,9 @@ define([
       self.frame = __.initial_frame;
 
       self.normalized_data = __.normalize_data ? data_module.normalizeData(__.data, __) : __.data;
-      self.parsed_data = data_module.groupNormalizedDataByIndex(
-        __.frame_identifier_index, self.normalized_data, __, 
-        {grouper: 'object', keyFunction: __.frameIdentifierKeyFunction});
+      //self.parsed_data = data_module.groupNormalizedDataByIndex(
+      //  __.frame_identifier_index, self.normalized_data, __, 
+      //  {grouper: 'object', keyFunction: __.frameIdentifierKeyFunction});
   
       self.state_machine = new StateMachine(states.transition_states);
       self.dispatch = d3.dispatch(
@@ -76,30 +76,28 @@ define([
     getset(Frame, __);
   
     Frame.prototype.startTransition = function () {
-      console.log('startTransition');
       var self = this;
       clearTimeout(__.current_timeout);
-      var data = self.getDataForFrame(self.parsed_data, __);
-      if (data) {
+      var data = self.getDataForFrame(self.normalized_data, __);
+      if (data[0].length > 0) { //data[0] FIXME???
       __.current_timeout = setTimeout( function () {
         // Fire the draw event
-        
         __.draw_dispatch.draw.call(self, data, __.old_frame);
       }, __.step);
       } else {
         // When no data is left to consume, let us stop the running frames!
         this.state_machine.consumeEvent('stop');
         this.frame = __.old_frame;
-      //}
+      }
       self.dispatch.at_beginning_of_transition.call(self);
     }
 
     Frame.prototype.getDataForFrame = function (data, __) {
       var self = this;
       if (__.frame_type == 'block') {
-        return [this.parsed_data[this.frame]];
+        return [this.parsed_data[this.frame]]; //FIXME!!!!
       } else {
-        return this.parsed_data[this.frame].map(function(d) {
+        return data.map(function(d) {
           return data_module.filterGroupedNormalizedDataAtIdentifier(
             self.frame, d, __);
         });
