@@ -362,6 +362,7 @@ define('data', [
 
   function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
     var index = getIndexFromIdentifier(identifier, data, __);
+    //console.log(data.slice(index, index+2));
     return data.slice(index, index+2);
   }
 
@@ -703,6 +704,9 @@ define('components/line', [
 ], function (d3, utils) {
   
 
+  // TODO: partially apply to handleTransitionEnd function instead. 
+  var lines_length = 0, config = void 0;
+
   function line (__) {
     return d3.svg.line().x(function(d, i) {
       return __.xScale(d[0]);
@@ -723,6 +727,13 @@ define('components/line', [
     return d[0];
   }
 
+  function handleTransitionEnd (d) {
+    lines_length -= 1;
+    if (lines_length === 0) {
+      config.handleTransitionEnd.apply(this, arguments);
+    }
+  }
+
   function transitionLine (d, __) {
 
     var self = this,
@@ -741,16 +752,12 @@ define('components/line', [
     line_head_path.enter().append("path")
       .attr("class", "line head path")
       .attr("d", function (d) {
-        //console.log(JSON.stringify(d));
         return line(__)(d);})    
       .transition()
       .delay(__.delay)
       .duration(__.duration)
       .attrTween("stroke-dasharray", tweenDash)
-      .call(utils.endall, [d], __.handleTransitionEnd);
-      //.each("end", function() { 
-      //  self.endall.call(this, data, __.handleTransitionEnd); 
-      //});
+      .call(utils.endall, [d], handleTransitionEnd);
   
   }
 
@@ -780,9 +787,11 @@ define('components/line', [
       .attr("class", "line body");
     line_g.append('g')
       .attr("class", "line head");
+    lines_length = line_g[0].length;
+    config = __;
     line_g.each(function (d, i) { 
-        //console.log('lines.enter().append("g")', d);
-        return transitionLine.call(d3.select(this), d, __) });
+      //console.log('lines.enter().append("g")', d);
+      return transitionLine.call(d3.select(this), d, __) });
 
     return this;
   }
@@ -1075,6 +1084,7 @@ define('frame/frame',[
       self.__ = __;
       getset(self, __);
       self.frame = __.initial_frame;
+      //self.handleFrameEndCalledTwice = false;
 
       self.normalized_data = __.normalize_data ? data_module.normalizeData(__.data, __) : __.data;
       //self.parsed_data = data_module.groupNormalizedDataByIndex(
@@ -1147,7 +1157,8 @@ define('frame/frame',[
       if (__.frame_type == 'block') {
         return [this.parsed_data[this.frame]]; //FIXME!!!!
       } else {
-        return data.map(function(d) {
+        //console.log(data);
+        return data.map(function(d) { 
           return data_module.filterGroupedNormalizedDataAtIdentifier(
             self.frame, d, __);
         });
@@ -1155,8 +1166,11 @@ define('frame/frame',[
     }
   
     Frame.prototype.handleFrameEnd = function () {
-      this.handleTransition();
-      return this;
+      //if (__.old_frame !== this.frame) {
+        this.frame_after_end_event = this.frame;
+        this.handleTransition();
+        return this;
+      //}
     }
   
     Frame.prototype.handleStop = function () {

@@ -4,6 +4,9 @@ define('components/line', [
 ], function (d3, utils) {
   'use strict';
 
+  // TODO: partially apply to handleTransitionEnd function instead. 
+  var lines_length = 0, config = void 0;
+
   function line (__) {
     return d3.svg.line().x(function(d, i) {
       return __.xScale(d[0]);
@@ -24,6 +27,13 @@ define('components/line', [
     return d[0];
   }
 
+  function handleTransitionEnd (d) {
+    lines_length -= 1;
+    if (lines_length === 0) {
+      config.handleTransitionEnd.apply(this, arguments);
+    }
+  }
+
   function transitionLine (d, __) {
 
     var self = this,
@@ -42,16 +52,12 @@ define('components/line', [
     line_head_path.enter().append("path")
       .attr("class", "line head path")
       .attr("d", function (d) {
-        //console.log(JSON.stringify(d));
         return line(__)(d);})    
       .transition()
       .delay(__.delay)
       .duration(__.duration)
       .attrTween("stroke-dasharray", tweenDash)
-      .call(utils.endall, [d], __.handleTransitionEnd);
-      //.each("end", function() { 
-      //  self.endall.call(this, data, __.handleTransitionEnd); 
-      //});
+      .call(utils.endall, [d], handleTransitionEnd);
   
   }
 
@@ -81,9 +87,11 @@ define('components/line', [
       .attr("class", "line body");
     line_g.append('g')
       .attr("class", "line head");
+    lines_length = line_g[0].length;
+    config = __;
     line_g.each(function (d, i) { 
-        //console.log('lines.enter().append("g")', d);
-        return transitionLine.call(d3.select(this), d, __) });
+      //console.log('lines.enter().append("g")', d);
+      return transitionLine.call(d3.select(this), d, __) });
 
     return this;
   }

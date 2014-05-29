@@ -9,6 +9,9 @@ define([
   'frame/state_machine'
 ], function(d3, utils, data_module, default_config, states, StateMachine) {
 
+  //FIXME: if sequence starts with no data... doesn't go anywhere! (even
+  //  if the data arrives in later sequences) --> data module?
+
   return function (user_config) {
 
     var config = user_config || {},
@@ -25,6 +28,7 @@ define([
       self.__ = __;
       getset(self, __);
       self.frame = __.initial_frame;
+      //self.handleFrameEndCalledTwice = false;
 
       self.normalized_data = __.normalize_data ? data_module.normalizeData(__.data, __) : __.data;
       //self.parsed_data = data_module.groupNormalizedDataByIndex(
@@ -97,7 +101,8 @@ define([
       if (__.frame_type == 'block') {
         return [this.parsed_data[this.frame]]; //FIXME!!!!
       } else {
-        return data.map(function(d) {
+        //console.log(data);
+        return data.map(function(d) { 
           return data_module.filterGroupedNormalizedDataAtIdentifier(
             self.frame, d, __);
         });
@@ -105,8 +110,11 @@ define([
     }
   
     Frame.prototype.handleFrameEnd = function () {
-      this.handleTransition();
-      return this;
+      //if (__.old_frame !== this.frame) {
+        this.frame_after_end_event = this.frame;
+        this.handleTransition();
+        return this;
+      //}
     }
   
     Frame.prototype.handleStop = function () {
