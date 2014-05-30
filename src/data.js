@@ -97,24 +97,24 @@ define('data', [
     }
   }
 
-  function sliceGroupedNormalizedDataAtIdentifier (identifier, data, __) {
-    var sliced_data = {};
-    for (var id in data) {
-      if( data.hasOwnProperty( id ) ) {
-        // it assumes the data object is correctly sorted.
-        sliced_data[id] = data[id];
-        if (identifier === id) {
-          break;
-        }
-      }
-    }
-    return sliced_data;
-  }
+  //function sliceGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+  //  var sliced_data = {};
+  //  for (var id in data) {
+  //    if( data.hasOwnProperty( id ) ) {
+  //      // it assumes the data object is correctly sorted.
+  //      sliced_data[id] = data[id];
+  //      if (identifier === id) {
+  //        break;
+  //      }
+  //    }
+  //  }
+  //  return sliced_data;
+  //}
 
-  function getIndexFromIdentifier (identifier, data, __) {
+  function getIndexFromIdentifier (identifier, data, frameIdentifierKeyFunction) {
     var index;
     data.forEach(function(d, i) {
-      if (__.frameIdentifierKeyFunction(d) === identifier) {
+      if (frameIdentifierKeyFunction(d) === identifier) {
         index = i;
       }
     });
@@ -122,8 +122,15 @@ define('data', [
   }
 
   function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
-    var index = getIndexFromIdentifier(identifier, data, __);
+    var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
+    console.log(data.slice(index, index+2));
     return data.slice(index, index+2);
+  }
+
+  function sliceGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+    var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
+    //console.log(data.slice(0, index+1));
+    return data.slice(0, index+1);
   }
 
   //function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
@@ -177,6 +184,7 @@ define('data', [
     groupNormalizedDataByIndex: groupNormalizedDataByIndex,
     sliceGroupedNormalizedDataAtIdentifier: sliceGroupedNormalizedDataAtIdentifier,
     filterGroupedNormalizedDataAtIdentifier: filterGroupedNormalizedDataAtIdentifier,
+    getIndexFromIdentifier: getIndexFromIdentifier,
     //sliceNormalizedDataAtIdentifier: sliceNormalizedDataAtIdentifier,
     simpleDataParser: simpleDataParser,
     groupedDataParser: groupedDataParser,

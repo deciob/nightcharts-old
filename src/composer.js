@@ -30,6 +30,7 @@ define([
     function compose (selection, options) {
       var is_frame = (!options || options.is_frame === "undefined") ? false : options.is_frame,
           old_frame_identifier = (!options || options.old_frame_identifier === "undefined") ? void 0 : options.old_frame_identifier,
+          frameIdentifierKeyFunction = (!options || options.frameIdentifierKeyFunction === "undefined") ? void 0 : options.frameIdentifierKeyFunction,
           data = selection.datum(),
           svg,
           g,
@@ -40,6 +41,8 @@ define([
       compose.current_configuration = extend ({}, __, {use_clone: true});
 
       __.data = data;
+      __.old_frame_identifier = old_frame_identifier;
+      __.frameIdentifierKeyFunction = frameIdentifierKeyFunction;
       __ = data_module.setDelay(data, __); //FIXME and TESTME
       if (!__.use_existing_chart) {
         __ = layout.setDimensions(selection, __);

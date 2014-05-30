@@ -86,7 +86,10 @@ define([
       if (data[0].length > 0) { //data[0] FIXME???
       __.current_timeout = setTimeout( function () {
         // Fire the draw event
-        __.draw_dispatch.draw.call(self, data, __.old_frame);
+        __.draw_dispatch.draw.call(self, data, {
+          old_frame_identifier: __.old_frame,
+          frameIdentifierKeyFunction: __.frameIdentifierKeyFunction
+        });
       }, __.step);
       } else {
         // When no data is left to consume, let us stop the running frames!
@@ -103,7 +106,7 @@ define([
       } else {
         //console.log(data);
         return data.map(function(d) { 
-          return data_module.filterGroupedNormalizedDataAtIdentifier(
+          return data_module.sliceGroupedNormalizedDataAtIdentifier(
             self.frame, d, __);
         });
       }

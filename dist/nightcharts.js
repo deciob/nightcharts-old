@@ -336,24 +336,24 @@ define('data', [
     }
   }
 
-  function sliceGroupedNormalizedDataAtIdentifier (identifier, data, __) {
-    var sliced_data = {};
-    for (var id in data) {
-      if( data.hasOwnProperty( id ) ) {
-        // it assumes the data object is correctly sorted.
-        sliced_data[id] = data[id];
-        if (identifier === id) {
-          break;
-        }
-      }
-    }
-    return sliced_data;
-  }
+  //function sliceGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+  //  var sliced_data = {};
+  //  for (var id in data) {
+  //    if( data.hasOwnProperty( id ) ) {
+  //      // it assumes the data object is correctly sorted.
+  //      sliced_data[id] = data[id];
+  //      if (identifier === id) {
+  //        break;
+  //      }
+  //    }
+  //  }
+  //  return sliced_data;
+  //}
 
-  function getIndexFromIdentifier (identifier, data, __) {
+  function getIndexFromIdentifier (identifier, data, frameIdentifierKeyFunction) {
     var index;
     data.forEach(function(d, i) {
-      if (__.frameIdentifierKeyFunction(d) === identifier) {
+      if (frameIdentifierKeyFunction(d) === identifier) {
         index = i;
       }
     });
@@ -361,9 +361,15 @@ define('data', [
   }
 
   function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
-    var index = getIndexFromIdentifier(identifier, data, __);
-    //console.log(data.slice(index, index+2));
+    var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
+    console.log(data.slice(index, index+2));
     return data.slice(index, index+2);
+  }
+
+  function sliceGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+    var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
+    //console.log(data.slice(0, index+1));
+    return data.slice(0, index+1);
   }
 
   //function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
@@ -417,6 +423,7 @@ define('data', [
     groupNormalizedDataByIndex: groupNormalizedDataByIndex,
     sliceGroupedNormalizedDataAtIdentifier: sliceGroupedNormalizedDataAtIdentifier,
     filterGroupedNormalizedDataAtIdentifier: filterGroupedNormalizedDataAtIdentifier,
+    getIndexFromIdentifier: getIndexFromIdentifier,
     //sliceNormalizedDataAtIdentifier: sliceNormalizedDataAtIdentifier,
     simpleDataParser: simpleDataParser,
     groupedDataParser: groupedDataParser,
@@ -700,12 +707,14 @@ define('components/y_axis', [
 });
 define('components/line', [
   "d3",
-  'utils'
-], function (d3, utils) {
+  'utils', 
+  'data'
+], function (d3, utils, data_utils) {
   
 
-  // TODO: partially apply to handleTransitionEnd function instead. 
-  var lines_length = 0, config = void 0;
+  var getIndexFromIdentifier = data_utils.getIndexFromIdentifier,
+      lines_length = 0,
+      handleTransitionEndBind;
 
   function line (__) {
     return d3.svg.line().x(function(d, i) {
@@ -723,23 +732,20 @@ define('components/line', [
   }
 
   function dataIdentifier (d) {
-    //console.log('dataIdentifier', d[0][0]);
-    return d[0];
+    //console.log('dataIdentifier', d[0]);
+    return d;
   }
 
-  function handleTransitionEnd (d) {
+  function handleTransitionEnd (__, d) {
     lines_length -= 1;
     if (lines_length === 0) {
-      config.handleTransitionEnd.apply(this, arguments);
+      __.handleTransitionEnd.apply(this, [d]);
     }
   }
 
-  function transitionLine (d, __) {
-
+  function transitionLH (d, __, options) {
     var self = this,
-        line_body = this.select('.line.body'),
         line_head = this.select('.line.head'),
-        line_body_path, 
         line_head_path;
 
     line_head_path = line_head.selectAll(".line.head.path")
@@ -754,16 +760,53 @@ define('components/line', [
       .attr("d", function (d) {
         return line(__)(d);})    
       .transition()
-      .delay(__.delay)
-      .duration(__.duration)
+      .delay(options.delay)
+      .duration(options.duration)
       .attrTween("stroke-dasharray", tweenDash)
-      .call(utils.endall, [d], handleTransitionEnd);
-  
+      .call(utils.endall, [d], handleTransitionEndBind);
   }
 
-  function setLines (selection, __, data, old_frame_identifier) {
+  function transitionLB (d, __, options) {
+    var self = this,
+        line_body = this.select('.line.body'),
+        line_body_path;
+
+    line_body_path = line_body.selectAll(".line.body.path")
+      .data([d], function(d) {
+        //console.log(d[0], '@@');
+        return d.length;});
+
+    line_body_path.exit().transition().remove();
+  
+    line_body_path.enter().append("path")
+      .attr("class", "line body path")
+      .attr("d", function (d) {
+        return line(__)(d);})    
+      .transition()
+      .delay(options.delay)
+      .duration(options.duration)
+      .attrTween("stroke-dasharray", tweenDash)
+      //.call(utils.endall, [d], handleTransitionEndBind);
+  }
+
+  function transitionL (d, __) {
+    var index, head_d, body_d;
+    if (__.old_frame_identifier) {
+      index = getIndexFromIdentifier(__.old_frame_identifier, d, __.frameIdentifierKeyFunction);
+      body_d = d.slice(0, index+1);
+      head_d = d.slice(index);
+      console.log(head_d);
+      console.log(index);
+      transitionLH.call(this, head_d, __, {delay: __.delay, duration: __.duration});
+      transitionLB.call(this, body_d, __, {delay: __.delay, duration: 0});
+    } else {
+      transitionLH.call(this, d, __, {delay: __.delay, duration: __.duration});
+    }
+  }
+
+  function setLines (selection, __, data) {
     //console.log('-----------------------------------');
-    //console.log(data);
+    //console.log(data, __.old_frame_identifier);
     //TODO: this is utils!!!
     var line = selection.selectAll(".line")
           // data is an array, each element one line.
@@ -790,15 +833,18 @@ define('components/line', [
     lines_length = line_g[0].length;
     config = __;
     line_g.each(function (d, i) { 
+      //console.log('line_g.each', d);
       //console.log('lines.enter().append("g")', d);
-      return transitionLine.call(d3.select(this), d, __) });
+      return transitionL.call(d3.select(this), d, __) });
 
     return this;
   }
 
-  function drawLines (selection, transition, __, old_frame_identifier) {
+  function drawLines (selection, transition, __) {
     var has_timescale = __.x_scale == 'time',
-        g; 
+        g;
+
+    handleTransitionEndBind = handleTransitionEnd.bind(undefined, __);
 
     if (__.lines.class_name != '') {
       g = selection.selectAll('g.lines.' + __.lines.class_name).data([__.data]);
@@ -810,7 +856,7 @@ define('components/line', [
     g.enter().append('g').attr('class', 'lines ' + __.lines.class_name);
 
     g.each(function(data, i) {
-      setLines(d3.select(this), __, data, old_frame_identifier);
+      setLines(d3.select(this), __, data);
       //var lines = this.selectAll(".line").data(data, __.dataIdentifier);
     });
 
@@ -873,6 +919,7 @@ define('composer',[
     function compose (selection, options) {
       var is_frame = (!options || options.is_frame === "undefined") ? false : options.is_frame,
           old_frame_identifier = (!options || options.old_frame_identifier === "undefined") ? void 0 : options.old_frame_identifier,
+          frameIdentifierKeyFunction = (!options || options.frameIdentifierKeyFunction === "undefined") ? void 0 : options.frameIdentifierKeyFunction,
           data = selection.datum(),
           svg,
           g,
@@ -883,6 +930,8 @@ define('composer',[
       compose.current_configuration = extend ({}, __, {use_clone: true});
 
       __.data = data;
+      __.old_frame_identifier = old_frame_identifier;
+      __.frameIdentifierKeyFunction = frameIdentifierKeyFunction;
       __ = data_module.setDelay(data, __); //FIXME and TESTME
       if (!__.use_existing_chart) {
         __ = layout.setDimensions(selection, __);
@@ -1068,6 +1117,9 @@ define('frame/frame',[
   'frame/state_machine'
 ], function(d3, utils, data_module, default_config, states, StateMachine) {
 
+  //FIXME: if sequence starts with no data... doesn't go anywhere! (even
+  //  if the data arrives in later sequences) --> data module?
+
   return function (user_config) {
 
     var config = user_config || {},
@@ -1142,7 +1194,10 @@ define('frame/frame',[
       if (data[0].length > 0) { //data[0] FIXME???
       __.current_timeout = setTimeout( function () {
         // Fire the draw event
-        __.draw_dispatch.draw.call(self, data, __.old_frame);
+        __.draw_dispatch.draw.call(self, data, {
+          old_frame_identifier: __.old_frame,
+          frameIdentifierKeyFunction: __.frameIdentifierKeyFunction
+        });
       }, __.step);
       } else {
         // When no data is left to consume, let us stop the running frames!
@@ -1159,7 +1214,7 @@ define('frame/frame',[
       } else {
         //console.log(data);
         return data.map(function(d) { 
-          return data_module.filterGroupedNormalizedDataAtIdentifier(
+          return data_module.sliceGroupedNormalizedDataAtIdentifier(
             self.frame, d, __);
         });
       }
