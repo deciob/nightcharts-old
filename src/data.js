@@ -54,7 +54,11 @@ define('data', [
         }
       });
     }
-
+    // Now the data is normalized:
+    __.xValueN = function (d) { return d[0]; };
+    __.yValueN = function (d) { return d[1]; };
+    __.zValueN = function (d) { return d[2]; };
+    
     return parsed_data;
   }
 

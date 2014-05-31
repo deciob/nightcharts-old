@@ -54,7 +54,7 @@ define('defaults', [
       tickValues: void 0,
     },
     lines: {class_name: ''},
-    bars: void 0,
+    bars: {class_name: ''},
     frames: {},
     // if x_scale: 'time'
     date_type: 'string', // or 'epoc'

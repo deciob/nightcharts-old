@@ -17,6 +17,7 @@ define('scale', [
   // TODO: Guard against axis argument == null or undefined --- TEST TEST TEST
   // TODO: data accessor?
   function _getDomain (data, axis, __) {
+    console.log(data, 'xxx');
     var dataParser = data_module[__.data_parser],
         min_max = utils.getMinMaxValues(data, dataParser, axis);
     return [min_max.min, min_max.max];
@@ -97,20 +98,28 @@ define('scale', [
 
   // Sets the range and domain for the ordinal scale.
   function _applyOrdinalScale (__, options) {
-    var data = __.x_axis_data || __.data,  // FIXME this hack!
-        range_method;
+    var range_method, callback;
     if (options.scale_type == 'time') {
       range_method = 'rangePoints';
     } else {
       range_method = 'rangeRoundBands';
     }
+    // FIXME!!! 
+    // This is based on the wrong? assumption that you can only have one 
+    // ordinal scale, on the x axis or on the y axis.
+    if (__.x_scale == 'ordinal') {
+      callback = __.xValueN
+    } else {
+      callback = __.yValueN
+    }
     return this
       [range_method](options.range, __.padding)
-      .domain(data[0].map( function(d) { return d[0]; } ) );
+      .domain(__.data[0].map( callback ) );
   }
 
   function _applyScale (__, options) {
     options.range = _getRange(options.axis, __);
+    console.log(options.range, options.axis, options.scale_type);
     switch (options.scale_type) {
       case 'ordinal':
         return _applyOrdinalScale.call(this, __, options);

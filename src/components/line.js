@@ -150,14 +150,8 @@ define('components/line', [
 
     g.each(function(data, i) {
       setLines(d3.select(this), __, data);
-      //var lines = this.selectAll(".line").data(data, __.dataIdentifier);
     });
 
-
-    //__.data.forEach( function (data, i) {
-    //  var g = selection.append("g").attr("class", ".lines");
-    //  setLines(g, transition, __, old_frame_identifier);
-    //});
   }
 
   return {

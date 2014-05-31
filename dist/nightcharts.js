@@ -207,7 +207,7 @@ define('defaults', [
       tickValues: void 0,
     },
     lines: {class_name: ''},
-    bars: void 0,
+    bars: {class_name: ''},
     frames: {},
     // if x_scale: 'time'
     date_type: 'string', // or 'epoc'
@@ -293,7 +293,11 @@ define('data', [
         }
       });
     }
-
+    // Now the data is normalized:
+    __.xValueN = function (d) { return d[0]; };
+    __.yValueN = function (d) { return d[1]; };
+    __.zValueN = function (d) { return d[2]; };
+    
     return parsed_data;
   }
 
@@ -451,6 +455,7 @@ define('scale', [
   // TODO: Guard against axis argument == null or undefined --- TEST TEST TEST
   // TODO: data accessor?
   function _getDomain (data, axis, __) {
+    console.log(data, 'xxx');
     var dataParser = data_module[__.data_parser],
         min_max = utils.getMinMaxValues(data, dataParser, axis);
     return [min_max.min, min_max.max];
@@ -531,20 +536,28 @@ define('scale', [
 
   // Sets the range and domain for the ordinal scale.
   function _applyOrdinalScale (__, options) {
-    var data = __.x_axis_data || __.data,  // FIXME this hack!
-        range_method;
+    var range_method, callback;
     if (options.scale_type == 'time') {
       range_method = 'rangePoints';
     } else {
       range_method = 'rangeRoundBands';
     }
+    // FIXME!!! 
+    // This is based on the wrong? assumption that you can only have one 
+    // ordinal scale, on the x axis or on the y axis.
+    if (__.x_scale == 'ordinal') {
+      callback = __.xValueN
+    } else {
+      callback = __.yValueN
+    }
     return this
       [range_method](options.range, __.padding)
-      .domain(data[0].map( function(d) { return d[0]; } ) );
+      .domain(__.data[0].map( callback ) );
   }
 
   function _applyScale (__, options) {
     options.range = _getRange(options.axis, __);
+    console.log(options.range, options.axis, options.scale_type);
     switch (options.scale_type) {
       case 'ordinal':
         return _applyOrdinalScale.call(this, __, options);
@@ -857,14 +870,8 @@ define('components/line', [
 
     g.each(function(data, i) {
       setLines(d3.select(this), __, data);
-      //var lines = this.selectAll(".line").data(data, __.dataIdentifier);
     });
 
-
-    //__.data.forEach( function (data, i) {
-    //  var g = selection.append("g").attr("class", ".lines");
-    //  setLines(g, transition, __, old_frame_identifier);
-    //});
   }
 
   return {
@@ -874,16 +881,173 @@ define('components/line', [
 });
 
 
+define('components/bar', [
+  "d3",
+  'utils', 
+  'data'
+], function (d3, utils, data_utils) {
+  
+
+  var getIndexFromIdentifier = data_utils.getIndexFromIdentifier,
+      lines_length = 0,
+      handleTransitionEndBind;
+
+
+  function dataIdentifier (d) {
+    //console.log('dataIdentifier', d[0]);
+    return d;
+  }
+
+  function _getBarOrientation (__) {
+    if ( (__.x_scale == 'ordinal' || __.x_scale == 'time') &&
+          __.y_scale == 'linear') {
+      return 'vertical';
+    } else if (__.x_scale == 'linear' && __.y_scale == 'ordinal') {
+      return 'horizontal';
+    } else {
+      throw new Error('x_scale-y_scale wrong options combination');
+    }
+  }
+
+  function _createVerticalBars (__) {
+    return this.append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return __.xScale(d[0]); })
+      .attr("width", __.xScale.rangeBand())
+      .attr("y", __.h)
+      .attr("height", 0);
+  }
+
+  function _createTimeBars (__) {
+    return this.append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) {
+        return __.xScale(d[0]) - __.bar_width / 2;
+      })
+      .attr("width", __.bar_width)
+      //attention TODO: this gets then overridden by the transition
+      .attr("y", __.h) 
+      .attr("height", 0);
+  }
+
+  function _createHorizontalBars (__) {
+    return this.append("rect")
+      .attr("class", "bar")
+      .attr("width", 0)
+      .attr("height", __.yScale.rangeBand());
+  }
+
+  function createBars (__) {
+    var orientation = _getBarOrientation(__);
+    if (orientation == 'vertical' && __.x_scale !== 'time') {
+      return _createVerticalBars.call(this, __);
+    } else if (orientation == 'vertical' && __.x_scale == 'time') {
+      return _createTimeBars.call(this, __);
+    } else if (orientation == 'horizontal') {
+      return _createHorizontalBars.call(this, __);
+    } else {
+      throw new Error("orientation-x_scale wrong combination");
+    }
+  }
+
+  function _transitionVerticalBars (__) {
+    return this.delay(__.delay)
+      .attr("x", function(d) { return __.xScale(d[1]) + __.offset_x; })
+      .attr("y", function(d) { return __.yScale(d[0]) - __.offset_y; })
+      .attr("height", function(d) { return __.h - __.yScale(d[0]); });
+  }
+
+  function _transitionTimeBars (__) {
+    return this.delay(__.delay)
+      .attr("x", function(d) { 
+        return __.xScale(d[0]) + __.offset_x - __.bar_width / 2;
+      })
+      .attr("y", function(d) { return __.yScale(d[1]) - __.offset_y; })
+      .attr("height", function(d) { return __.h - __.yScale(d[1]); });
+  }
+
+  function _transitionHorizontalBars (__) {
+    return this.delay(__.delay)
+      .attr("y", function(d) { 
+        return __.yScale(d[1]) - __.offset_y; })
+      .attr("x", __.offset_x)
+      .attr("width", function(d) { 
+        return __.xScale(d[0]) + __.offset_x; 
+      });
+  }
+
+  function transitionBars (orientation, __) {
+    var orientation = _getBarOrientation(__);
+    if (orientation == 'vertical' && __.x_scale !== 'time') {
+      return _transitionVerticalBars.call(this, __);
+    } else if (orientation == 'vertical' && __.x_scale == 'time') {
+      return _transitionTimeBars.call(this, __);
+    } else if (orientation == 'horizontal') {
+      return _transitionHorizontalBars.call(this, __);
+    } else {
+      throw new Error("orientation-x_scale wrong combination");
+    }
+  }
+
+  function setBars (selection, __, data) {
+    console.log('-----------------------------------');
+    console.log(data, __.old_frame_identifier);
+    data.forEach( function (data, i) {
+      var bar = selection.selectAll(".bar")
+            .data(data, dataIdentifier),
+          ov_options = __.overlapping_charts.options,
+          ov_bar_options = ov_options ? ov_options.bars : void 0;
+      // Exit phase (pushes out old bars before new ones come in).
+      bar.exit()
+        .transition().duration(__.duration).style('opacity', 0).remove();
+      createBars.call(bar.enter(), __)
+        .on('click', __.handleClick);
+  
+      // And transition them.
+      transitionBars
+        .call(bar.transition().duration(__.duration), __.orientation, __)
+        .call(utils.endall, data, __.handleTransitionEnd);
+    });
+  }
+
+  function drawBars (selection, transition, __) {
+    var has_timescale = __.x_scale == 'time',
+        g;
+
+    if (__.bars.class_name != '') {
+      g = selection.selectAll('g.bars.' + __.bars.class_name).data([__.data]);
+    } else {
+      g = selection.selectAll('g.bars').data([__.data]);
+    }
+
+    g.exit().remove();
+    g.enter().append('g').attr('class', 'bars ' + __.bars.class_name);
+
+    g.each(function(data, i) {
+      setBars(d3.select(this), __, data);
+    });
+
+  }
+
+  return {
+    drawBars: drawBars,
+  };
+
+});
+
+
 define('components/components', [
   'components/x_axis',
   'components/y_axis',
-  'components/line'
-], function (x_axis, y_axis, line) {
+  'components/line',
+  'components/bar'
+], function (x_axis, y_axis, line, bar) {
 
   return {
     x_axis: x_axis,
     y_axis: y_axis,
     lines: line,
+    bars: bar,
   };
 
 });
