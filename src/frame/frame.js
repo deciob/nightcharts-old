@@ -102,7 +102,7 @@ define([
     Frame.prototype.getDataForFrame = function (data, __) {
       var self = this;
       if (__.frame_type == 'block') {
-        return [this.parsed_data[this.frame]]; //FIXME!!!!
+        return [data[this.frame]]; //FIXME!!!!
       } else {
         //console.log(data);
         return data.map(function(d) { 
