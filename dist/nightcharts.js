@@ -667,9 +667,7 @@ define('components/x_axis', [
 
   function drawXAxis (selection, transition, __, data) {
     var g,
-        //selection = d3.select('svg > g')
-        //transition = selection.transition().duration(__.duration);
-    __ = setAxis(__);
+        __ = setAxis(__);
     // Select the g element, if it exists.
     g = selection.selectAll("g.x.axis").data([data]);
     // Otherwise, create the skeletal axis.
@@ -693,7 +691,6 @@ define('components/y_axis', [
 ], function (d3, utils) {
   
 
-  console.log(d3);
   var d3 = d3;
 
   function setAxis (__) {
@@ -711,9 +708,7 @@ define('components/y_axis', [
 
   function drawYAxis (selection, transition, __, data) {
     var g,
-        //selection = d3.select('svg > g')
-        //transition = selection.transition().duration(__.duration);
-    __ = setAxis(__);
+        __ = setAxis(__);
     // Select the g element, if it exists.
     g = selection.selectAll("g.y.axis").data([data]);
     // Otherwise, create the skeletal axis.
@@ -1137,11 +1132,8 @@ define('composer',[
           __.margin.left + "," + __.margin.top + ")");
       }
       // Transitions root.
-      //transition = g.transition().duration(__.duration);
-
       g = d3.select('svg > g');
       transition = g.transition().duration(__.duration);
-      //console.log('compose', g, transition);
 
       __.components.forEach( function (component) {
         var method_name;
@@ -1195,8 +1187,8 @@ define('frame/defaults', [], function() {
     data: {},
     frame_type: 'block', //or 'sequence'
     categoricalValue: function (d) { return d[0]; },
-    normalize_data: false
-
+    normalize_data: false,
+    dispatch_identifier: ''
   };
 
 });
@@ -1329,14 +1321,14 @@ define('frame/frame',[
   
       self.state_machine = new StateMachine(states.transition_states);
       self.dispatch = d3.dispatch(
-        'start', 
-        'stop', 
-        'next', 
-        'prev', 
-        'reset', 
-        'end',
-        'jump',
-        'at_beginning_of_transition'
+        'start' + __.dispatch_identifier, 
+        'stop' + __.dispatch_identifier, 
+        'next' + __.dispatch_identifier, 
+        'prev' + __.dispatch_identifier, 
+        'reset' + __.dispatch_identifier, 
+        'end' + __.dispatch_identifier, 
+        'jump' + __.dispatch_identifier, 
+        'at_beginning_of_transition' + __.dispatch_identifier
       );
       
       // Fired when all the chart related transitions within a frame are 
@@ -1351,19 +1343,19 @@ define('frame/frame',[
       // existing listener is removed before the new listener is added. To 
       // register multiple listeners for the same event type, the type may be 
       // followed by an optional namespace, such as 'click.foo' and 'click.bar'.
-      self.dispatch.on('end.frame', self.handleFrameEnd);
+      self.dispatch.on('end' + __.dispatch_identifier + '.frame', self.handleFrameEnd);
   
-      self.dispatch.on('stop', self.handleStop);
+      self.dispatch.on('stop' + __.dispatch_identifier, self.handleStop);
   
-      self.dispatch.on('start', self.handleStart);
+      self.dispatch.on('start' + __.dispatch_identifier, self.handleStart);
   
-      self.dispatch.on('next', self.handleNext);
+      self.dispatch.on('next' + __.dispatch_identifier, self.handleNext);
   
-      self.dispatch.on('prev', self.handlePrev);
+      self.dispatch.on('prev' + __.dispatch_identifier, self.handlePrev);
   
-      self.dispatch.on('reset', self.handleReset);
+      self.dispatch.on('reset' + __.dispatch_identifier, self.handleReset);
   
-      self.dispatch.on('jump', self.handleJump);
+      self.dispatch.on('jump' + __.dispatch_identifier, self.handleJump);
   
       return self;
     }
@@ -1375,7 +1367,6 @@ define('frame/frame',[
       var self = this;
       clearTimeout(__.current_timeout);
       var data = self.getDataForFrame(self.normalized_data, __);
-      console.log(data);
       if (data[0] && data[0].length > 0) { //data[0] FIXME???
       __.current_timeout = setTimeout( function () {
         // Fire the draw event
@@ -1389,7 +1380,7 @@ define('frame/frame',[
         this.state_machine.consumeEvent('stop');
         this.frame = __.old_frame;
       }
-      self.dispatch.at_beginning_of_transition.call(self);
+      self.dispatch['at_beginning_of_transition' + __.dispatch_identifier].call(self);
     }
 
     Frame.prototype.getDataForFrame = function (data, __) {
@@ -1397,7 +1388,6 @@ define('frame/frame',[
       if (__.frame_type == 'block') {
         return [data[this.frame]]; //FIXME!!!!
       } else {
-        //console.log(data);
         return data.map(function(d) { 
           return data_module.sliceGroupedNormalizedDataAtIdentifier(
             self.frame, d, __);
