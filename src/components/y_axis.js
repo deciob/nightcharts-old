@@ -4,6 +4,8 @@ define('components/y_axis', [
 ], function (d3, utils) {
   'use strict';
 
+  var d3 = d3;
+
   function setAxis (__) {
     __.yAxis = utils.setAxisProps(__.y_axis, __.yScale);
     return __;
@@ -17,13 +19,17 @@ define('components/y_axis', [
       .delay( __.delay );
   }
 
-  function drawYAxis (selection, transition, __) {
-    var g;
-    __ = setAxis(__);
-    g = selection.append("g").attr("class", "y axis");
+  function drawYAxis (selection, transition, __, data) {
+    var g,
+        __ = setAxis(__);
+    // Select the g element, if it exists.
+    g = selection.selectAll("g.y.axis").data([data]);
+    // Otherwise, create the skeletal axis.
+    g.enter().append("g").attr("class", "y axis");
+    g.exit().remove();
     // Update the axis.
     transitionAxis.call(transition.selectAll('.y.axis'), __);
-    return g; 
+    return g;
   }
 
   return {

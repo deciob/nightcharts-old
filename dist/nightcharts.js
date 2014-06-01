@@ -455,7 +455,6 @@ define('scale', [
   // TODO: Guard against axis argument == null or undefined --- TEST TEST TEST
   // TODO: data accessor?
   function _getDomain (data, axis, __) {
-    console.log(data, 'xxx');
     var dataParser = data_module[__.data_parser],
         min_max = utils.getMinMaxValues(data, dataParser, axis);
     return [min_max.min, min_max.max];
@@ -557,7 +556,6 @@ define('scale', [
 
   function _applyScale (__, options) {
     options.range = _getRange(options.axis, __);
-    console.log(options.range, options.axis, options.scale_type);
     switch (options.scale_type) {
       case 'ordinal':
         return _applyOrdinalScale.call(this, __, options);
@@ -667,10 +665,16 @@ define('components/x_axis', [
     return __;
   }
 
-  function drawXAxis (selection, transition, __) {
-    var g;
+  function drawXAxis (selection, transition, __, data) {
+    var g,
+        //selection = d3.select('svg > g')
+        //transition = selection.transition().duration(__.duration);
     __ = setAxis(__);
-    g = selection.append("g").attr("class", "x axis");
+    // Select the g element, if it exists.
+    g = selection.selectAll("g.x.axis").data([data]);
+    // Otherwise, create the skeletal axis.
+    g.enter().append("g").attr("class", "x axis");
+    g.exit().remove();
     // Update the axis.
     transitionAxis.call(transition.selectAll('.x.axis'), __);
     return g;
@@ -689,6 +693,9 @@ define('components/y_axis', [
 ], function (d3, utils) {
   
 
+  console.log(d3);
+  var d3 = d3;
+
   function setAxis (__) {
     __.yAxis = utils.setAxisProps(__.y_axis, __.yScale);
     return __;
@@ -702,13 +709,19 @@ define('components/y_axis', [
       .delay( __.delay );
   }
 
-  function drawYAxis (selection, transition, __) {
-    var g;
+  function drawYAxis (selection, transition, __, data) {
+    var g,
+        //selection = d3.select('svg > g')
+        //transition = selection.transition().duration(__.duration);
     __ = setAxis(__);
-    g = selection.append("g").attr("class", "y axis");
+    // Select the g element, if it exists.
+    g = selection.selectAll("g.y.axis").data([data]);
+    // Otherwise, create the skeletal axis.
+    g.enter().append("g").attr("class", "y axis");
+    g.exit().remove();
     // Update the axis.
     transitionAxis.call(transition.selectAll('.y.axis'), __);
-    return g; 
+    return g;
   }
 
   return {
@@ -817,7 +830,7 @@ define('components/line', [
     }
   }
 
-  function setLines (selection, __, data) {
+  function setLines (selection, transition, __, data) {
     //console.log('-----------------------------------');
     //console.log(data, __.old_frame_identifier);
     //TODO: this is utils!!!
@@ -853,7 +866,7 @@ define('components/line', [
     return this;
   }
 
-  function drawLines (selection, transition, __) {
+  function drawLines (selection, transition, __, data) {
     var has_timescale = __.x_scale == 'time',
         g;
 
@@ -869,7 +882,7 @@ define('components/line', [
     g.enter().append('g').attr('class', 'lines ' + __.lines.class_name);
 
     g.each(function(data, i) {
-      setLines(d3.select(this), __, data);
+      setLines(d3.select(this), transition, __, data);
     });
 
   }
@@ -894,8 +907,8 @@ define('components/bar', [
 
 
   function dataIdentifier (d) {
-    //console.log('dataIdentifier', d[0]);
-    return d;
+    //console.log('dataIdentifier', d[1]);
+    return d[1];
   }
 
   function _getBarOrientation (__) {
@@ -989,9 +1002,9 @@ define('components/bar', [
     }
   }
 
-  function setBars (selection, __, data) {
-    console.log('-----------------------------------');
-    console.log(data, __.old_frame_identifier);
+  function setBars (selection, transition, __, data) {
+    //console.log('-----------------------------------');
+    //console.log(data, __.old_frame_identifier);
     data.forEach( function (data, i) {
       var bar = selection.selectAll(".bar")
             .data(data, dataIdentifier),
@@ -1005,26 +1018,28 @@ define('components/bar', [
   
       // And transition them.
       transitionBars
-        .call(bar.transition().duration(__.duration), __.orientation, __)
+        .call(transition.selectAll('.bar'), __.orientation, __)
         .call(utils.endall, data, __.handleTransitionEnd);
     });
   }
 
-  function drawBars (selection, transition, __) {
-    var has_timescale = __.x_scale == 'time',
-        g;
+  function drawBars (selection, transition, __, data) {
+    var g,
+        has_timescale = __.x_scale == 'time';
+        //selection = d3.select('svg > g'),
+        //transition = selection.transition().duration(__.duration);
 
     if (__.bars.class_name != '') {
-      g = selection.selectAll('g.bars.' + __.bars.class_name).data([__.data]);
+      g = selection.selectAll('g.bars.' + __.bars.class_name).data([data]);
     } else {
-      g = selection.selectAll('g.bars').data([__.data]);
+      g = selection.selectAll('g.bars').data([data]);
     }
 
     g.exit().remove();
     g.enter().append('g').attr('class', 'bars ' + __.bars.class_name);
 
     g.each(function(data, i) {
-      setBars(d3.select(this), __, data);
+      setBars(d3.select(this), transition, __, data);
     });
 
   }
@@ -1081,6 +1096,7 @@ define('composer',[
         __     = extend(defaults, config);
 
     function compose (selection, options) {
+
       var is_frame = (!options || options.is_frame === "undefined") ? false : options.is_frame,
           old_frame_identifier = (!options || options.old_frame_identifier === "undefined") ? void 0 : options.old_frame_identifier,
           frameIdentifierKeyFunction = (!options || options.frameIdentifierKeyFunction === "undefined") ? void 0 : options.frameIdentifierKeyFunction,
@@ -1121,13 +1137,17 @@ define('composer',[
           __.margin.left + "," + __.margin.top + ")");
       }
       // Transitions root.
+      //transition = g.transition().duration(__.duration);
+
+      g = d3.select('svg > g');
       transition = g.transition().duration(__.duration);
+      //console.log('compose', g, transition);
 
       __.components.forEach( function (component) {
         var method_name;
         if (components_module[component]) {
           method_name = utils.toCamelCase('draw_' + component);
-          components_module[component][method_name](g, transition, __);
+          components_module[component][method_name](g, transition, __, data);
         }
       });
 
@@ -1355,7 +1375,8 @@ define('frame/frame',[
       var self = this;
       clearTimeout(__.current_timeout);
       var data = self.getDataForFrame(self.normalized_data, __);
-      if (data[0].length > 0) { //data[0] FIXME???
+      console.log(data);
+      if (data[0] && data[0].length > 0) { //data[0] FIXME???
       __.current_timeout = setTimeout( function () {
         // Fire the draw event
         __.draw_dispatch.draw.call(self, data, {
@@ -1374,7 +1395,7 @@ define('frame/frame',[
     Frame.prototype.getDataForFrame = function (data, __) {
       var self = this;
       if (__.frame_type == 'block') {
-        return [this.parsed_data[this.frame]]; //FIXME!!!!
+        return [data[this.frame]]; //FIXME!!!!
       } else {
         //console.log(data);
         return data.map(function(d) { 

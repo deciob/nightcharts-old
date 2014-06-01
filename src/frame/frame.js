@@ -83,7 +83,7 @@ define([
       var self = this;
       clearTimeout(__.current_timeout);
       var data = self.getDataForFrame(self.normalized_data, __);
-      if (data[0].length > 0) { //data[0] FIXME???
+      if (data[0] && data[0].length > 0) { //data[0] FIXME???
       __.current_timeout = setTimeout( function () {
         // Fire the draw event
         __.draw_dispatch.draw.call(self, data, {

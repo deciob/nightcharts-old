@@ -31,10 +31,14 @@ define('components/x_axis', [
     return __;
   }
 
-  function drawXAxis (selection, transition, __) {
-    var g;
-    __ = setAxis(__);
-    g = selection.append("g").attr("class", "x axis");
+  function drawXAxis (selection, transition, __, data) {
+    var g,
+        __ = setAxis(__);
+    // Select the g element, if it exists.
+    g = selection.selectAll("g.x.axis").data([data]);
+    // Otherwise, create the skeletal axis.
+    g.enter().append("g").attr("class", "x axis");
+    g.exit().remove();
     // Update the axis.
     transitionAxis.call(transition.selectAll('.x.axis'), __);
     return g;

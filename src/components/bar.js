@@ -11,8 +11,8 @@ define('components/bar', [
 
 
   function dataIdentifier (d) {
-    //console.log('dataIdentifier', d[0]);
-    return d;
+    //console.log('dataIdentifier', d[1]);
+    return d[1];
   }
 
   function _getBarOrientation (__) {
@@ -106,9 +106,9 @@ define('components/bar', [
     }
   }
 
-  function setBars (selection, __, data) {
-    console.log('-----------------------------------');
-    console.log(data, __.old_frame_identifier);
+  function setBars (selection, transition, __, data) {
+    //console.log('-----------------------------------');
+    //console.log(data, __.old_frame_identifier);
     data.forEach( function (data, i) {
       var bar = selection.selectAll(".bar")
             .data(data, dataIdentifier),
@@ -122,26 +122,28 @@ define('components/bar', [
   
       // And transition them.
       transitionBars
-        .call(bar.transition().duration(__.duration), __.orientation, __)
+        .call(transition.selectAll('.bar'), __.orientation, __)
         .call(utils.endall, data, __.handleTransitionEnd);
     });
   }
 
-  function drawBars (selection, transition, __) {
-    var has_timescale = __.x_scale == 'time',
-        g;
+  function drawBars (selection, transition, __, data) {
+    var g,
+        has_timescale = __.x_scale == 'time';
+        //selection = d3.select('svg > g'),
+        //transition = selection.transition().duration(__.duration);
 
     if (__.bars.class_name != '') {
-      g = selection.selectAll('g.bars.' + __.bars.class_name).data([__.data]);
+      g = selection.selectAll('g.bars.' + __.bars.class_name).data([data]);
     } else {
-      g = selection.selectAll('g.bars').data([__.data]);
+      g = selection.selectAll('g.bars').data([data]);
     }
 
     g.exit().remove();
     g.enter().append('g').attr('class', 'bars ' + __.bars.class_name);
 
     g.each(function(data, i) {
-      setBars(d3.select(this), __, data);
+      setBars(d3.select(this), transition, __, data);
     });
 
   }

@@ -28,6 +28,7 @@ define([
         __     = extend(defaults, config);
 
     function compose (selection, options) {
+
       var is_frame = (!options || options.is_frame === "undefined") ? false : options.is_frame,
           old_frame_identifier = (!options || options.old_frame_identifier === "undefined") ? void 0 : options.old_frame_identifier,
           frameIdentifierKeyFunction = (!options || options.frameIdentifierKeyFunction === "undefined") ? void 0 : options.frameIdentifierKeyFunction,
@@ -68,13 +69,14 @@ define([
           __.margin.left + "," + __.margin.top + ")");
       }
       // Transitions root.
+      g = d3.select('svg > g');
       transition = g.transition().duration(__.duration);
 
       __.components.forEach( function (component) {
         var method_name;
         if (components_module[component]) {
           method_name = utils.toCamelCase('draw_' + component);
-          components_module[component][method_name](g, transition, __);
+          components_module[component][method_name](g, transition, __, data);
         }
       });
 

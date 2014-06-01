@@ -17,7 +17,6 @@ define('scale', [
   // TODO: Guard against axis argument == null or undefined --- TEST TEST TEST
   // TODO: data accessor?
   function _getDomain (data, axis, __) {
-    console.log(data, 'xxx');
     var dataParser = data_module[__.data_parser],
         min_max = utils.getMinMaxValues(data, dataParser, axis);
     return [min_max.min, min_max.max];
@@ -119,7 +118,6 @@ define('scale', [
 
   function _applyScale (__, options) {
     options.range = _getRange(options.axis, __);
-    console.log(options.range, options.axis, options.scale_type);
     switch (options.scale_type) {
       case 'ordinal':
         return _applyOrdinalScale.call(this, __, options);

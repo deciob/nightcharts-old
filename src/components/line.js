@@ -97,7 +97,7 @@ define('components/line', [
     }
   }
 
-  function setLines (selection, __, data) {
+  function setLines (selection, transition, __, data) {
     //console.log('-----------------------------------');
     //console.log(data, __.old_frame_identifier);
     //TODO: this is utils!!!
@@ -133,7 +133,7 @@ define('components/line', [
     return this;
   }
 
-  function drawLines (selection, transition, __) {
+  function drawLines (selection, transition, __, data) {
     var has_timescale = __.x_scale == 'time',
         g;
 
@@ -149,7 +149,7 @@ define('components/line', [
     g.enter().append('g').attr('class', 'lines ' + __.lines.class_name);
 
     g.each(function(data, i) {
-      setLines(d3.select(this), __, data);
+      setLines(d3.select(this), transition, __, data);
     });
 
   }
