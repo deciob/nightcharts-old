@@ -9,6 +9,8 @@ define([
   var lineFrameController = function (args) {
     var selection = d3.select(args.selector),
       linechart,
+      selected_linechart,
+      transition,
       draw;
 
     function accessor(d) {
@@ -26,82 +28,69 @@ define([
     d3.csv(args.data_url, accessor , function(error, data) {
 
       var draw, draw_dispatch, drawChart, handleFrameEnd, frame_config, 
-          frame, year = 1955, delta = 5, 
+          frame, year = 1950, delta = 5, 
           year_div = document.getElementById('line-frame-viz-year');
 
-      var data_by_selected_town = _.filter(data, function (obj) {
-        return obj.agglomeration == 'Tokyo';
-      });
-      //var data_by_year = _.groupBy( data_by_selected_town, function (obj) {
-      //  return obj.year;
-      //});
+      linechart = chart.composer()
+        .xValue(function(d) {return d.year})
+        .yValue(function(d) {return d.population})
+        .zValue(function(d) {return d.agglomeration})
+        .duration(1000)
+        .date_format('%Y')
+        .x_scale('time')
+        .components(['x_axis', 'y_axis', 'lines'])
+        .x_axis({tickFormat: d3.time.format("%Y")})
+        .lines({class_name: 'linechart'});
+      var normalized_data = chart.data.normalizeData(data, linechart.__);
+      var grouped_data = chart.data.groupNormalizedDataByIndex(
+        2, normalized_data, linechart.__, {grouper: 'array'});
+      chart.draw(linechart, selection, grouped_data);
+      
 
-      // wraps every year value in an array
-      //_.forEach(data_by_year, function(num, k) { 
-      //  data_by_year[k] = [num]; 
-      //});
-
-
-
-      linechart = chart.Line()
-        .margin({left: 150, bottom: 35})
-        .ratio(.6)
-        .duration(600)
-        .categoricalValue( function(d) { return d['year']; } )
-        .quantativeValue( function(d) { return d['population']; } )
-        .scale_bounds('0,40')
-        .x_scale('ordinal');
-      draw = chart.draw(linechart, selection);
-
-      drawChart = function (data, old_frame_identifier) {
-        draw(data, old_frame_identifier);
-        year_div.innerText = this.frame;
+      var grouped_data_obj = chart.data.groupNormalizedDataByIndex(
+        2, normalized_data, linechart.__, {grouper: 'object'});
+      var data_by_selected_town = [
+        grouped_data_obj['São Paulo'], 
+        grouped_data_obj['New York']
+      ];
+      selected_linechart = chart.composer(linechart.current_applied_configuration)
+        .components(['lines'])
+        .use_existing_chart(true)
+        .duration(400)
+        .lines({class_name: 'selected_linechart'});
+      draw = chart.draw(selected_linechart, selection);
+      drawChart = function (data, options) {
+        draw(data, options);
+        //year_div.innerText = this.frame;
       }
-      draw_dispatch = linechart.drawDispatch();
+      draw_dispatch = selected_linechart.drawDispatch();
       draw_dispatch.on('draw', drawChart);
-
-
-//          __ = {
-//      initial_frame: 1950,  // Start date in data.
-//      draw_dispatch: d3.dispatch('draw'),
-//      delta: 5,
-//      step: 500,
-//      data: data_array,
-//      frame_type: 'block',
-//      frame_identifier: 'year',
-//      },
-//      FrameConstructor = Frame(__);
-//      frame = FrameConstructor();
-//  
-//      frame = chart.Frame()
-//          .draw_dispatch(draw_dispatch)
-//          .data(data_by_year)
-//          .initial_frame(year)
-//          .step(50)
-//          .delta(delta)();
-
-      frame = chart.Frame()
-        .step(50)
+      transition = chart.Frame(linechart.__)
         .draw_dispatch(draw_dispatch)
         .data(data_by_selected_town)
         .initial_frame(year)
-        .delta(delta)
-        .frame_identifier('year')
-        .frame_type('sequence')();
+        .frame_identifier_index(0)
+        .dispatch_identifier('_line')
+        .frameIdentifierKeyFunction(function(d){
+          return d[0].getFullYear();
+        })
+        .step(50)
+        .frame_type('sequence')
+        .delta(delta)();
 
-      linechart.handleTransitionEnd( function () {
-        frame.dispatch.end.call(frame);
+      selected_linechart.handleTransitionEnd( function () {
+        transition.dispatch.end_line.call(transition);
       });
 
-      frame.dispatch.jump.call(frame, year);
+      transition.dispatch.jump_line.call(transition, year);
       document.getElementById('start-transition').onclick = function(e){
-        frame.dispatch.start.call(frame);
+        transition.dispatch.start_line.call(transition);
       }
       document.getElementById('stop-transition').onclick = function(e){
-        frame.dispatch.stop.call(frame);
+        transition.dispatch.stop_line.call(transition);
       }
       document.getElementById('reset-transition').onclick = function(e){
-        frame.dispatch.reset.call(frame);
+        transition.dispatch.reset_line.call(transition);
       }
 
     });

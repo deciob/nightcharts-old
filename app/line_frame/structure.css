@@ -21,3 +21,15 @@
 #line_frame-viz text {
   fill: #555;
 }
+
+.line {
+  fill: none;
+  stroke: #e3e3e3;
+  stroke-width: .6px;
+  /*opacity: .8;*/
+}
+
+.lines.selected_linechart .line {
+  stroke: #961016;
+  stroke-width: 2.4px;
+}

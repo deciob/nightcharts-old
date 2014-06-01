@@ -3,7 +3,7 @@ define([
   'd3',
   'underscore',
   'chart',
-], function(when, d3, _, chart) {
+], function (when, d3, _, chart) {
   'use strict';
 
   var lineController = function (args) {
@@ -26,10 +26,8 @@ define([
         )
       });
 
-      var fd = [ formatted_data[1].map(function(d) {
-        return [d[0]+', 2012', d[1]] }) ];
-
-      console.log(fd);
+      var fd = formatted_data[1].map(function(d) {
+        return [d[0]+', 2012', d[1]] });
 
       
       var tooltip_format = d3.time.format("%b, %Y");
@@ -42,18 +40,15 @@ define([
       }
 
       linechart = chart.composer()
-        //.offset_x(200)
         .duration(0)
         .date_format('%b, %Y')
         .x_scale('time')
-        //.overlapping_charts({ 
-        //  names: ['circles'],
-        //  options: { circles: { tooltip: tooltip_conf } }
-        //})
+        .components(['x_axis', 'y_axis', 'lines'])
         .x_axis({tickFormat: d3.time.format("%b")});
 
-
-      chart.draw(linechart, selection, fd);
+      // every line data (arrays) is wrapped in an array.
+      var normalized_data = [chart.data.normalizeData(fd, linechart.__)];
+      chart.draw(linechart, selection, normalized_data);
 
     });
 
