@@ -1132,7 +1132,7 @@ define('composer',[
           __.margin.left + "," + __.margin.top + ")");
       }
       // Transitions root.
-      g = d3.select('svg > g');
+      g = selection.select('svg > g');
       transition = g.transition().duration(__.duration);
 
       __.components.forEach( function (component) {
@@ -1301,7 +1301,7 @@ define('frame/frame',[
     var config = user_config || {},
         extend = utils.extend,
         getset = utils.getset,
-        __     = extend(default_config, config, {not_override: false});
+        __     = extend(utils.clone(default_config), config, {not_override: false});
 
     function Frame () {
   

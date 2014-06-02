@@ -69,7 +69,7 @@ define([
           __.margin.left + "," + __.margin.top + ")");
       }
       // Transitions root.
-      g = d3.select('svg > g');
+      g = selection.select('svg > g');
       transition = g.transition().duration(__.duration);
 
       __.components.forEach( function (component) {
