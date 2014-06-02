@@ -88,8 +88,6 @@ define('components/line', [
       index = getIndexFromIdentifier(__.old_frame_identifier, d, __.frameIdentifierKeyFunction);
       body_d = d.slice(0, index+1);
       head_d = d.slice(index);
-      console.log(head_d);
-      console.log(index);
       transitionLH.call(this, head_d, __, {delay: __.delay, duration: __.duration});
       transitionLB.call(this, body_d, __, {delay: __.delay, duration: 0});
     } else {

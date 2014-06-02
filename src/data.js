@@ -127,7 +127,6 @@ define('data', [
 
   function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
     var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
-    console.log(data.slice(index, index+2));
     return data.slice(index, index+2);
   }
 

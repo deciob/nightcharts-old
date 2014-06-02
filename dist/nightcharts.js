@@ -366,7 +366,6 @@ define('data', [
 
   function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
     var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
-    console.log(data.slice(index, index+2));
     return data.slice(index, index+2);
   }
 
@@ -816,8 +815,6 @@ define('components/line', [
       index = getIndexFromIdentifier(__.old_frame_identifier, d, __.frameIdentifierKeyFunction);
       body_d = d.slice(0, index+1);
       head_d = d.slice(index);
-      console.log(head_d);
-      console.log(index);
       transitionLH.call(this, head_d, __, {delay: __.delay, duration: __.duration});
       transitionLB.call(this, body_d, __, {delay: __.delay, duration: 0});
     } else {
@@ -1370,7 +1367,7 @@ define('frame/frame',[
       if (data[0] && data[0].length > 0) { //data[0] FIXME???
       __.current_timeout = setTimeout( function () {
         // Fire the draw event
-        __.draw_dispatch.draw.call(self, data, {
+        __.draw_dispatch['draw' + __.dispatch_identifier].call(self, data, {
           old_frame_identifier: __.old_frame,
           frameIdentifierKeyFunction: __.frameIdentifierKeyFunction
         });

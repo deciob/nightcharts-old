@@ -86,7 +86,7 @@ define([
       if (data[0] && data[0].length > 0) { //data[0] FIXME???
       __.current_timeout = setTimeout( function () {
         // Fire the draw event
-        __.draw_dispatch.draw.call(self, data, {
+        __.draw_dispatch['draw' + __.dispatch_identifier].call(self, data, {
           old_frame_identifier: __.old_frame,
           frameIdentifierKeyFunction: __.frameIdentifierKeyFunction
         });
