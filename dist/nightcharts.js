@@ -667,9 +667,7 @@ define('components/x_axis', [
 
   function drawXAxis (selection, transition, __, data) {
     var g,
-        //selection = d3.select('svg > g')
-        //transition = selection.transition().duration(__.duration);
-    __ = setAxis(__);
+        __ = setAxis(__);
     // Select the g element, if it exists.
     g = selection.selectAll("g.x.axis").data([data]);
     // Otherwise, create the skeletal axis.
@@ -693,7 +691,6 @@ define('components/y_axis', [
 ], function (d3, utils) {
   
 
-  console.log(d3);
   var d3 = d3;
 
   function setAxis (__) {
@@ -711,9 +708,7 @@ define('components/y_axis', [
 
   function drawYAxis (selection, transition, __, data) {
     var g,
-        //selection = d3.select('svg > g')
-        //transition = selection.transition().duration(__.duration);
-    __ = setAxis(__);
+        __ = setAxis(__);
     // Select the g element, if it exists.
     g = selection.selectAll("g.y.axis").data([data]);
     // Otherwise, create the skeletal axis.
@@ -1137,11 +1132,8 @@ define('composer',[
           __.margin.left + "," + __.margin.top + ")");
       }
       // Transitions root.
-      //transition = g.transition().duration(__.duration);
-
-      g = d3.select('svg > g');
+      g = selection.select('svg > g');
       transition = g.transition().duration(__.duration);
-      //console.log('compose', g, transition);
 
       __.components.forEach( function (component) {
         var method_name;
@@ -1196,7 +1188,6 @@ define('frame/defaults', [], function() {
     frame_type: 'block', //or 'sequence'
     categoricalValue: function (d) { return d[0]; },
     normalize_data: false
-
   };
 
 });
@@ -1306,10 +1297,11 @@ define('frame/frame',[
 
   return function (user_config) {
 
+
     var config = user_config || {},
         extend = utils.extend,
         getset = utils.getset,
-        __     = extend(default_config, config, {not_override: false});
+        __     = extend(utils.clone(default_config), config, {not_override: false});
 
     function Frame () {
   
@@ -1375,7 +1367,6 @@ define('frame/frame',[
       var self = this;
       clearTimeout(__.current_timeout);
       var data = self.getDataForFrame(self.normalized_data, __);
-      console.log(data);
       if (data[0] && data[0].length > 0) { //data[0] FIXME???
       __.current_timeout = setTimeout( function () {
         // Fire the draw event
@@ -1394,6 +1385,7 @@ define('frame/frame',[
 
     Frame.prototype.getDataForFrame = function (data, __) {
       var self = this;
+      console.log(__);
       if (__.frame_type == 'block') {
         return [data[this.frame]]; //FIXME!!!!
       } else {

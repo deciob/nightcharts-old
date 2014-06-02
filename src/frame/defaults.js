@@ -15,7 +15,6 @@ define('frame/defaults', [], function() {
     frame_type: 'block', //or 'sequence'
     categoricalValue: function (d) { return d[0]; },
     normalize_data: false
-    dispatch_identifier: ''
   };
 
 });
