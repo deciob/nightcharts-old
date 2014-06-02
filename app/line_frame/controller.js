@@ -56,7 +56,8 @@ define([
       selected_linechart = chart.composer(linechart.current_applied_configuration)
         .components(['lines'])
         .use_existing_chart(true)
-        .duration(400)
+        .duration(200)
+        .drawDispatch(d3.dispatch('draw_line'))
         .lines({class_name: 'selected_linechart'});
       draw = chart.draw(selected_linechart, selection);
       drawChart = function (data, options) {
@@ -64,7 +65,7 @@ define([
         //year_div.innerText = this.frame;
       }
       draw_dispatch = selected_linechart.drawDispatch();
-      draw_dispatch.on('draw', drawChart);
+      draw_dispatch.on('draw_line', drawChart);
       transition = chart.Frame(linechart.__)
         .draw_dispatch(draw_dispatch)
         .data(data_by_selected_town)
@@ -83,13 +84,14 @@ define([
       });
 
       transition.dispatch.jump_line.call(transition, year);
-      document.getElementById('start-transition').onclick = function(e){
+      document.getElementById('start-transition-line').onclick = function(e){
+        console.log('transition.dispatch.jump_line', transition.dispatch_identifier());
         transition.dispatch.start_line.call(transition);
       }
-      document.getElementById('stop-transition').onclick = function(e){
+      document.getElementById('stop-transition-line').onclick = function(e){
         transition.dispatch.stop_line.call(transition);
       }
-      document.getElementById('reset-transition').onclick = function(e){
+      document.getElementById('reset-transition-line').onclick = function(e){
         transition.dispatch.reset_line.call(transition);
       }
 

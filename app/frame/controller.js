@@ -47,7 +47,8 @@ define([
         .invert_data(true)
         //.quantitative_scale('x')
         .y_scale('ordinal')
-        .x_scale('linear');
+        .x_scale('linear')
+        .drawDispatch(d3.dispatch('draw_bar'));
       var normalized_data = chart.data.normalizeData(data, barchart.__);
       var grouped_data = chart.data.groupNormalizedDataByIndex(
         2, normalized_data, barchart.__, {grouper: 'object'});
@@ -58,7 +59,7 @@ define([
         year_div.innerText = this.frame;
       }
       draw_dispatch = barchart.drawDispatch();
-      draw_dispatch.on('draw', drawChart);
+      draw_dispatch.on('draw_bar', drawChart);
 
       transition = chart.Frame(barchart.__)
         .draw_dispatch(draw_dispatch)
@@ -66,7 +67,6 @@ define([
         .initial_frame(year)
         .step(50)
         .delta(delta)
-        //.frame_type('block')
         .dispatch_identifier('_bar')
         .frame_identifier_index(0)();
 
@@ -75,13 +75,13 @@ define([
       });
 
       transition.dispatch.jump_bar.call(transition, year);
-      document.getElementById('start-transition').onclick = function(e){
+      document.getElementById('start-transition-bar').onclick = function(e){
         transition.dispatch.start_bar.call(transition);
       }
-      document.getElementById('stop-transition').onclick = function(e){
+      document.getElementById('stop-transition-bar').onclick = function(e){
         transition.dispatch.stop_bar.call(transition);
       }
-      document.getElementById('reset-transition').onclick = function(e){
+      document.getElementById('reset-transition-bar').onclick = function(e){
         transition.dispatch.reset_bar.call(transition);
       }
 
