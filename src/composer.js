@@ -2,7 +2,6 @@ define([
   'd3',
   'utils',
   'defaults',
-  'data',
   'scale',
   'layout',
   'components/components',
@@ -10,7 +9,6 @@ define([
   d3,
   utils,
   defaults,
-  data_module,
   scale,
   layout,
   components_module
@@ -44,7 +42,7 @@ define([
       __.data = data;
       __.old_frame_identifier = old_frame_identifier;
       __.frameIdentifierKeyFunction = frameIdentifierKeyFunction;
-      __ = data_module.setDelay(data, __); //FIXME and TESTME
+      __ = utils.setDelay(data, __); //FIXME and TESTME
       if (!__.use_existing_chart) {
         __ = layout.setDimensions(selection, __);
         __ = scale.setScales(__);

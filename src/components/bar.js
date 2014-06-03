@@ -1,11 +1,10 @@
 define('components/bar', [
   "d3",
   'utils', 
-  'data'
-], function (d3, utils, data_utils) {
+], function (d3, utils) {
   'use strict';
 
-  var getIndexFromIdentifier = data_utils.getIndexFromIdentifier,
+  var getIndexFromIdentifier = utils.getIndexFromIdentifier,
       lines_length = 0,
       handleTransitionEndBind;
 

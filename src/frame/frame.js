@@ -3,11 +3,10 @@
 define([
   'd3',
   'utils',
-  'data',
   'frame/defaults',
   'frame/states',
   'frame/state_machine'
-], function(d3, utils, data_module, default_config, states, StateMachine) {
+], function(d3, utils, default_config, states, StateMachine) {
 
   //FIXME: if sequence starts with no data... doesn't go anywhere! (even
   //  if the data arrives in later sequences) --> data module?
@@ -30,8 +29,8 @@ define([
       self.frame = __.initial_frame;
       //self.handleFrameEndCalledTwice = false;
 
-      self.normalized_data = __.normalize_data ? data_module.normalizeData(__.data, __) : __.data;
-      //self.parsed_data = data_module.groupNormalizedDataByIndex(
+      self.normalized_data = __.normalize_data ? utils.normalizeData(__.data, __) : __.data;
+      //self.parsed_data = utils.groupNormalizedDataByIndex(
       //  __.frame_identifier_index, self.normalized_data, __, 
       //  {grouper: 'object', keyFunction: __.frameIdentifierKeyFunction});
   
@@ -105,7 +104,7 @@ define([
         return [data[this.frame]]; //FIXME!!!!
       } else {
         return data.map(function(d) { 
-          return data_module.sliceGroupedNormalizedDataAtIdentifier(
+          return utils.sliceGroupedNormalizedDataAtIdentifier(
             self.frame, d, __);
         });
       }

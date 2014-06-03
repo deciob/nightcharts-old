@@ -1,8 +1,7 @@
 define('scale', [
   'd3',
   'utils',
-  'data'
-], function (d3, utils, data_module) {
+], function (d3, utils) {
   'use strict';
 
   function _getRange (axis, __) {
@@ -17,7 +16,7 @@ define('scale', [
   // TODO: Guard against axis argument == null or undefined --- TEST TEST TEST
   // TODO: data accessor?
   function _getDomain (data, axis, __) {
-    var dataParser = data_module[__.data_parser],
+    var dataParser = utils[__.data_parser],
         min_max = utils.getMinMaxValues(data, dataParser, axis);
     return [min_max.min, min_max.max];
   }
@@ -48,9 +47,8 @@ define('scale', [
   }
 
   //TODO: throw on wrong input
-  function _parseScaleBounds (__, options) {
-    var data = __.data,
-        data_parser = data_module[__.data_parser],
+  function _parseScaleBounds (__, data, options) {
+    var data_parser = utils[__.data_parser],
         min_max = utils.getMinMaxValues(data, data_parser),
         bounds = __.scale_bounds.split(',');
     if (bounds[0] == 'min') { 

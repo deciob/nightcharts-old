@@ -137,6 +137,140 @@ define('utils',[
     return axis;
   }
 
+
+
+  // Data functions
+
+
+  function setDelay (data, __) {
+    var duration = __.duration;
+    if (duration == undefined) { throw new Error('__.duration unset')}
+    __.delay = function (d, i) {
+      // FIXME: only referring to the first dataset, 
+      // while setting the delay on all!
+      return i / data[0].length * duration;
+    }
+    return __;
+  };
+
+  function normalizeData (data, __) {
+    var parsed_data,
+        date_chart = __.x_scale == 'time' ? true : false,
+        date_format = __.date_format,
+        date_type = __.date_type,
+        xValue = __.xValue,
+        yValue = __.yValue,
+        zValue = __.zValue;
+
+    if (date_chart) {
+      parsed_data = data.map(function(d, i) {
+        var x,
+            z = zValue.call(data, d);
+        // The time data is encoded in a string:
+        if (date_chart && date_type == 'string') {
+          x = d3.time.format(date_format)
+            .parse( xValue.call(data, d).toString() );
+        // The time data is encoded in an epoch number:
+        } else if (date_chart && date_type == 'epoch') {
+          x = new Date(xValue.call(data, d) * 1000);
+        }
+        if (z) {
+          return [x, yValue.call(data, d), z];
+        } else {
+          return [x, yValue.call(data, d)];
+        }
+      });
+    } else {
+      data = __.invert_data ? clone(data).reverse() : data;
+      parsed_data = data.map(function(d, i) {
+        var x = xValue.call(data, d),
+            z = zValue.call(data, d);
+        if (z) {
+          return [x, yValue.call(data, d), z];
+        } else {
+          return [x, yValue.call(data, d)];
+        }
+      });
+    }
+    // Now the data is normalized:
+    __.xValueN = function (d) { return d[0]; };
+    __.yValueN = function (d) { return d[1]; };
+    __.zValueN = function (d) { return d[2]; };
+    
+    return parsed_data;
+  }
+
+  function _groupInObj (identifier_index, data, __, options) {
+    var parsed_data = {},
+        keyFunction = options && options.keyFunction || function(k){return k;};
+    data.forEach(function (d, i) {
+      var group = parsed_data[keyFunction(d[identifier_index])];
+      if (group) {
+        group.push(d);
+      } else {
+        parsed_data[keyFunction(d[identifier_index])] = [d];
+      }
+    });
+    return parsed_data;    
+  }
+
+  function _groupInArr (identifier_index, data, __, options) {
+    var parsed_data = [],
+        obj_grouped_data = options && options.obj_grouped_data || 
+          _groupInObj(identifier_index, data, __, options);
+    for ( var identifier in obj_grouped_data ) {
+      if( obj_grouped_data.hasOwnProperty( identifier ) ) {
+        parsed_data.push(obj_grouped_data[identifier]);
+      }
+    }
+    return parsed_data;
+  }
+
+  // Expects dataset argument to be the return value of normalizeData
+  // groupNormalizedDataByIndex(index, options) data, __, identifier_index, grouper
+  function groupNormalizedDataByIndex (identifier_index, data, __, options) {
+    var grouper = options.grouper;
+    if (grouper === 'object') {
+      return _groupInObj(identifier_index, data, __, options);
+    } else if (grouper === 'array') {
+      return _groupInArr(identifier_index, data, __, options);
+    } else {
+      throw new Error('grouper must be either `object` or `array`');
+    }
+  }
+
+  function getIndexFromIdentifier (identifier, data, frameIdentifierKeyFunction) {
+    var index;
+    data.forEach(function(d, i) {
+      if (frameIdentifierKeyFunction(d) === identifier) {
+        index = i;
+      }
+    });
+    return index;
+  }
+
+  function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+    var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
+    return data.slice(index, index+2);
+  }
+
+  function sliceGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+    var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
+    return data.slice(0, index+1);
+  }
+
+  function simpleDataParser (data, callback) {
+    data.forEach( function (d, i, data) {
+      callback(d, i, data);
+    });
+  }
+
+  function groupedDataParser (dataset, callback) {
+    dataset.forEach( function (data, index, dataset) {
+      simpleDataParser(data, callback);
+    });
+  }
+
   return {
     toCamelCase: toCamelCase,
     clone: clone,
@@ -148,6 +282,15 @@ define('utils',[
     getGraphHelperMethod: getGraphHelperMethod,
     getMinMaxValues: getMinMaxValues,
     setAxisProps: setAxisProps,
+    // data functions
+    setDelay: setDelay,
+    normalizeData: normalizeData,
+    groupNormalizedDataByIndex: groupNormalizedDataByIndex,
+    sliceGroupedNormalizedDataAtIdentifier: sliceGroupedNormalizedDataAtIdentifier,
+    filterGroupedNormalizedDataAtIdentifier: filterGroupedNormalizedDataAtIdentifier,
+    getIndexFromIdentifier: getIndexFromIdentifier,
+    simpleDataParser: simpleDataParser,
+    groupedDataParser: groupedDataParser,
   };
 
 });
@@ -237,209 +380,10 @@ define('defaults', [
 });
 
 
-define('data', [
-  "d3",
-  'utils'
-], function (d3, utils) {
-  
-
-  function setDelay (data, __) {
-    var duration = __.duration;
-    if (duration == undefined) { throw new Error('__.duration unset')}
-    __.delay = function (d, i) {
-      // FIXME: only referring to the first dataset, 
-      // while setting the delay on all!
-      return i / data[0].length * duration;
-    }
-    return __;
-  };
-
-  function normalizeData (data, __) {
-    var parsed_data,
-        date_chart = __.x_scale == 'time' ? true : false,
-        date_format = __.date_format,
-        date_type = __.date_type,
-        xValue = __.xValue,
-        yValue = __.yValue,
-        zValue = __.zValue;
-
-    if (date_chart) {
-      parsed_data = data.map(function(d, i) {
-        var x,
-            z = zValue.call(data, d);
-        // The time data is encoded in a string:
-        if (date_chart && date_type == 'string') {
-          x = d3.time.format(date_format)
-            .parse( xValue.call(data, d).toString() );
-        // The time data is encoded in an epoch number:
-        } else if (date_chart && date_type == 'epoch') {
-          x = new Date(xValue.call(data, d) * 1000);
-        }
-        if (z) {
-          return [x, yValue.call(data, d), z];
-        } else {
-          return [x, yValue.call(data, d)];
-        }
-      });
-    } else {
-      data = __.invert_data ? utils.clone(data).reverse() : data;
-      parsed_data = data.map(function(d, i) {
-        var x = xValue.call(data, d),
-            z = zValue.call(data, d);
-        if (z) {
-          return [x, yValue.call(data, d), z];
-        } else {
-          return [x, yValue.call(data, d)];
-        }
-      });
-    }
-    // Now the data is normalized:
-    __.xValueN = function (d) { return d[0]; };
-    __.yValueN = function (d) { return d[1]; };
-    __.zValueN = function (d) { return d[2]; };
-    
-    return parsed_data;
-  }
-
-  function _groupInObj (identifier_index, data, __, options) {
-    var parsed_data = {},
-        keyFunction = options && options.keyFunction || function(k){return k;};
-    data.forEach(function (d, i) {
-      var group = parsed_data[keyFunction(d[identifier_index])];
-      if (group) {
-        group.push(d);
-      } else {
-        parsed_data[keyFunction(d[identifier_index])] = [d];
-      }
-    });
-    return parsed_data;    
-  }
-
-  function _groupInArr (identifier_index, data, __, options) {
-    var parsed_data = [],
-        obj_grouped_data = options && options.obj_grouped_data || 
-          _groupInObj(identifier_index, data, __, options);
-    for ( var identifier in obj_grouped_data ) {
-      if( obj_grouped_data.hasOwnProperty( identifier ) ) {
-        parsed_data.push(obj_grouped_data[identifier]);
-      }
-    }
-    return parsed_data;
-  }
-
-  // Expects dataset argument to be the return value of normalizeData
-  // groupNormalizedDataByIndex(index, options) data, __, identifier_index, grouper
-  function groupNormalizedDataByIndex (identifier_index, data, __, options) {
-    var grouper = options.grouper;
-    if (grouper === 'object') {
-      return _groupInObj(identifier_index, data, __, options);
-    } else if (grouper === 'array') {
-      return _groupInArr(identifier_index, data, __, options);
-    } else {
-      throw new Error('grouper must be either `object` or `array`');
-    }
-  }
-
-  //function sliceGroupedNormalizedDataAtIdentifier (identifier, data, __) {
-  //  var sliced_data = {};
-  //  for (var id in data) {
-  //    if( data.hasOwnProperty( id ) ) {
-  //      // it assumes the data object is correctly sorted.
-  //      sliced_data[id] = data[id];
-  //      if (identifier === id) {
-  //        break;
-  //      }
-  //    }
-  //  }
-  //  return sliced_data;
-  //}
-
-  function getIndexFromIdentifier (identifier, data, frameIdentifierKeyFunction) {
-    var index;
-    data.forEach(function(d, i) {
-      if (frameIdentifierKeyFunction(d) === identifier) {
-        index = i;
-      }
-    });
-    return index;
-  }
-
-  function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
-    var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
-    return data.slice(index, index+2);
-  }
-
-  function sliceGroupedNormalizedDataAtIdentifier (identifier, data, __) {
-    var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
-    //console.log(data.slice(0, index+1));
-    return data.slice(0, index+1);
-  }
-
-  //function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
-  //  var identified = false;
-  //  return data.map(function(data) {
-  //    return data.filter(function(d) {
-  //      var include = identified ? false : true;
-  //      console.log(d, identifier);
-  //      indentified = d[__.frame_identifier_index] === identifier;
-  //      return include;
-  //    });
-  //  });
-  //}
-
-//  // TODO: rock test this shit!!!!
-//  function sliceNormalizedDataAtIdentifier (identifier, data, __) {
-//    var sliced_data = [];
-//    for (var id in data) {
-//      if( data.hasOwnProperty( id ) ) {
-//        var g = [];
-//        data[id].forEach(function (d, i) {
-//          g.push(d);
-//        })
-//        // it assumes the data object is correctly sorted.
-//        sliced_data.push(data[id][0]);
-//        if (identifier === id) {
-//          break;
-//        }
-//      }
-//    }
-//    return sliced_data;
-//  }
-
-
-
-  function simpleDataParser (data, callback) {
-    data.forEach( function (d, i, data) {
-      callback(d, i, data);
-    });
-  }
-
-  function groupedDataParser (dataset, callback) {
-    dataset.forEach( function (data, index, dataset) {
-      simpleDataParser(data, callback);
-    });
-  }
-
-  return {
-    setDelay: setDelay,
-    normalizeData: normalizeData,
-    groupNormalizedDataByIndex: groupNormalizedDataByIndex,
-    sliceGroupedNormalizedDataAtIdentifier: sliceGroupedNormalizedDataAtIdentifier,
-    filterGroupedNormalizedDataAtIdentifier: filterGroupedNormalizedDataAtIdentifier,
-    getIndexFromIdentifier: getIndexFromIdentifier,
-    //sliceNormalizedDataAtIdentifier: sliceNormalizedDataAtIdentifier,
-    simpleDataParser: simpleDataParser,
-    groupedDataParser: groupedDataParser,
-  };
-
-});
-
-
 define('scale', [
   'd3',
   'utils',
-  'data'
-], function (d3, utils, data_module) {
+], function (d3, utils) {
   
 
   function _getRange (axis, __) {
@@ -454,7 +398,7 @@ define('scale', [
   // TODO: Guard against axis argument == null or undefined --- TEST TEST TEST
   // TODO: data accessor?
   function _getDomain (data, axis, __) {
-    var dataParser = data_module[__.data_parser],
+    var dataParser = utils[__.data_parser],
         min_max = utils.getMinMaxValues(data, dataParser, axis);
     return [min_max.min, min_max.max];
   }
@@ -485,9 +429,8 @@ define('scale', [
   }
 
   //TODO: throw on wrong input
-  function _parseScaleBounds (__, options) {
-    var data = __.data,
-        data_parser = data_module[__.data_parser],
+  function _parseScaleBounds (__, data, options) {
+    var data_parser = utils[__.data_parser],
         min_max = utils.getMinMaxValues(data, data_parser),
         bounds = __.scale_bounds.split(',');
     if (bounds[0] == 'min') { 
@@ -555,6 +498,7 @@ define('scale', [
 
   function _applyScale (__, options) {
     options.range = _getRange(options.axis, __);
+    console.log(__);
     switch (options.scale_type) {
       case 'ordinal':
         return _applyOrdinalScale.call(this, __, options);
@@ -728,11 +672,10 @@ define('components/y_axis', [
 define('components/line', [
   "d3",
   'utils', 
-  'data'
-], function (d3, utils, data_utils) {
+], function (d3, utils) {
   
 
-  var getIndexFromIdentifier = data_utils.getIndexFromIdentifier,
+  var getIndexFromIdentifier = utils.getIndexFromIdentifier,
       lines_length = 0,
       handleTransitionEndBind;
 
@@ -889,11 +832,10 @@ define('components/line', [
 define('components/bar', [
   "d3",
   'utils', 
-  'data'
-], function (d3, utils, data_utils) {
+], function (d3, utils) {
   
 
-  var getIndexFromIdentifier = data_utils.getIndexFromIdentifier,
+  var getIndexFromIdentifier = utils.getIndexFromIdentifier,
       lines_length = 0,
       handleTransitionEndBind;
 
@@ -1062,7 +1004,6 @@ define('composer',[
   'd3',
   'utils',
   'defaults',
-  'data',
   'scale',
   'layout',
   'components/components',
@@ -1070,7 +1011,6 @@ define('composer',[
   d3,
   utils,
   defaults,
-  data_module,
   scale,
   layout,
   components_module
@@ -1101,10 +1041,10 @@ define('composer',[
 
       compose.current_configuration = extend ({}, __, {use_clone: true});
 
-      __.data = data;
+      __.data = data; //TODO: restrict this to a small subset?
       __.old_frame_identifier = old_frame_identifier;
       __.frameIdentifierKeyFunction = frameIdentifierKeyFunction;
-      __ = data_module.setDelay(data, __); //FIXME and TESTME
+      __ = utils.setDelay(data, __); //FIXME and TESTME
       if (!__.use_existing_chart) {
         __ = layout.setDimensions(selection, __);
         __ = scale.setScales(__);
@@ -1284,11 +1224,10 @@ define('frame/state_machine',['require'],function(require) {
 define('frame/frame',[
   'd3',
   'utils',
-  'data',
   'frame/defaults',
   'frame/states',
   'frame/state_machine'
-], function(d3, utils, data_module, default_config, states, StateMachine) {
+], function(d3, utils, default_config, states, StateMachine) {
 
   //FIXME: if sequence starts with no data... doesn't go anywhere! (even
   //  if the data arrives in later sequences) --> data module?
@@ -1311,8 +1250,8 @@ define('frame/frame',[
       self.frame = __.initial_frame;
       //self.handleFrameEndCalledTwice = false;
 
-      self.normalized_data = __.normalize_data ? data_module.normalizeData(__.data, __) : __.data;
-      //self.parsed_data = data_module.groupNormalizedDataByIndex(
+      self.normalized_data = __.normalize_data ? utils.normalizeData(__.data, __) : __.data;
+      //self.parsed_data = utils.groupNormalizedDataByIndex(
       //  __.frame_identifier_index, self.normalized_data, __, 
       //  {grouper: 'object', keyFunction: __.frameIdentifierKeyFunction});
   
@@ -1386,7 +1325,7 @@ define('frame/frame',[
         return [data[this.frame]]; //FIXME!!!!
       } else {
         return data.map(function(d) { 
-          return data_module.sliceGroupedNormalizedDataAtIdentifier(
+          return utils.sliceGroupedNormalizedDataAtIdentifier(
             self.frame, d, __);
         });
       }
@@ -1507,7 +1446,6 @@ define('chart',[
   'defaults',
   'composer',
   'draw',
-  'data',
   'scale',
   'layout',
   'components/components',
@@ -1518,7 +1456,6 @@ define('chart',[
   defaults, 
   composer,
   draw,
-  data,
   scale,
   layout,
   components,
@@ -1531,7 +1468,6 @@ define('chart',[
     defaults: defaults,
     composer: composer,
     draw: draw,
-    data: data,
     scale: scale,
     layout: layout,
     components: components,

@@ -137,6 +137,140 @@ define([
     return axis;
   }
 
+
+
+  // Data functions
+
+
+  function setDelay (data, __) {
+    var duration = __.duration;
+    if (duration == undefined) { throw new Error('__.duration unset')}
+    __.delay = function (d, i) {
+      // FIXME: only referring to the first dataset, 
+      // while setting the delay on all!
+      return i / data[0].length * duration;
+    }
+    return __;
+  };
+
+  function normalizeData (data, __) {
+    var parsed_data,
+        date_chart = __.x_scale == 'time' ? true : false,
+        date_format = __.date_format,
+        date_type = __.date_type,
+        xValue = __.xValue,
+        yValue = __.yValue,
+        zValue = __.zValue;
+
+    if (date_chart) {
+      parsed_data = data.map(function(d, i) {
+        var x,
+            z = zValue.call(data, d);
+        // The time data is encoded in a string:
+        if (date_chart && date_type == 'string') {
+          x = d3.time.format(date_format)
+            .parse( xValue.call(data, d).toString() );
+        // The time data is encoded in an epoch number:
+        } else if (date_chart && date_type == 'epoch') {
+          x = new Date(xValue.call(data, d) * 1000);
+        }
+        if (z) {
+          return [x, yValue.call(data, d), z];
+        } else {
+          return [x, yValue.call(data, d)];
+        }
+      });
+    } else {
+      data = __.invert_data ? clone(data).reverse() : data;
+      parsed_data = data.map(function(d, i) {
+        var x = xValue.call(data, d),
+            z = zValue.call(data, d);
+        if (z) {
+          return [x, yValue.call(data, d), z];
+        } else {
+          return [x, yValue.call(data, d)];
+        }
+      });
+    }
+    // Now the data is normalized:
+    __.xValueN = function (d) { return d[0]; };
+    __.yValueN = function (d) { return d[1]; };
+    __.zValueN = function (d) { return d[2]; };
+    
+    return parsed_data;
+  }
+
+  function _groupInObj (identifier_index, data, __, options) {
+    var parsed_data = {},
+        keyFunction = options && options.keyFunction || function(k){return k;};
+    data.forEach(function (d, i) {
+      var group = parsed_data[keyFunction(d[identifier_index])];
+      if (group) {
+        group.push(d);
+      } else {
+        parsed_data[keyFunction(d[identifier_index])] = [d];
+      }
+    });
+    return parsed_data;    
+  }
+
+  function _groupInArr (identifier_index, data, __, options) {
+    var parsed_data = [],
+        obj_grouped_data = options && options.obj_grouped_data || 
+          _groupInObj(identifier_index, data, __, options);
+    for ( var identifier in obj_grouped_data ) {
+      if( obj_grouped_data.hasOwnProperty( identifier ) ) {
+        parsed_data.push(obj_grouped_data[identifier]);
+      }
+    }
+    return parsed_data;
+  }
+
+  // Expects dataset argument to be the return value of normalizeData
+  // groupNormalizedDataByIndex(index, options) data, __, identifier_index, grouper
+  function groupNormalizedDataByIndex (identifier_index, data, __, options) {
+    var grouper = options.grouper;
+    if (grouper === 'object') {
+      return _groupInObj(identifier_index, data, __, options);
+    } else if (grouper === 'array') {
+      return _groupInArr(identifier_index, data, __, options);
+    } else {
+      throw new Error('grouper must be either `object` or `array`');
+    }
+  }
+
+  function getIndexFromIdentifier (identifier, data, frameIdentifierKeyFunction) {
+    var index;
+    data.forEach(function(d, i) {
+      if (frameIdentifierKeyFunction(d) === identifier) {
+        index = i;
+      }
+    });
+    return index;
+  }
+
+  function filterGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+    var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
+    return data.slice(index, index+2);
+  }
+
+  function sliceGroupedNormalizedDataAtIdentifier (identifier, data, __) {
+    var index = getIndexFromIdentifier(identifier, data, __.frameIdentifierKeyFunction);
+    return data.slice(0, index+1);
+  }
+
+  function simpleDataParser (data, callback) {
+    data.forEach( function (d, i, data) {
+      callback(d, i, data);
+    });
+  }
+
+  function groupedDataParser (dataset, callback) {
+    dataset.forEach( function (data, index, dataset) {
+      simpleDataParser(data, callback);
+    });
+  }
+
   return {
     toCamelCase: toCamelCase,
     clone: clone,
@@ -148,6 +282,15 @@ define([
     getGraphHelperMethod: getGraphHelperMethod,
     getMinMaxValues: getMinMaxValues,
     setAxisProps: setAxisProps,
+    // data functions
+    setDelay: setDelay,
+    normalizeData: normalizeData,
+    groupNormalizedDataByIndex: groupNormalizedDataByIndex,
+    sliceGroupedNormalizedDataAtIdentifier: sliceGroupedNormalizedDataAtIdentifier,
+    filterGroupedNormalizedDataAtIdentifier: filterGroupedNormalizedDataAtIdentifier,
+    getIndexFromIdentifier: getIndexFromIdentifier,
+    simpleDataParser: simpleDataParser,
+    groupedDataParser: groupedDataParser,
   };
 
 });
