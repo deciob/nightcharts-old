@@ -4,20 +4,15 @@
 		// baseUrl: '',
 		paths: {
       d3: 'bower_components/d3/d3.js',
-      d3_tip: 'lib/d3-tip/index.js',
       underscore: 'bower_components/lodash/dist/lodash.js',
       chart: 'dist/nightcharts.js',
 		},
 		packages: [
 			// Define application-level packages
-			{name: 'chart', location: 'app/chart', main: 'chart_constructor',},
-			{name: 'welcome', location: 'app/welcome',},
-			{name: 'inline', location: 'app/inline',},
+			{name: 'data', location: 'app/data',},
+			{name: 'controllers', location: 'app/controllers',},
+			{name: 'bar_frame', location: 'app/bar_frame',},
 			{name: 'line_frame', location: 'app/line_frame',},
-			{name: 'frame', location: 'app/frame',},
-			{name: 'tooltip', location: 'app/tooltip',},
-			{name: 'timeseries', location: 'app/timeseries',},
-			{name: 'line', location: 'app/line',},
 
 			// Define a theme package, and configure it to always use the css module loader
 			// No need to use AMD 'css!' plugin to load things in this package, it will happen

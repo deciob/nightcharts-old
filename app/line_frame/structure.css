@@ -1,23 +1,24 @@
-
-#line_frame-viz rect {
+#line-frame-viz rect {
   fill: #5C8100;
   shape-rendering: crispEdges;
 }
 
-#line_frame-viz rect:hover {
-  fill: #E6E4A6;
-}
-
-.d3-tip {
-  padding: 5px;
-  background-color: rgba(250, 250, 250, 0.9);
-}
-
-#line_frame-viz .y.axis line, #frame-viz .y.axis path, #frame-viz .x.axis line {
+#line-frame-viz .y.axis line, #frame-viz .y.axis path, #frame-viz .x.axis line {
   fill: none;
   stroke: #555;
 }
 
-#line_frame-viz text {
-  fill: #555;
+#line-frame-viz text {
+  fill: #444;
+}
+
+.line {
+  fill: none;
+  stroke: #e3e3e3;
+  stroke-width: .6px;
+}
+
+.lines.selected_linechart .line {
+  stroke: #961016;
+  stroke-width: 2.4px;
 }

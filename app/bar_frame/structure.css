@@ -1,0 +1,8 @@
+#bar-frame-viz rect {
+  fill: #CCC;
+  shape-rendering: crispEdges;
+}
+
+#bar-frame-viz text {
+  fill: #444;
+}
