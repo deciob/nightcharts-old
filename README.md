@@ -30,10 +30,3 @@ selection = d3.select('#viz');
 barchart = chart.bar();
 chart.draw(barchart, selection, data);
 ```
-
-#TODO before merge into master
-
-* update README
-* get transitions working again
-* reintegrate all missing tests
-* clean out - improve comments
