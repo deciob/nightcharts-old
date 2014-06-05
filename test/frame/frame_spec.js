@@ -21,6 +21,7 @@ define(['chai', 'sample_data', 'd3', 'frame/frame'], function(chai, sample_data,
       frame_identifier_index: 0,
       xValue: function (d) { return d['year']; },
       yValue: function (d) { return d['population']; },
+      dispatch_identifier: '',
       zValue: function (d) { return d['agglomeration']; },
     },
     FrameConstructor = Frame(__);

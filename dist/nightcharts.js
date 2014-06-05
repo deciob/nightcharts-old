@@ -498,7 +498,6 @@ define('scale', [
 
   function _applyScale (__, options) {
     options.range = _getRange(options.axis, __);
-    console.log(__);
     switch (options.scale_type) {
       case 'ordinal':
         return _applyOrdinalScale.call(this, __, options);
@@ -1041,7 +1040,7 @@ define('composer',[
 
       compose.current_configuration = extend ({}, __, {use_clone: true});
 
-      __.data = data; //TODO: restrict this to a small subset?
+      __.data = data;
       __.old_frame_identifier = old_frame_identifier;
       __.frameIdentifierKeyFunction = frameIdentifierKeyFunction;
       __ = utils.setDelay(data, __); //FIXME and TESTME

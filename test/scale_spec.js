@@ -58,6 +58,8 @@ function(chai, d3, utils, scale) {
               data_parser: 'groupedDataParser',
             };
 
+        __.xValueN = function (d) { return d[0]; };
+        __.yValueN = function (d) { return d[1]; };
         __ = scale.setScales(__);
         scale.applyScales(__);
 
