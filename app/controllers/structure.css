@@ -1,12 +1,33 @@
+section.controllers {
+  color: #646464;
+}
+
 section.controllers .info {
   display: none;
 }
 
 section.controllers .info.active {
   position: absolute;
-  width: 790px;
+  width: 840px;
   height: 196px;
   background-color: white;
   display: block;
+  padding: 50px 100px;
+  font-size: 22px;
+  font-weight: bold;
+  line-height: 2;
+  
+}
+
+section.controllers section.buttons {
+  
+  padding: 50px;
+  margin: 0 auto;
+}
+
+section.controllers section.buttons button {
+  font-size: 24px;
+  padding: 5px 10px;
+  color: #646464;
 }
 

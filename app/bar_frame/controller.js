@@ -22,7 +22,7 @@ define([
         draw;
 
     barchart = chart.composer()
-      .margin({left: 180, bottom: 35})
+      .margin({left: 230, bottom: 35})
       .height(600)
       .duration(300)
       .yValue( function(d) { return d['agglomeration']; } )
@@ -33,6 +33,7 @@ define([
       .invert_data(true)
       .y_scale('ordinal')
       .x_scale('linear')
+      .x_axis({tickValues: ['0', '20', '40']})
       .delay(function(){return 0;})
       .drawDispatch(d3.dispatch('draw_bar'));
     normalized_data = chart.utils.normalizeData(data, barchart.__);
