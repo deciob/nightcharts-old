@@ -804,7 +804,6 @@ define('components/line', [
   }
 
   function drawLines (selection, transition, __, data) {
-    //console.log('drawLines', data);
     var has_timescale = __.x_scale == 'time',
         g;
 

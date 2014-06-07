@@ -68,8 +68,6 @@ define([
       draw(data, options);
     }
 
-    console.log(data_by_selected_town);
-
     draw_dispatch = selected_linechart.drawDispatch();
     draw_dispatch.on('draw_line', drawChart);
     this.transition = chart.Frame(this.linechart.__)
@@ -89,6 +87,11 @@ define([
       self.transition.dispatch.end_line.call(self.transition);
     });
 
+    // If the transition has no data, it is never going to jump! So we
+    // need to reset the lines.
+    if (data_by_selected_town.length === 0) {
+      d3.select('.selected_linechart').remove();
+    }
     this.transition.dispatch.jump_line.call(self.transition, year);
 
     return text_selections;

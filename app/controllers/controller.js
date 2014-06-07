@@ -14,7 +14,7 @@ define([
   }
 
   ControllersController.prototype.handleInfo = function(selections) {
-    if (selections.length > 0) {
+    if (selections[0].length > 0) {
       hideInfo();
     } else {
       showInfo();
