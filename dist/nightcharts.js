@@ -145,10 +145,12 @@ define('utils',[
   function setDelay (data, __) {
     var duration = __.duration;
     if (duration == undefined) { throw new Error('__.duration unset')}
-    __.delay = function (d, i) {
-      // FIXME: only referring to the first dataset, 
-      // while setting the delay on all!
-      return i / data[0].length * duration;
+    if (!__.delay) {
+      __.delay = function (d, i) {
+        // FIXME: only referring to the first dataset, 
+        // while setting the delay on all!
+        return i / data[0].length * duration;
+      }
     }
     return __;
   };
@@ -374,7 +376,8 @@ define('defaults', [
     overlapping_charts: { names: [] },
     drawDispatch: d3.dispatch('draw'),
     // .....
-    use_existing_chart: false
+    use_existing_chart: false,
+    delay: void 0
   };
   
 });
@@ -491,7 +494,6 @@ define('scale', [
     } else {
       callback = __.yValueN
     }
-    console.log('########################', __.data[0].map( callback ) );
     return this
       [range_method](options.range, __.padding)
       .domain(__.data[0].map( callback ) );

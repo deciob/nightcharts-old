@@ -3,6 +3,17 @@
   shape-rendering: crispEdges;
 }
 
+
+#bar-frame-viz rect.active {
+  fill: steelblue;
+}
+
+#bar-frame-viz rect.active ~ .active {
+  fill: orangered;
+}
+
+
+
 #bar-frame-viz text {
   fill: #444;
 }

@@ -12,7 +12,12 @@ define({
     render: {
       template: { module: 'text!controllers/template.html' },
     },
-    insert: { at: 'dom.first!.controllers' }
+    insert: { at: 'dom.first!.controllers' },
+    on: {
+      'click:.start': 'bar_frame_controller.start',
+      'click:.stop': 'bar_frame_controller.stop',
+      'click:.reset': 'bar_frame_controller.reset',
+    },
   },
 
   controllers_controller: {
@@ -25,7 +30,11 @@ define({
       replace: { module: 'i18n!bar_frame/strings' },
       css: { module: 'css!bar_frame/structure.css' }
     },
-    insert: { at: 'dom.first!.bar_frame' }
+    insert: { at: 'dom.first!.bar_frame' },
+    on: {
+      'click:#bar-frame-viz g.y text, #bar-frame-viz g.bars rect': 
+        'bar_frame_controller.getSelections | bar_frame_controller.updateSelections',
+    }
   },
 
   bar_frame_controller: {
@@ -36,6 +45,11 @@ define({
         selector: '#bar-frame-viz',
         data: {$ref: "data"}
       }
+    },
+    connect: {
+      'start': 'line_frame_controller.start',
+      'stop': 'line_frame_controller.stop',
+      'reset': 'line_frame_controller.reset',
     }
   },
 
@@ -62,6 +76,8 @@ define({
 	// Wire.js plugins
 	plugins: [
 		{ module: 'wire/dom', classes: { init: 'loading' } },
-		{ module: 'wire/dom/render' }
+		{ module: 'wire/dom/render' },
+    { module: 'wire/on' },
+    { module: 'wire/connect'},
 	]
 });
