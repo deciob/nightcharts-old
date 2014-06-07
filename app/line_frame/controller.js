@@ -13,47 +13,56 @@ define([
         normalized_data,
         grouped_data,
         grouped_data_obj,
-        data_by_selected_town,
-        linechart,
-        selected_linechart,
-        draw_dispatch,
-        drawChart,
-        frame_config, 
-        frame, 
-        year = 1950, 
-        delta = 5, 
-        draw;
+        linechart;
 
-    linechart = chart.composer()
+    this.selection = selection;
+
+    this.linechart = chart.composer()
       .margin({bottom: 35})
       .xValue(function(d) {return d.year})
       .yValue(function(d) {return d.population})
       .zValue(function(d) {return d.agglomeration})
-      .duration(1000)
+      .duration(400)
       .height(400)
       .date_format('%Y')
       .x_scale('time')
       .components(['x_axis', 'y_axis', 'lines'])
       .x_axis({tickFormat: d3.time.format("%Y")})
       .lines({class_name: 'linechart'});
-    normalized_data = chart.utils.normalizeData(data, linechart.__);
+    normalized_data = chart.utils.normalizeData(data, this.linechart.__);
     grouped_data = chart.utils.groupNormalizedDataByIndex(
-      2, normalized_data, linechart.__, {grouper: 'array'});
-    chart.draw(linechart, selection, grouped_data);
+      2, normalized_data, this.linechart.__, {grouper: 'array'});
+    chart.draw(this.linechart, selection, grouped_data);
   
     self.grouped_data_obj = chart.utils.groupNormalizedDataByIndex(
-      2, normalized_data, linechart.__, {grouper: 'object'});
-    data_by_selected_town = [
-      self.grouped_data_obj['São Paulo'], 
-      self.grouped_data_obj['New York']
-    ];
-    selected_linechart = chart.composer(linechart.current_applied_configuration)
+      2, normalized_data, this.linechart.__, {grouper: 'object'});
+
+  }
+
+
+  LineFrameController.prototype.setFrames = function(text_selections) {
+
+    var self = this,
+        data_by_selected_town = [],
+        selected_linechart,
+        draw_dispatch,
+        drawChart,
+        frame_config, 
+        frame, 
+        year = 1955, 
+        delta = 5, 
+        draw;
+
+    text_selections.each(function(d) {
+      data_by_selected_town.push(self.grouped_data_obj[d]);
+    });
+    selected_linechart = chart.composer(this.linechart.current_applied_configuration)
       .components(['lines'])
       .use_existing_chart(true)
-      .duration(400)
+      .duration(300)
       .drawDispatch(d3.dispatch('draw_line'))
-      .lines({class_name: 'selected_linechart'});
-    draw = chart.draw(selected_linechart, selection);
+      .lines({class_name: 'selected_linechart', reset: true});
+    draw = chart.draw(selected_linechart, this.selection);
 
     drawChart = function (data, options) {
       draw(data, options);
@@ -61,7 +70,7 @@ define([
 
     draw_dispatch = selected_linechart.drawDispatch();
     draw_dispatch.on('draw_line', drawChart);
-    this.transition = chart.Frame(linechart.__)
+    this.transition = chart.Frame(this.linechart.__)
       .draw_dispatch(draw_dispatch)
       .data(data_by_selected_town)
       .initial_frame(year)
@@ -70,7 +79,7 @@ define([
       .frameIdentifierKeyFunction(function(d){
         return d[0].getFullYear();
       })
-      .step(60)
+      .step(50)
       .frame_type('sequence')
       .delta(delta)();
 
@@ -79,36 +88,11 @@ define([
     });
 
     this.transition.dispatch.jump_line.call(self.transition, year);
-
   }
 
-
-
-
-
-
-  LineFrameController.prototype.setFrames = function(args) {
-    args.selections.forEach(function(selection) {
-      console.log(selection);
-    });
-  }
-
-  LineFrameController.prototype.setSelections = function(event) {
-    console.log(event.target.__data__);
-    var selection = event.target.__data__;
-
-    //args.selections.forEach(function(selection) {
-    //  console.log(selection);
-    //});
-  }
-
-
-
-
-
+  
 
   LineFrameController.prototype.start = function() {
-    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaa');
     this.transition.dispatch.start_line.call(this.transition);
   }
 

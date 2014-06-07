@@ -9,10 +9,12 @@
 }
 
 #bar-frame-viz rect.active ~ .active {
-  fill: orangered;
+  fill: firebrick;
 }
 
-
+#bar-frame-viz .y.axis text {
+  cursor: pointer;
+}
 
 #bar-frame-viz text {
   fill: #444;

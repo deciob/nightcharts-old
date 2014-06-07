@@ -22,9 +22,9 @@ define([
         draw;
 
     barchart = chart.composer()
-      .margin({left: 150, bottom: 35})
+      .margin({left: 180, bottom: 35})
       .height(600)
-      .duration(400)
+      .duration(300)
       .yValue( function(d) { return d['agglomeration']; } )
       .xValue( function(d) { return d['population']; } )
       .zValue(function(d) {return d.year})
@@ -53,7 +53,7 @@ define([
       .draw_dispatch(draw_dispatch)
       .data(grouped_data)
       .initial_frame(year)
-      .step(60)
+      .step(50)
       .delta(delta)
       .dispatch_identifier('_bar')
       .frame_identifier_index(0)();
@@ -87,22 +87,27 @@ define([
       return classSelections.call(this, active_text_selections);
     });
 
-    return d3.selectAll('#bar-frame-viz > svg > g > g.y text.active');
+    return d3.selectAll('#bar-frame-viz > svg g.y text.active');
   }
 
   BarFrameController.prototype.getSelections = function(event) {
-    var wrapper_element = event.target.parentElement,
-        wrapper_element_idx = Array.prototype.indexOf.call(
-          event.target.parentElement.parentElement.children, wrapper_element),
+    var wrapper_element,
+        wrapper_element_idx,
         tag_name, 
         text_selection, 
         rect_selection;
     tag_name = event.target.tagName;
     if ( tag_name == 'text' ) {
+      wrapper_element = event.target.parentElement;
+      wrapper_element_idx = Array.prototype.indexOf.call(
+          event.target.parentElement.parentElement.children, wrapper_element);
       text_selection = d3.select(event.target);
       rect_selection = d3.select(
         d3.selectAll('#bar-frame-viz > svg g.bars rect')[0][wrapper_element_idx]);
     } else {
+      wrapper_element = event.target;
+      wrapper_element_idx = Array.prototype.indexOf.call(
+          event.target.parentElement.children, wrapper_element);
       rect_selection = d3.select(event.target);
       text_selection = d3.select(
         d3.selectAll('#bar-frame-viz > svg g.y text')[0][wrapper_element_idx]);

@@ -351,7 +351,7 @@ define('defaults', [
       orient: 'left',
       tickValues: void 0,
     },
-    lines: {class_name: ''},
+    lines: {class_name: '', reset: false},
     bars: {class_name: ''},
     frames: {},
     // if x_scale: 'time'
@@ -696,8 +696,8 @@ define('components/line', [
       return i(t); };
   }
 
-  function dataIdentifier (d) {
-    //console.log('dataIdentifier', d[0]);
+  function dataIdentifier (d, i) {
+    //console.log('dataIdentifier', d, i);
     return d;
   }
 
@@ -715,7 +715,7 @@ define('components/line', [
 
     line_head_path = line_head.selectAll(".line.head.path")
       .data([d], function(d) {
-        //console.log(d[0], '@@');
+        //console.log(d, d.length, '@@');
         return d.length;});
 
     line_head_path.exit().transition().remove();
@@ -769,7 +769,7 @@ define('components/line', [
 
   function setLines (selection, transition, __, data) {
     //console.log('-----------------------------------');
-    //console.log(data, __.old_frame_identifier);
+    //console.log('setLines', data);
     //TODO: this is utils!!!
     var line = selection.selectAll(".line")
           // data is an array, each element one line.
@@ -804,8 +804,16 @@ define('components/line', [
   }
 
   function drawLines (selection, transition, __, data) {
+    //console.log('drawLines', data);
     var has_timescale = __.x_scale == 'time',
         g;
+
+    // TODO: can this be handled by the enter-exit-update?
+    if (__.lines.reset) {
+      selection.selectAll('g.lines.' + __.lines.class_name).each(function(d) {
+        d3.select(this).remove();
+      })
+    }
 
     handleTransitionEndBind = handleTransitionEnd.bind(undefined, __);
 
@@ -819,6 +827,7 @@ define('components/line', [
     g.enter().append('g').attr('class', 'lines ' + __.lines.class_name);
 
     g.each(function(data, i) {
+      //d3.select(this).remove()
       setLines(d3.select(this), transition, __, data);
     });
 
