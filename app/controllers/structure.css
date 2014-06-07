@@ -1,0 +1,12 @@
+section.controllers .info {
+  display: none;
+}
+
+section.controllers .info.active {
+  position: absolute;
+  width: 790px;
+  height: 196px;
+  background-color: white;
+  display: block;
+}
+

@@ -11,6 +11,7 @@ define({
   controllers: {
     render: {
       template: { module: 'text!controllers/template.html' },
+      css: { module: 'css!controllers/structure.css' }
     },
     insert: { at: 'dom.first!.controllers' },
     on: {
@@ -21,7 +22,9 @@ define({
   },
 
   controllers_controller: {
-
+    create: {
+      module: 'controllers/controller',
+    }
   },
 
   bar_frame: {
@@ -33,7 +36,10 @@ define({
     insert: { at: 'dom.first!.bar_frame' },
     on: {
       'click:#bar-frame-viz g.y text, #bar-frame-viz g.bars rect': 
-        'bar_frame_controller.getSelections | bar_frame_controller.updateSelections | line_frame_controller.setFrames',
+        'bar_frame_controller.getSelections | ' + 
+        'bar_frame_controller.updateSelections | ' + 
+        'line_frame_controller.setFrames | ' +
+        'controllers_controller.handleInfo',
     }
   },
 

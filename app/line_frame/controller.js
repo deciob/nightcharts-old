@@ -68,6 +68,8 @@ define([
       draw(data, options);
     }
 
+    console.log(data_by_selected_town);
+
     draw_dispatch = selected_linechart.drawDispatch();
     draw_dispatch.on('draw_line', drawChart);
     this.transition = chart.Frame(this.linechart.__)
@@ -88,6 +90,8 @@ define([
     });
 
     this.transition.dispatch.jump_line.call(self.transition, year);
+
+    return text_selections;
   }
 
   

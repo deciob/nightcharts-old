@@ -106,6 +106,7 @@ section.viz {
   background-color: #BF9C88;
   width: 790px;
   height: 196px;
+  position: relative;
 }
 
 .line_frame {
