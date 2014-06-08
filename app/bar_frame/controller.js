@@ -74,11 +74,15 @@ define([
         active_text_selections = d3.selectAll('#bar-frame-viz > svg g.y text.active');
 
     function classSelections(active_selections) {
-      if ( active_selections[0].length > 1 || d3.select(this).classed('active') ) {
-        return false;
-      } else {
+      if ( !d3.select(this).classed('active') && active_selections[0].length > 1 ) {
+        d3.select(active_selections[0].slice(-1)[0]).classed('active', false);
         return true;
+      } else if ( !d3.select(this).classed('active') && active_selections[0].length < 2 ) {
+        return true;
+      } else if ( active_selections[0].length > 1 || d3.select(this).classed('active') ) {
+        return false;
       }
+      
     }
 
     current_rect_selection.classed('active', function(d) {

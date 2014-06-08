@@ -8,25 +8,25 @@ section.controllers .info {
 
 section.controllers .info.active {
   position: absolute;
-  width: 840px;
+  width: 810px;
   height: 196px;
   background-color: white;
   display: block;
   padding: 50px 100px;
-  font-size: 22px;
-  font-weight: bold;
-  line-height: 2;
+  font-size: 20px;
+  /*font-weight: bold;*/
+  line-height: 1.4;
   
 }
 
 section.controllers section.buttons {
-  
-  padding: 50px;
+  padding: 50px 8px;
   margin: 0 auto;
 }
 
 section.controllers section.buttons button {
-  font-size: 24px;
+  font-family: 'Merriweather';
+  font-size: 20px;
   padding: 5px 10px;
   color: #646464;
 }
