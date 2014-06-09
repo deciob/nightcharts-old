@@ -690,8 +690,14 @@ define('components/line', [
   }
 
   function tweenDash() {
-    var l = this.getTotalLength(),
-        i = d3.interpolateString("0," + l, l + "," + l);
+    var l, i;
+    try {
+      l = this.getTotalLength();
+    } catch (e) {
+      l = 0;
+    }
+    i = d3.interpolateString("0," + l, l + "," + l);
+    console.log('tweenDash l ', l);
     return function(t) { 
       return i(t); };
   }

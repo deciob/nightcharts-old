@@ -115,7 +115,7 @@ define([
   }
 
   LineFrameController.prototype.jump = function() {
-    this.selected_linechart.duration(1400);
+    this.selected_linechart.duration(4000);
     this.transition.dispatch.jump_line.call(this.transition, 2025);
   }
 
