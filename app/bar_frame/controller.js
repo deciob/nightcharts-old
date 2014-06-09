@@ -136,7 +136,7 @@ define([
   }
 
   BarFrameController.prototype.jump = function() {
-    this.barchart.duration(1200);
+    this.barchart.duration(1400);
     this.transition.dispatch.jump_bar.call(this.transition, 2020);
   }
 
