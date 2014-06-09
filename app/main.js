@@ -15,6 +15,7 @@ define({
     },
     insert: { at: 'dom.first!.controllers' },
     on: {
+      'click:.jump': 'bar_frame_controller.jump',
       'click:.start': 'bar_frame_controller.start',
       'click:.stop': 'bar_frame_controller.stop',
       'click:.reset': 'bar_frame_controller.reset',
@@ -56,6 +57,7 @@ define({
       'start': 'line_frame_controller.start',
       'stop': 'line_frame_controller.stop',
       'reset': 'line_frame_controller.reset',
+      'jump': 'line_frame_controller.jump',
     }
   },
 

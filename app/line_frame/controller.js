@@ -94,6 +94,8 @@ define([
     }
     this.transition.dispatch.jump_line.call(self.transition, year);
 
+    this.selected_linechart = selected_linechart;
+
     return text_selections;
   }
 
@@ -108,7 +110,13 @@ define([
   }
 
   LineFrameController.prototype.reset = function() {
+    this.selected_linechart.duration(300);
     this.transition.dispatch.reset_line.call(this.transition);
+  }
+
+  LineFrameController.prototype.jump = function() {
+    this.selected_linechart.duration(1400);
+    this.transition.dispatch.jump_line.call(this.transition, 2025);
   }
 
   return LineFrameController;

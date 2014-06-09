@@ -65,6 +65,8 @@ define([
   
     this.transition.dispatch.jump_bar.call(this.transition, year);
 
+    this.barchart = barchart;
+
   };
 
   BarFrameController.prototype.updateSelections = function(selections) {
@@ -129,7 +131,13 @@ define([
   }
 
   BarFrameController.prototype.reset = function() {
+    this.barchart.duration(300);
     this.transition.dispatch.reset_bar.call(this.transition);
+  }
+
+  BarFrameController.prototype.jump = function() {
+    this.barchart.duration(1200);
+    this.transition.dispatch.jump_bar.call(this.transition, 2020);
   }
 
   return BarFrameController;
