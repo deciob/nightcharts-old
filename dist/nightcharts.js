@@ -361,7 +361,6 @@ define('defaults', [
     // used for extending the timescale on the margins.
     date_offset: false,
     duration: 900,  // transition duration
-    delay: 100,  // transition delay
     invert_data: false,  // Data sorting
     data_parser: 'groupedDataParser', // or simpleDataParser
     xValue: function (d) { return d[0]; },
@@ -377,7 +376,7 @@ define('defaults', [
     drawDispatch: d3.dispatch('draw'),
     // .....
     use_existing_chart: false,
-    delay: void 0
+    delay: void 0,
   };
   
 });
@@ -689,6 +688,7 @@ define('components/line', [
     });
   }
 
+  // FIXME: NS_ERROR_FAILURE in Firefox, handled by try-catch.
   function tweenDash() {
     var l, i;
     try {
@@ -697,7 +697,6 @@ define('components/line', [
       l = 0;
     }
     i = d3.interpolateString("0," + l, l + "," + l);
-    console.log('tweenDash l ', l);
     return function(t) { 
       return i(t); };
   }
@@ -760,16 +759,18 @@ define('components/line', [
       //.call(utils.endall, [d], handleTransitionEndBind);
   }
 
-  function transitionL (d, __) {
-    var index, head_d, body_d;
+  function transitionL (d, __, options) {
+    var index, head_d, body_d,
+        duration = options.duration === undefined ? __.duration : options.duration;
+    //console.log(options.duration === undefined, __.duration);
     if (__.old_frame_identifier) {
       index = getIndexFromIdentifier(__.old_frame_identifier, d, __.frameIdentifierKeyFunction);
       body_d = d.slice(0, index+1);
       head_d = d.slice(index);
-      transitionLH.call(this, head_d, __, {delay: __.delay, duration: __.duration});
+      transitionLH.call(this, head_d, __, {delay: __.delay, duration: duration});
       transitionLB.call(this, body_d, __, {delay: __.delay, duration: 0});
     } else {
-      transitionLH.call(this, d, __, {delay: __.delay, duration: __.duration});
+      transitionLH.call(this, d, __, {delay: __.delay, duration: duration});
     }
   }
 
@@ -783,12 +784,13 @@ define('components/line', [
         line_g, 
         line_g_start, 
         line_g_end,
+        options = {},
         ov_options = __.overlapping_charts.options,
         ov_line_options = ov_options ? ov_options.lines : void 0;
   
     // Exit phase (let us push out old line before the new ones come in).
     line.exit()
-      .transition().duration(__.duration).style('opacity', 0).remove();
+      .transition().duration(0).style('opacity', 0).remove();
 
     // this should end the line or line segment (depends from the data),
     // if the data only represents a fraction of the line then the charting
@@ -803,8 +805,15 @@ define('components/line', [
     config = __;
     line_g.each(function (d, i) { 
       //console.log('line_g.each', d);
-      //console.log('lines.enter().append("g")', d);
-      return transitionL.call(d3.select(this), d, __) });
+      //console.log('xxxx', __.filled_data_index, i);
+      if(__.filled_data_index === i) {
+        options.duration = 0;
+      } else {
+        options.duration = void 0;
+      }
+      //console.log(options);
+      return transitionL.call(d3.select(this), d, __, options);
+    });  
 
     return this;
   }
@@ -1045,9 +1054,10 @@ define('composer',[
 
     function compose (selection, options) {
 
-      var is_frame = (!options || options.is_frame === "undefined") ? false : options.is_frame,
-          old_frame_identifier = (!options || options.old_frame_identifier === "undefined") ? void 0 : options.old_frame_identifier,
-          frameIdentifierKeyFunction = (!options || options.frameIdentifierKeyFunction === "undefined") ? void 0 : options.frameIdentifierKeyFunction,
+      var is_frame = (!options || options.is_frame === undefined) ? false : options.is_frame,
+          old_frame_identifier = (!options || options.old_frame_identifier === undefined) ? void 0 : options.old_frame_identifier,
+          frameIdentifierKeyFunction = (!options || options.frameIdentifierKeyFunction === undefined) ? void 0 : options.frameIdentifierKeyFunction,
+          filled_data_index = (!options || options.filled_data_index === undefined) ? void 0 : options.filled_data_index,
           data = selection.datum(),
           svg,
           g,
@@ -1060,6 +1070,7 @@ define('composer',[
       __.data = data;
       __.old_frame_identifier = old_frame_identifier;
       __.frameIdentifierKeyFunction = frameIdentifierKeyFunction;
+      __.filled_data_index = filled_data_index;
       __ = utils.setDelay(data, __); //FIXME and TESTME
       if (!__.use_existing_chart) {
         __ = layout.setDimensions(selection, __);
@@ -1125,6 +1136,8 @@ define('draw',['require'],function(require) {
 
 
 define('frame/defaults', [], function() {
+
+  // Should be separated from the chart config not merged from!!!
     
   return {
 
@@ -1141,7 +1154,8 @@ define('frame/defaults', [], function() {
     frame_type: 'block', //or 'sequence'
     categoricalValue: function (d) { return d[0]; },
     normalize_data: false,
-    dispatch_identifier: ''
+    dispatch_identifier: '',
+    fill_empty_data_sequence: false
   };
 
 });
@@ -1315,23 +1329,51 @@ define('frame/frame',[
     //getset(Frame.prototype, __);
     getset(Frame, __);
   
+    // TODO: needs refactor and testing.
     Frame.prototype.startTransition = function () {
-      var self = this;
+      var self = this,
+          data = self.getDataForFrame(self.normalized_data, __),
+          stop_transition = true;
       clearTimeout(__.current_timeout);
-      var data = self.getDataForFrame(self.normalized_data, __);
-      if (data[0] && data[0].length > 0) { //data[0] FIXME???
-      __.current_timeout = setTimeout( function () {
-        // Fire the draw event
-        __.draw_dispatch['draw' + __.dispatch_identifier].call(self, data, {
-          old_frame_identifier: __.old_frame,
-          frameIdentifierKeyFunction: __.frameIdentifierKeyFunction
-        });
-      }, __.step);
-      } else {
-        // When no data is left to consume, let us stop the running frames!
+
+      function _startTransition(data) {
+        var self = this;
+        __.current_timeout = setTimeout( function () {
+          //console.log('filled_data_index',  __.filled_data_index);
+          // Fire the draw event
+          __.draw_dispatch['draw' + __.dispatch_identifier].call(self, data, {
+            old_frame_identifier: __.old_frame,
+            frameIdentifierKeyFunction: __.frameIdentifierKeyFunction,
+            filled_data_index: __.filled_data_index,
+          });
+          self.old_frame_data = data;
+        }, __.step);
+      }
+
+      if ( data.length > 1 ) {
+        data.forEach(function(d, i) {
+          //console.log(d, i, __.fill_empty_data_sequence);
+          if (d.length === 0 && __.fill_empty_data_sequence === true) {
+            //console.log('@@', data[i], self.old_frame_data[i]);
+            data[i] = self.old_frame_data[i];
+            __.filled_data_index = i;
+          }
+          if (d[0] && d[0].length > 0) {
+            stop_transition = false;
+            _startTransition.call(this, data);
+          }
+        }, this);
+      } else if (data[0] && data[0].length > 0) {
+        stop_transition = false;
+        _startTransition.call(this, data);
+      } 
+
+      if (stop_transition) {
         this.state_machine.consumeEvent('stop');
         this.frame = __.old_frame;
+        __.filled_data_index = void 0;
       }
+
       self.dispatch['at_beginning_of_transition' + __.dispatch_identifier].call(self);
     }
 

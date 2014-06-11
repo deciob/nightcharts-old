@@ -122,6 +122,21 @@ define([
     return [text_selection, rect_selection];
   }
 
+  BarFrameController.prototype.resetSelections = function(data_by_selected_town) {
+    // FIXME: callback or promise to handle stuff like:
+    // this.transition.dispatch.jump_bar.call(this.transition, 2020)
+    // instead of using this setTimeout here!
+    setTimeout( function () {
+      d3.selectAll('#bar-frame-viz > svg g.bars rect').each(function(d) {
+        data_by_selected_town.forEach(function (town) {
+          if(town == d[1]) {
+            d3.select(this).classed('active', true);
+          }
+        }, this);
+      });
+    }, 400);
+  }
+
   BarFrameController.prototype.start = function() {
     this.transition.dispatch.start_bar.call(this.transition);
   }

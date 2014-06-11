@@ -53,7 +53,10 @@ define([
         delta = 5, 
         draw;
 
+    this.towns = [];
+
     text_selections.each(function(d) {
+      self.towns.push(d);
       data_by_selected_town.push(self.grouped_data_obj[d]);
     });
     selected_linechart = chart.composer(this.linechart.current_applied_configuration)
@@ -70,12 +73,13 @@ define([
 
     draw_dispatch = selected_linechart.drawDispatch();
     draw_dispatch.on('draw_line', drawChart);
-    this.transition = chart.Frame(this.linechart.__)
+    this.frame = chart.Frame(this.linechart.__)
       .draw_dispatch(draw_dispatch)
       .data(data_by_selected_town)
       .initial_frame(year)
       .frame_identifier_index(0)
       .dispatch_identifier('_line')
+      .fill_empty_data_sequence(true)
       .frameIdentifierKeyFunction(function(d){
         return d[0].getFullYear();
       })
@@ -84,7 +88,7 @@ define([
       .delta(delta)();
 
     selected_linechart.handleTransitionEnd( function () {
-      self.transition.dispatch.end_line.call(self.transition);
+      self.frame.dispatch.end_line.call(self.frame);
     });
 
     // If the transition has no data, it is never going to jump! So we
@@ -92,7 +96,7 @@ define([
     if (data_by_selected_town.length === 0) {
       d3.select('.selected_linechart').remove();
     }
-    this.transition.dispatch.jump_line.call(self.transition, year);
+    this.frame.dispatch.jump_line.call(self.frame, year);
 
     this.selected_linechart = selected_linechart;
 
@@ -102,21 +106,23 @@ define([
   
 
   LineFrameController.prototype.start = function() {
-    this.transition.dispatch.start_line.call(this.transition);
+    this.frame.dispatch.start_line.call(this.frame);
   }
 
   LineFrameController.prototype.stop = function() {
-    this.transition.dispatch.stop_line.call(this.transition);
+    this.frame.dispatch.stop_line.call(this.frame);
   }
 
   LineFrameController.prototype.reset = function() {
+    //var towns = this.data_by_selected_town.slice();
     this.selected_linechart.duration(300);
-    this.transition.dispatch.reset_line.call(this.transition);
+    this.frame.dispatch.reset_line.call(this.frame);
+    return this.towns;
   }
 
   LineFrameController.prototype.jump = function() {
-    this.selected_linechart.duration(4000);
-    this.transition.dispatch.jump_line.call(this.transition, 2025);
+    this.selected_linechart.duration(1400);
+    this.frame.dispatch.jump_line.call(this.frame, 2025);
   }
 
   return LineFrameController;

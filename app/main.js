@@ -56,7 +56,7 @@ define({
     connect: {
       'start': 'line_frame_controller.start',
       'stop': 'line_frame_controller.stop',
-      'reset': 'line_frame_controller.reset',
+      'reset': 'line_frame_controller.reset | bar_frame_controller.resetSelections',
       'jump': 'line_frame_controller.jump',
     }
   },
