@@ -4,6 +4,15 @@ define({
 	// configured in run.js, curl knows to load this as CSS.
 	theme: { module: 'theme/basic.css' },
 
+  config: {
+    single_frame_duration: 400,
+    all_frames_duration: 1200,
+    start_year: 1955,
+    end_year: 2025,
+    delta: 5,
+    step: 50
+  },
+
   data: {
     module: 'data/fetch_data',
   },
@@ -50,7 +59,8 @@ define({
       args: {
         el: {$ref: "bar_frame"},
         selector: '#bar-frame-viz',
-        data: {$ref: "data"}
+        data: {$ref: "data"},
+        config: {$ref: "config"},
       }
     },
     connect: {
@@ -76,7 +86,8 @@ define({
       args: {
         el: {$ref: "line_frame"},
         selector: '#line-frame-viz',
-        data: {$ref: "data"}
+        data: {$ref: "data"},
+        config: {$ref: "config"},
       }
     }
   },

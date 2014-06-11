@@ -9,6 +9,7 @@ define([
 
     var self = this,
         selection = d3.select(args.selector),
+        config = args.config,
         data = args.data,
         normalized_data,
         grouped_data,
@@ -17,14 +18,16 @@ define([
         drawChart,
         frame_config, 
         frame, 
-        year = 1950, 
-        delta = 5, 
+        year = config.start_year, 
+        delta = config.delta,
         draw;
+
+    this.config = config;
 
     barchart = chart.composer()
       .margin({left: 230, bottom: 35})
       .height(600)
-      .duration(300)
+      .duration(config.single_frame_duration)
       .yValue( function(d) { return d['agglomeration']; } )
       .xValue( function(d) { return d['population']; } )
       .zValue(function(d) {return d.year})
@@ -54,8 +57,8 @@ define([
       .draw_dispatch(draw_dispatch)
       .data(grouped_data)
       .initial_frame(year)
-      .step(50)
-      .delta(delta)
+      .step(config.step)
+      .delta(config.delta)
       .dispatch_identifier('_bar')
       .frame_identifier_index(0)();
   
@@ -134,7 +137,7 @@ define([
           }
         }, this);
       });
-    }, 400);
+    }, this.config.single_frame_duration);
   }
 
   BarFrameController.prototype.start = function() {
@@ -146,13 +149,13 @@ define([
   }
 
   BarFrameController.prototype.reset = function() {
-    this.barchart.duration(300);
+    this.barchart.duration(this.config.single_frame_duration);
     this.transition.dispatch.reset_bar.call(this.transition);
   }
 
   BarFrameController.prototype.jump = function() {
-    this.barchart.duration(1400);
-    this.transition.dispatch.jump_bar.call(this.transition, 2020);
+    this.barchart.duration(this.config.all_frames_duration);
+    this.transition.dispatch.jump_bar.call(this.transition, this.config.end_year);
   }
 
   return BarFrameController;

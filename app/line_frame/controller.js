@@ -9,6 +9,7 @@ define([
 
     var self = this,
         selection = d3.select(args.selector),
+        config = args.config,
         data = args.data,
         normalized_data,
         grouped_data,
@@ -16,13 +17,14 @@ define([
         linechart;
 
     this.selection = selection;
+    this.config = config;
 
     this.linechart = chart.composer()
       .margin({bottom: 35})
       .xValue(function(d) {return d.year})
       .yValue(function(d) {return d.population})
       .zValue(function(d) {return d.agglomeration})
-      .duration(400)
+      .duration(config.single_frame_duration)
       .height(400)
       .date_format('%Y')
       .x_scale('time')
@@ -49,8 +51,8 @@ define([
         drawChart,
         frame_config, 
         frame, 
-        year = 1955, 
-        delta = 5, 
+        year = this.config.start_year, 
+        delta = this.config.delta, 
         draw;
 
     this.towns = [];
@@ -62,7 +64,7 @@ define([
     selected_linechart = chart.composer(this.linechart.current_applied_configuration)
       .components(['lines'])
       .use_existing_chart(true)
-      .duration(300)
+      .duration(this.config.single_frame_duration)
       .drawDispatch(d3.dispatch('draw_line'))
       .lines({class_name: 'selected_linechart', reset: true});
     draw = chart.draw(selected_linechart, this.selection);
@@ -83,7 +85,7 @@ define([
       .frameIdentifierKeyFunction(function(d){
         return d[0].getFullYear();
       })
-      .step(50)
+      .step(this.config.step)
       .frame_type('sequence')
       .delta(delta)();
 
@@ -115,14 +117,14 @@ define([
 
   LineFrameController.prototype.reset = function() {
     //var towns = this.data_by_selected_town.slice();
-    this.selected_linechart.duration(300);
+    this.selected_linechart.duration(this.config.single_frame_duration);
     this.frame.dispatch.reset_line.call(this.frame);
     return this.towns;
   }
 
   LineFrameController.prototype.jump = function() {
-    this.selected_linechart.duration(1400);
-    this.frame.dispatch.jump_line.call(this.frame, 2025);
+    this.selected_linechart.duration(this.config.all_frames_duration);
+    this.frame.dispatch.jump_line.call(this.frame, this.config.end_year);
   }
 
   return LineFrameController;
