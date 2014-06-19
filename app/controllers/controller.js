@@ -5,20 +5,35 @@ define([
 
   var ControllersController = function () {};
 
-  function hideInfo() {
+  ControllersController.prototype.handleInfo = function(args) {
+    var selections = args.text_selections;
+    if (args.warning) {
+      this.showWarning();
+    } else {
+      this.hideWarning();
+      if (selections[0].length > 0) {
+        this.hideInfo();
+      } else {
+        this.showInfo();
+      }
+    }
+
+  }
+
+  ControllersController.prototype.hideInfo = function() {
     d3.select('section.controllers .info').classed('active', false);
   }
 
-  function showInfo() {
+  ControllersController.prototype.showInfo = function() {
     d3.select('section.controllers .info').classed('active', true);
   }
 
-  ControllersController.prototype.handleInfo = function(selections) {
-    if (selections[0].length > 0) {
-      hideInfo();
-    } else {
-      showInfo();
-    }
+  ControllersController.prototype.hideWarning = function() {
+    d3.select('section.controllers .warning').classed('active', false);
+  }
+
+  ControllersController.prototype.showWarning = function() {
+    d3.select('section.controllers .warning').classed('active', true);
   }
 
   return ControllersController;

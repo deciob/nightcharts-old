@@ -351,8 +351,15 @@ define('defaults', [
       orient: 'left',
       tickValues: void 0,
     },
-    lines: {class_name: '', reset: false},
-    bars: {class_name: ''},
+    lines: {
+        class_name: '', // on g wrapper element
+        class_name_on_path: function() {return '';},
+        reset: false
+    },
+    bars: {
+        class_name: '',
+        class_name_on_rect: function() {return '';},
+    },
     frames: {},
     // if x_scale: 'time'
     date_type: 'string', // or 'epoc'
@@ -366,6 +373,7 @@ define('defaults', [
     xValue: function (d) { return d[0]; },
     yValue: function (d) { return d[1]; },
     zValue: function (d) { return d[2]; },
+    identifier: void 0,
     // events
     handleClick: function (d, i) { return void 0; },
     handleTransitionEnd: function(d) { return void 0; },
@@ -681,7 +689,8 @@ define('components/line', [
       handleTransitionEndBind;
 
   function line (__) {
-    return d3.svg.line().x(function(d, i) {
+    return d3.svg.line()
+    .x(function(d, i) {
       return __.xScale(d[0]);
     }).y(function(d, i) {
       return __.yScale(d[1]);
@@ -726,9 +735,9 @@ define('components/line', [
     line_head_path.exit().transition().remove();
   
     line_head_path.enter().append("path")
-      .attr("class", "line head path")
+      .attr("class", "line head path " + __.lines.class_name_on_path(d))
       .attr("d", function (d) {
-        return line(__)(d);})    
+        return line(__)(d);})
       .transition()
       .delay(options.delay)
       .duration(options.duration)
@@ -749,7 +758,7 @@ define('components/line', [
     line_body_path.exit().transition().remove();
   
     line_body_path.enter().append("path")
-      .attr("class", "line body path")
+      .attr("class", "line body path " + __.lines.class_name_on_path(d))
       .attr("d", function (d) {
         return line(__)(d);})    
       .transition()
@@ -904,7 +913,7 @@ define('components/bar', [
 
   function _createHorizontalBars (__) {
     return this.append("rect")
-      .attr("class", "bar")
+      .attr("class", function(d){return "bar " + __.bars.class_name_on_rect(d);})
       .attr("width", 0)
       .attr("height", __.yScale.rangeBand());
   }

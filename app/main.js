@@ -17,6 +17,17 @@ define({
     module: 'data/fetch_data',
   },
 
+  classed_controller: {
+    create: {
+      module: 'classed/controller',
+      args: {
+        colours: {'red': false, 'blue': false},
+        active_rect_selector: '#bar-frame-viz > svg g.bars rect.active',
+        active_text_selector: '#bar-frame-viz > svg g.y text.active',
+        config: {$ref: "config"},      }
+    }
+  },
+
   controllers: {
     render: {
       template: { module: 'text!controllers/template.html' },
@@ -27,7 +38,7 @@ define({
       'click:.jump': 'bar_frame_controller.jump',
       'click:.start': 'bar_frame_controller.start',
       'click:.stop': 'bar_frame_controller.stop',
-      'click:.reset': 'bar_frame_controller.reset',
+      'click:.reset': 'controllers_controller.hideWarning | bar_frame_controller.reset',
     },
   },
 
@@ -47,8 +58,9 @@ define({
     on: {
       'click:#bar-frame-viz g.y text, #bar-frame-viz g.bars rect': 
         'bar_frame_controller.getSelections | ' + 
-        'bar_frame_controller.updateSelections | ' + 
+        'classed_controller.updateBarSelections | ' +
         'line_frame_controller.setFrames | ' +
+        //'classed_controller.updateLineSelections | ' +
         'controllers_controller.handleInfo',
     }
   },
@@ -60,6 +72,7 @@ define({
         el: {$ref: "bar_frame"},
         selector: '#bar-frame-viz',
         data: {$ref: "data"},
+        active_line_selector: '#line-frame-viz .lines.selected_linechart',
         config: {$ref: "config"},
       }
     },

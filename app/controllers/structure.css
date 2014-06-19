@@ -6,6 +6,10 @@ section.controllers .info {
   display: none;
 }
 
+section.controllers .warning {
+  display: none;
+}
+
 section.controllers .info.active {
   position: absolute;
   width: 810px;
@@ -16,7 +20,11 @@ section.controllers .info.active {
   font-size: 20px;
   /*font-weight: bold;*/
   line-height: 1.4;
-  
+}
+
+section.controllers .warning.active {
+  display: block;
+  font-weight: bold;
 }
 
 section.controllers section.buttons {

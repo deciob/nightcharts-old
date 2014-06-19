@@ -11,6 +11,7 @@
 			// Define application-level packages
 			{name: 'data', location: 'app/data',},
 			{name: 'controllers', location: 'app/controllers',},
+			{name: 'classed', location: 'app/classed',},
 			{name: 'bar_frame', location: 'app/bar_frame',},
 			{name: 'line_frame', location: 'app/line_frame',},
 

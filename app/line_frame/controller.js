@@ -42,9 +42,15 @@ define([
   }
 
 
-  LineFrameController.prototype.setFrames = function(text_selections) {
+  LineFrameController.prototype.setFrames = function(args) {
+
+    if (args.warning) {
+      return args;
+    }
 
     var self = this,
+        text_selections = args.text_selections,
+        rect_selections = args.rect_selections,
         data_by_selected_town = [],
         selected_linechart,
         draw_dispatch,
@@ -66,7 +72,19 @@ define([
       .use_existing_chart(true)
       .duration(this.config.single_frame_duration)
       .drawDispatch(d3.dispatch('draw_line'))
-      .lines({class_name: 'selected_linechart', reset: true});
+      .identifier('year')
+      .lines({
+        class_name: 'selected_linechart', 
+        class_name_on_path: function(d) {
+          var classed = '';
+          rect_selections.each(function(r) {
+            if (d[0] && d[0][2] === r[1]) {
+              classed = d3.select(this).classed('red') ? 'red' : 'blue';
+            }
+          });
+          return classed;
+        },
+        reset: true});
     draw = chart.draw(selected_linechart, this.selection);
 
     drawChart = function (data, options) {
@@ -102,7 +120,7 @@ define([
 
     this.selected_linechart = selected_linechart;
 
-    return text_selections;
+    return {text_selections: text_selections, line_class: 'selected_linechart'};
   }
 
   

@@ -9,6 +9,7 @@ define([
 
     var self = this,
         selection = d3.select(args.selector),
+        active_line_selector = args.active_line_selector,
         config = args.config,
         data = args.data,
         normalized_data,
@@ -23,6 +24,10 @@ define([
         draw;
 
     this.config = config;
+    this.colours = [
+      {colour: 'red', active: false,},
+      {colour: 'blue', active: false,},
+    ];
 
     barchart = chart.composer()
       .margin({left: 230, bottom: 35})
@@ -32,12 +37,25 @@ define([
       .xValue( function(d) { return d['population']; } )
       .zValue(function(d) {return d.year})
       .components(['x_axis', 'y_axis', 'bars'])
+      .bars({
+        class_name_on_rect: function(d) {
+          var classed = '';
+          d3.selectAll(active_line_selector).each(function(l) {
+            console.log(this.__data__[0][0][2], l[0][0][2]);
+            if (this.__data__[0] && this.__data__[0][0][2] === l[0][0][2]) {
+              classed = d3.select(this).select('path').classed('red') ? 'red' : 'blue';
+            }
+          });
+          return classed;
+        }
+      })
       .scale_bounds('0,40')
       .invert_data(true)
       .y_scale('ordinal')
       .x_scale('linear')
       .x_axis({tickValues: ['0', '20', '40']})
       .delay(function(){return 0;})
+      .identifier('year')
       .drawDispatch(d3.dispatch('draw_bar'));
     normalized_data = chart.utils.normalizeData(data, barchart.__);
     grouped_data = chart.utils.groupNormalizedDataByIndex(
@@ -72,57 +90,41 @@ define([
 
   };
 
-  BarFrameController.prototype.updateSelections = function(selections) {
-    var current_rect_selection = selections[1],
-        current_text_selection = selections[0],
-        active_rect_selections = d3.selectAll('#bar-frame-viz > svg g.bars rect.active'),
-        active_text_selections = d3.selectAll('#bar-frame-viz > svg g.y text.active');
-
-    function classSelections(active_selections) {
-      if ( !d3.select(this).classed('active') && active_selections[0].length > 1 ) {
-        d3.select(active_selections[0].slice(-1)[0]).classed('active', false);
-        return true;
-      } else if ( !d3.select(this).classed('active') && active_selections[0].length < 2 ) {
-        return true;
-      } else if ( active_selections[0].length > 1 || d3.select(this).classed('active') ) {
-        return false;
-      }
-      
-    }
-
-    current_rect_selection.classed('active', function(d) {
-      return classSelections.call(this, active_rect_selections);
-    });
-    current_text_selection.classed('active', function(d) {
-      return classSelections.call(this, active_text_selections);
-    });
-
-    return d3.selectAll('#bar-frame-viz > svg g.y text.active');
-  }
-
   BarFrameController.prototype.getSelections = function(event) {
-    var wrapper_element,
+    var city,
+        wrapper_element,
         wrapper_element_idx,
         tag_name, 
         text_selection, 
         rect_selection;
     tag_name = event.target.tagName;
+    debugger
     if ( tag_name == 'text' ) {
-      wrapper_element = event.target.parentElement;
-      wrapper_element_idx = Array.prototype.indexOf.call(
-          event.target.parentElement.parentElement.children, wrapper_element);
-      text_selection = d3.select(event.target);
-      rect_selection = d3.select(
-        d3.selectAll('#bar-frame-viz > svg g.bars rect')[0][wrapper_element_idx]);
+      city = event.target.__data__;
+      //wrapper_element = event.target.parentElement;
+      //wrapper_element_idx = Array.prototype.indexOf.call(
+      //    event.target.parentElement.parentElement.children, wrapper_element);
+      //if (d3.selectAll(
+      //  '#bar-frame-viz > svg g.bars rect')[0][wrapper_element_idx]
+      //  .__data__[2] !== this.config.start_year) {
+      //    return {warning: true};
+      //}
+      //text_selection = d3.select(event.target);
+      //rect_selection = d3.select(
+      //  d3.selectAll('#bar-frame-viz > svg g.bars rect')[0][wrapper_element_idx]);
     } else {
-      wrapper_element = event.target;
-      wrapper_element_idx = Array.prototype.indexOf.call(
-          event.target.parentElement.children, wrapper_element);
-      rect_selection = d3.select(event.target);
-      text_selection = d3.select(
-        d3.selectAll('#bar-frame-viz > svg g.y text')[0][wrapper_element_idx]);
+      if (event.target.__data__[2] !== this.config.start_year) {
+        return {warning: true};
+      }
+      city = event.target[1].__data__;
+      //wrapper_element = event.target;
+      //wrapper_element_idx = Array.prototype.indexOf.call(
+      //    event.target.parentElement.children, wrapper_element);
+      //rect_selection = d3.select(event.target);
+      //text_selection = d3.select(
+      //  d3.selectAll('#bar-frame-viz > svg g.y text')[0][wrapper_element_idx]);
     }
-    return [text_selection, rect_selection];
+    //return {text_selection: text_selection, rect_selection: rect_selection};
   }
 
   BarFrameController.prototype.resetSelections = function(data_by_selected_town) {

@@ -22,6 +22,15 @@
   stroke-width: 2.8px;
 }
 
+#line-frame-viz .lines.selected_linechart path.blue {
+  stroke: steelblue;
+}
+
+#line-frame-viz .lines.selected_linechart path.red {
+  stroke: firebrick;
+}
+
+/*
 #line-frame-viz .lines.selected_linechart > .line path {
   stroke: steelblue;
 }
@@ -29,3 +38,4 @@
 #line-frame-viz .lines.selected_linechart > .line ~ .line path {
   stroke: firebrick;
 }
+*/
