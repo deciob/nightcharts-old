@@ -4,11 +4,11 @@
 }
 
 
-#bar-frame-viz rect.active.blue {
+#bar-frame-viz rect.blue {
   fill: steelblue;
 }
 
-#bar-frame-viz rect.active.red {
+#bar-frame-viz rect.red {
   fill: firebrick;
 }
 

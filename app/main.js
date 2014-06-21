@@ -5,7 +5,7 @@ define({
 	theme: { module: 'theme/basic.css' },
 
   config: {
-    single_frame_duration: 400,
+    single_frame_duration: 200,
     all_frames_duration: 1200,
     start_year: 1955,
     end_year: 2025,
@@ -58,9 +58,10 @@ define({
     on: {
       'click:#bar-frame-viz g.y text, #bar-frame-viz g.bars rect': 
         'bar_frame_controller.getSelections | ' + 
-        'classed_controller.updateBarSelections | ' +
+        'classed_controller.updateCities | ' +
+        'bar_frame_controller.updateSelections | ' +
         'line_frame_controller.setFrames | ' +
-        //'classed_controller.updateLineSelections | ' +
+        'line_frame_controller.updateSelections | ' +
         'controllers_controller.handleInfo',
     }
   },

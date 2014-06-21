@@ -24,10 +24,8 @@ define([
         draw;
 
     this.config = config;
-    this.colours = [
-      {colour: 'red', active: false,},
-      {colour: 'blue', active: false,},
-    ];
+    this.colours = ['red', 'blue'];
+    this.cities = [];
 
     barchart = chart.composer()
       .margin({left: 230, bottom: 35})
@@ -37,18 +35,18 @@ define([
       .xValue( function(d) { return d['population']; } )
       .zValue(function(d) {return d.year})
       .components(['x_axis', 'y_axis', 'bars'])
-      .bars({
-        class_name_on_rect: function(d) {
-          var classed = '';
-          d3.selectAll(active_line_selector).each(function(l) {
-            console.log(this.__data__[0][0][2], l[0][0][2]);
-            if (this.__data__[0] && this.__data__[0][0][2] === l[0][0][2]) {
-              classed = d3.select(this).select('path').classed('red') ? 'red' : 'blue';
-            }
-          });
-          return classed;
-        }
-      })
+      //.bars({
+      //  class_name_on_rect: function(d) {
+      //    var classed = '';
+      //    d3.selectAll(active_line_selector).each(function(l) {
+      //      console.log(this.__data__[0][0][2], l[0][0][2]);
+      //      if (this.__data__[0] && this.__data__[0][0][2] === l[0][0][2]) {
+      //        classed = d3.select(this).select('path').classed('red') ? 'red' : 'blue';
+      //      }
+      //    });
+      //    return classed;
+      //  }
+      //})
       .scale_bounds('0,40')
       .invert_data(true)
       .y_scale('ordinal')
@@ -92,50 +90,71 @@ define([
 
   BarFrameController.prototype.getSelections = function(event) {
     var city,
-        wrapper_element,
-        wrapper_element_idx,
-        tag_name, 
-        text_selection, 
-        rect_selection;
-    tag_name = event.target.tagName;
-    debugger
+        tag_name = event.target.tagName;
+
     if ( tag_name == 'text' ) {
       city = event.target.__data__;
-      //wrapper_element = event.target.parentElement;
-      //wrapper_element_idx = Array.prototype.indexOf.call(
-      //    event.target.parentElement.parentElement.children, wrapper_element);
-      //if (d3.selectAll(
-      //  '#bar-frame-viz > svg g.bars rect')[0][wrapper_element_idx]
-      //  .__data__[2] !== this.config.start_year) {
-      //    return {warning: true};
-      //}
-      //text_selection = d3.select(event.target);
-      //rect_selection = d3.select(
-      //  d3.selectAll('#bar-frame-viz > svg g.bars rect')[0][wrapper_element_idx]);
     } else {
       if (event.target.__data__[2] !== this.config.start_year) {
         return {warning: true};
       }
-      city = event.target[1].__data__;
-      //wrapper_element = event.target;
-      //wrapper_element_idx = Array.prototype.indexOf.call(
-      //    event.target.parentElement.children, wrapper_element);
-      //rect_selection = d3.select(event.target);
-      //text_selection = d3.select(
-      //  d3.selectAll('#bar-frame-viz > svg g.y text')[0][wrapper_element_idx]);
+      city = event.target.__data__[1];
     }
-    //return {text_selection: text_selection, rect_selection: rect_selection};
+
+    return {city: city};
   }
 
-  BarFrameController.prototype.resetSelections = function(data_by_selected_town) {
+  BarFrameController.prototype.updateSelections = function(args) {
+    var cities = args.cities || this.cities,
+        colours = this.colours,
+        bars = d3.selectAll('#bar-frame-viz > svg g.bars rect');
+
+    this.cities = cities;
+
+
+    //console.log(cities);
+
+    d3.select('#bar-frame-viz > svg g.bars rect.red').classed('red', false);
+    d3.select('#bar-frame-viz > svg g.bars rect.blue').classed('blue', false);
+
+    d3.selectAll('#bar-frame-viz > svg g.bars rect').each(function(d) {
+      cities.forEach(function(city, i){
+        var selection = d3.select(this);
+        console.log(d[1]);
+        if (d[1] === city) {
+          selection.classed('red', function(){
+            return colours.indexOf('red') === i ? true : false;
+          });
+          selection.classed('blue', function(){
+            console.log(city, i);
+            return colours.indexOf('blue') === i ? true : false;
+          });
+        }
+      }, this);
+    });
+
+    return args;
+  }
+
+  BarFrameController.prototype.resetSelections = function() {
     // FIXME: callback or promise to handle stuff like:
     // this.transition.dispatch.jump_bar.call(this.transition, 2020)
     // instead of using this setTimeout here!
+    var cities = this.cities,
+        colours = this.colours;
     setTimeout( function () {
       d3.selectAll('#bar-frame-viz > svg g.bars rect').each(function(d) {
-        data_by_selected_town.forEach(function (town) {
-          if(town == d[1]) {
-            d3.select(this).classed('active', true);
+        cities.forEach(function(city, i){
+          var selection = d3.select(this);
+          console.log(d[1]);
+          if (d[1] === city) {
+            selection.classed('red', function(){
+              return colours.indexOf('red') === i ? true : false;
+            });
+            selection.classed('blue', function(){
+              console.log(city, i);
+              return colours.indexOf('blue') === i ? true : false;
+            });
           }
         }, this);
       });

@@ -18,6 +18,8 @@ define([
 
     this.selection = selection;
     this.config = config;
+    this.colours = ['red', 'blue'];
+    this.data = data;
 
     this.linechart = chart.composer()
       .margin({bottom: 35})
@@ -49,7 +51,8 @@ define([
     }
 
     var self = this,
-        text_selections = args.text_selections,
+        cities = args.cities,
+        //text_selections = args.text_selections,
         rect_selections = args.rect_selections,
         data_by_selected_town = [],
         selected_linechart,
@@ -61,12 +64,11 @@ define([
         delta = this.config.delta, 
         draw;
 
-    this.towns = [];
+    //this.towns = [];
 
-    text_selections.each(function(d) {
-      self.towns.push(d);
+    cities.forEach(function(d) {
       data_by_selected_town.push(self.grouped_data_obj[d]);
-    });
+    }, this);
     selected_linechart = chart.composer(this.linechart.current_applied_configuration)
       .components(['lines'])
       .use_existing_chart(true)
@@ -76,13 +78,17 @@ define([
       .lines({
         class_name: 'selected_linechart', 
         class_name_on_path: function(d) {
-          var classed = '';
-          rect_selections.each(function(r) {
-            if (d[0] && d[0][2] === r[1]) {
-              classed = d3.select(this).classed('red') ? 'red' : 'blue';
+          var colour;
+          cities.forEach(function(town, i) {
+            if (d[0] && d[0][2] === town) {
+              if (self.colours.indexOf('red') === i) {
+                colour = 'red';
+              } else if (self.colours.indexOf('blue') === i) {
+                colour = 'blue';
+              }
             }
-          });
-          return classed;
+          }, this);
+          return colour;
         },
         reset: true});
     draw = chart.draw(selected_linechart, this.selection);
@@ -120,7 +126,64 @@ define([
 
     this.selected_linechart = selected_linechart;
 
-    return {text_selections: text_selections, line_class: 'selected_linechart'};
+    return {
+      cities: args.cities, 
+      //text_selections: text_selections, 
+      line_class: 'selected_linechart'
+    };
+  }
+
+  LineFrameController.prototype.updateSelections = function(args) {
+    var cities = args.cities,
+        colours = this.colours,
+        bars = d3.selectAll('#bar-frame-viz > svg g.bars rect'),
+        lines = d3.selectAll('#line-frame-viz g.' + args.line_class + ' > g.line');
+
+    d3.selectAll('#line-frame-viz g.' + args.line_class + ' > g.line.red')
+      .classed('red', false);
+    d3.selectAll('#line-frame-viz g.' + args.line_class + ' > g.line.blue')
+      .classed('blue', false);
+
+    setTimeout( function () {
+      d3.selectAll('#line-frame-viz g.' + args.line_class + ' > g.line').each(function(d) {
+        //console.log(d);
+        cities.forEach(function(city, i){
+          var selection = d3.select(this);
+          if (d[1] === city) {
+            selection.classed('red', function(){
+              return colours.indexOf('red') === i ? true : false;
+            });
+            selection.classed('blue', function(){
+              return colours.indexOf('blue') === i ? true : false;
+            });
+          }
+        }, this);
+        //if (red[0][0] !== undefined && red[0][0].__data__[1] === d[0][2]) {
+        //  d3.select(this).classed({red: true, blue: false});
+        //} else if (blue[0][0] !== undefined && blue[0][0].__data__[1] === d[0][2]) {
+        //  d3.select(this).classed({red: false, blue: true});
+        //}
+      });
+    }, 100);
+
+//    d3.select('#bar-frame-viz > svg g.bars rect.red').classed('red', false);
+//    d3.select('#bar-frame-viz > svg g.bars rect.blue').classed('blue', false);
+//
+//    bars.each(function(d) {
+//      cities.forEach(function(city, i){
+//        var selection = d3.select(this);
+//        if (d[1] === city) {
+//          selection.classed('red', function(){
+//            return colours.indexOf('red') === i ? true : false;
+//          });
+//          selection.classed('blue', function(){
+//            return colours.indexOf('blue') === i ? true : false;
+//          });
+//        }
+//      }, this);
+//    });
+
+    return args;
   }
 
   
@@ -137,7 +200,7 @@ define([
     //var towns = this.data_by_selected_town.slice();
     this.selected_linechart.duration(this.config.single_frame_duration);
     this.frame.dispatch.reset_line.call(this.frame);
-    return this.towns;
+    return {};
   }
 
   LineFrameController.prototype.jump = function() {

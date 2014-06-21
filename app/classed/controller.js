@@ -8,15 +8,30 @@ define([
     this.colours = args.colours;
     this.active_rect_selector = args.active_rect_selector;
     this.active_text_selector = args.active_text_selector;
+    this.cities = [];//d3.map({});
 
   };
 
-//  function hideInfo() {
-//    d3.select('section.controllers .info').classed('active', false);
-//  }
-//
   function isEqual(s1, s2) {
     return s1.__data__[1] === s2.__data__[1];
+  }
+
+  ClassedController.prototype.updateCities = function(args) {
+    var city = args.city,
+        existing_city_idx = this.cities.indexOf(city);
+    if (existing_city_idx !== -1) {
+      this.cities.splice(existing_city_idx, 1);
+    } else {
+      this.cities.push(city);
+    }
+    if (this.cities.length > 2) {
+      this.cities.shift();
+    }
+    return {cities: this.cities, warning: args.warning};
+  }
+
+  ClassedController.prototype.resetCities = function(city) {
+    this.cities = [];
   }
 
   ClassedController.prototype.updateBarSelections = function(args) {

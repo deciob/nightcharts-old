@@ -6,7 +6,7 @@ define([
   var ControllersController = function () {};
 
   ControllersController.prototype.handleInfo = function(args) {
-    var selections = args.text_selections;
+    var selections = args.cities;
     if (args.warning) {
       this.showWarning();
     } else {
