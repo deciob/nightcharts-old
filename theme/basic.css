@@ -63,6 +63,13 @@ h2 {
   font-size: 25px;
 }
 
+h2 span.year {
+  font-size: 28px;
+  color: orangered;
+  width: 70px;
+  display: inline-block;
+}
+
 a {
   color: #666;
 }
@@ -180,6 +187,7 @@ footer.fixed {
 svg * {
   font-family: 'PT Mono';
 }
+
 
 
 @media screen and (max-width:1200px) {

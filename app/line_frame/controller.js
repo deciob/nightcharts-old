@@ -110,6 +110,7 @@ define([
       .delta(delta)();
 
     selected_linechart.handleTransitionEnd( function () {
+      d3.select(self.config.year_dom_selector).text(self.frame.frame);
       self.frame.dispatch.end_line.call(self.frame);
     });
 

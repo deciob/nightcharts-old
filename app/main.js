@@ -5,6 +5,7 @@ define({
 	theme: { module: 'theme/basic.css' },
 
   config: {
+    year_dom_selector: 'section.title span.year',
     single_frame_duration: 200,
     all_frames_duration: 1200,
     start_year: 1955,
@@ -24,7 +25,8 @@ define({
         colours: {'red': false, 'blue': false},
         active_rect_selector: '#bar-frame-viz > svg g.bars rect.active',
         active_text_selector: '#bar-frame-viz > svg g.y text.active',
-        config: {$ref: "config"},      }
+        config: {$ref: "config"},      
+      }
     }
   },
 
@@ -45,6 +47,7 @@ define({
   controllers_controller: {
     create: {
       module: 'controllers/controller',
+      args: {config: {$ref: "config"},}
     }
   },
 

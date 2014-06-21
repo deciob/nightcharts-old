@@ -3,7 +3,9 @@ define([
 ], function(d3) {
   'use strict';
 
-  var ControllersController = function () {};
+  var ControllersController = function (args) {
+    this.config = args.config;
+  };
 
   ControllersController.prototype.handleInfo = function(args) {
     var selections = args.cities;
@@ -11,9 +13,10 @@ define([
       this.showWarning();
     } else {
       this.hideWarning();
-      if (selections[0].length > 0) {
+      if (selections[0] && selections[0].length > 0) {
         this.hideInfo();
       } else {
+        d3.select(this.config.year_dom_selector).text('');
         this.showInfo();
       }
     }
