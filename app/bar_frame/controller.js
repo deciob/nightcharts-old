@@ -104,59 +104,50 @@ define([
     return {city: city};
   }
 
-  BarFrameController.prototype.updateSelections = function(args) {
-    var cities = args.cities || this.cities,
-        colours = this.colours,
-        bars = d3.selectAll('#bar-frame-viz > svg g.bars rect');
-
-    this.cities = cities;
-
-
-    //console.log(cities);
-
-    d3.select('#bar-frame-viz > svg g.bars rect.red').classed('red', false);
-    d3.select('#bar-frame-viz > svg g.bars rect.blue').classed('blue', false);
-
-    d3.selectAll('#bar-frame-viz > svg g.bars rect').each(function(d) {
-      cities.forEach(function(city, i){
+  BarFrameController.prototype.setSelections = function(args) {
+    d3.selectAll(args.selector).each(function(d) {
+      args.cities.forEach(function(city, i){
         var selection = d3.select(this);
-        console.log(d[1]);
         if (d[1] === city) {
           selection.classed('red', function(){
-            return colours.indexOf('red') === i ? true : false;
+            return args.colours.indexOf('red') === i ? true : false;
           });
           selection.classed('blue', function(){
-            console.log(city, i);
-            return colours.indexOf('blue') === i ? true : false;
+            return args.colours.indexOf('blue') === i ? true : false;
           });
         }
       }, this);
     });
+  }
 
+  BarFrameController.prototype.updateSelections = function(args) {
+    var cities = args.cities || this.cities,
+        colours = this.colours,
+        selector = '#bar-frame-viz > svg g.bars rect';
+    this.cities = cities;
+    d3.select('#bar-frame-viz > svg g.bars rect.red').classed('red', false);
+    d3.select('#bar-frame-viz > svg g.bars rect.blue').classed('blue', false);
+    this.setSelections({
+      selector: selector,
+      cities: cities,
+      colours: colours
+    });
     return args;
   }
 
-  BarFrameController.prototype.resetSelections = function() {
+  BarFrameController.prototype.recoverSelections = function() {
     // FIXME: callback or promise to handle stuff like:
     // this.transition.dispatch.jump_bar.call(this.transition, 2020)
     // instead of using this setTimeout here!
     var cities = this.cities,
-        colours = this.colours;
+        colours = this.colours,
+        selector = '#bar-frame-viz > svg g.bars rect',
+        setSelections = this.setSelections;
     setTimeout( function () {
-      d3.selectAll('#bar-frame-viz > svg g.bars rect').each(function(d) {
-        cities.forEach(function(city, i){
-          var selection = d3.select(this);
-          console.log(d[1]);
-          if (d[1] === city) {
-            selection.classed('red', function(){
-              return colours.indexOf('red') === i ? true : false;
-            });
-            selection.classed('blue', function(){
-              console.log(city, i);
-              return colours.indexOf('blue') === i ? true : false;
-            });
-          }
-        }, this);
+      setSelections({
+        selector: selector,
+        cities: cities,
+        colours: colours
       });
     }, this.config.single_frame_duration);
   }
