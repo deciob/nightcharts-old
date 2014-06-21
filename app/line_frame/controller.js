@@ -52,8 +52,6 @@ define([
 
     var self = this,
         cities = args.cities,
-        //text_selections = args.text_selections,
-        rect_selections = args.rect_selections,
         data_by_selected_town = [],
         selected_linechart,
         draw_dispatch,
@@ -63,8 +61,6 @@ define([
         year = this.config.start_year, 
         delta = this.config.delta, 
         draw;
-
-    //this.towns = [];
 
     cities.forEach(function(d) {
       data_by_selected_town.push(self.grouped_data_obj[d]);
@@ -146,7 +142,6 @@ define([
 
     setTimeout( function () {
       d3.selectAll('#line-frame-viz g.' + args.line_class + ' > g.line').each(function(d) {
-        //console.log(d);
         cities.forEach(function(city, i){
           var selection = d3.select(this);
           if (d[1] === city) {
@@ -158,35 +153,11 @@ define([
             });
           }
         }, this);
-        //if (red[0][0] !== undefined && red[0][0].__data__[1] === d[0][2]) {
-        //  d3.select(this).classed({red: true, blue: false});
-        //} else if (blue[0][0] !== undefined && blue[0][0].__data__[1] === d[0][2]) {
-        //  d3.select(this).classed({red: false, blue: true});
-        //}
       });
     }, 100);
 
-//    d3.select('#bar-frame-viz > svg g.bars rect.red').classed('red', false);
-//    d3.select('#bar-frame-viz > svg g.bars rect.blue').classed('blue', false);
-//
-//    bars.each(function(d) {
-//      cities.forEach(function(city, i){
-//        var selection = d3.select(this);
-//        if (d[1] === city) {
-//          selection.classed('red', function(){
-//            return colours.indexOf('red') === i ? true : false;
-//          });
-//          selection.classed('blue', function(){
-//            return colours.indexOf('blue') === i ? true : false;
-//          });
-//        }
-//      }, this);
-//    });
-
     return args;
   }
-
-  
 
   LineFrameController.prototype.start = function() {
     this.frame.dispatch.start_line.call(this.frame);
@@ -205,6 +176,10 @@ define([
 
   LineFrameController.prototype.jump = function() {
     this.selected_linechart.duration(this.config.all_frames_duration);
+    // Fixme!
+    // There is a bug in the frame module. The sequence of frames will 
+    // not start if the jump year is empty and as a consequence also the next
+    // start sequence will brake. 
     this.frame.dispatch.jump_line.call(this.frame, this.config.end_year);
   }
 

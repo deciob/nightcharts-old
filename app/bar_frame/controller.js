@@ -35,18 +35,6 @@ define([
       .xValue( function(d) { return d['population']; } )
       .zValue(function(d) {return d.year})
       .components(['x_axis', 'y_axis', 'bars'])
-      //.bars({
-      //  class_name_on_rect: function(d) {
-      //    var classed = '';
-      //    d3.selectAll(active_line_selector).each(function(l) {
-      //      console.log(this.__data__[0][0][2], l[0][0][2]);
-      //      if (this.__data__[0] && this.__data__[0][0][2] === l[0][0][2]) {
-      //        classed = d3.select(this).select('path').classed('red') ? 'red' : 'blue';
-      //      }
-      //    });
-      //    return classed;
-      //  }
-      //})
       .scale_bounds('0,40')
       .invert_data(true)
       .y_scale('ordinal')
@@ -58,9 +46,7 @@ define([
     normalized_data = chart.utils.normalizeData(data, barchart.__);
     grouped_data = chart.utils.groupNormalizedDataByIndex(
       2, normalized_data, barchart.__, {grouper: 'object'});
-    //console.log(grouped_data);
     draw = chart.draw(barchart, selection);
-
 
     drawChart = function (data, options) {
       draw(data, options);
@@ -95,9 +81,9 @@ define([
     if ( tag_name == 'text' ) {
       city = event.target.__data__;
     } else {
-      if (event.target.__data__[2] !== this.config.start_year) {
-        return {warning: true};
-      }
+      //if (event.target.__data__[2] !== this.config.start_year) {
+      //  return {warning: true};
+      //}
       city = event.target.__data__[1];
     }
 
